@@ -148,12 +148,13 @@ nb = {
     "cells": [
         {
             "cell_type": kind,
+            "id": f"sel-{i:02d}",
             "metadata": {},
             **({"source": text.splitlines(keepends=True)} if kind == "markdown"
                else {"source": text.splitlines(keepends=True), "outputs": [],
                      "execution_count": None}),
         }
-        for kind, text in cells
+        for i, (kind, text) in enumerate(cells)
     ],
     "metadata": {
         "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
