@@ -125,10 +125,12 @@ download_data.py       unduh dataset via kagglehub
 eda_run.py             pipeline EDA + guardrail leakage + baseline regresi
 eda_notebook.ipynb     versi notebook (tereksekusi, interpretasi per sel)
 etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage + self-test
+fase3_modeling.ipynb   Fase 3: starter modeling utk Kaggle/Colab (Run All, 10-20 mnt)
 figures/               10 figur EDA (PNG 150 dpi)
 models/                pipeline ter-fit (joblib) per skenario
 eda_results.json       seluruh angka terverifikasi (sumber laporan)
 make_notebook.py       generator + eksekutor notebook
+make_fase3_notebook.py generator fase3_modeling.ipynb
 ```
 
 ## Roadmap
@@ -142,6 +144,9 @@ make_notebook.py       generator + eksekutor notebook
       pra MAE 3,66 R² 0,33; post-hoc MAE 2,95 R² 0,55 - konsisten dengan CV.
 - [ ] **Fase 3 (Minggu 13).** XGBoost/LightGBM + Bayesian hyperparameter
       tuning + MLflow + SHAP; target MAE ≤ 3,0 pp, R² ≥ 0,35.
+      **Starter siap jalan: buka `fase3_modeling.ipynb` di Kaggle (Internet On)
+      atau Colab, Run All** - sudah termasuk clone repo, install paket kurang,
+      Optuna 30 trial, SHAP, MLflow opsional, dan penyimpanan artefak.
 - [ ] **Fase 4 (Minggu 16).** Docker + API FastAPI + dasbor Streamlit +
       Technical Report IEEE 8 halaman.
 
