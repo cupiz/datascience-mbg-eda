@@ -109,26 +109,37 @@ python download_data.py
 # 3. jalankan seluruh pipeline EDA -> figures/ + eda_results.json
 python eda_run.py
 
+# 4. bangun dataset siap latih (Fase 2): transform + split + guardrail leakage
+python etl_pipeline.py
+#    -> data/processed/{pra,posthoc}/{X,y}_{train,test}.csv + models/pipeline_*.joblib
+
 # atau buka eda_notebook.ipynb untuk versi interaktif
 ```
 
 ## Struktur Repositori
 
 ```
-data/                  dataset CSV (diunduh lokal, tidak di-commit)
+data/                  dataset CSV mentah (diunduh lokal, tidak di-commit)
+data/processed/        dataset siap latih per skenario (pra/posthoc, hasil Fase 2)
 download_data.py       unduh dataset via kagglehub
 eda_run.py             pipeline EDA + guardrail leakage + baseline regresi
-eda_notebook.ipynb     versi notebook (14 sel)
+eda_notebook.ipynb     versi notebook (tereksekusi, interpretasi per sel)
+etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage + self-test
 figures/               10 figur EDA (PNG 150 dpi)
+models/                pipeline ter-fit (joblib) per skenario
 eda_results.json       seluruh angka terverifikasi (sumber laporan)
-make_notebook.py       regenerasi notebook dari eda_run.py
+make_notebook.py       generator + eksekutor notebook
 ```
 
 ## Roadmap
 
 - [x] **Fase 1 (Minggu 2).** Project Charter + Laporan EDA Bab 1-9 + repositori ini.
-- [ ] **Fase 2 (Minggu 7).** Pipeline ETL bebas leakage: transformasi skew
-      (log + refleksi), encoding, feature engineering, split train/test.
+- [x] **Fase 2 (Minggu 7, selesai lebih awal).** `etl_pipeline.py`: ColumnTransformer
+      bebas leakage (log1p skew kanan, refleksi-log suhu, binning kuartil jarak,
+      one-hot, StandardScaler; state transformer di-fit pada train saja), split 80:20
+      terstratifikasi kuartil target, self-test guardrail. Output: 33 fitur (pra) /
+      37 fitur (post-hoc), 10.400 train / 2.600 test. Sanity holdout HGB:
+      pra MAE 3,66 R² 0,33; post-hoc MAE 2,95 R² 0,55 - konsisten dengan CV.
 - [ ] **Fase 3 (Minggu 13).** XGBoost/LightGBM + Bayesian hyperparameter
       tuning + MLflow + SHAP; target MAE ≤ 3,0 pp, R² ≥ 0,35.
 - [ ] **Fase 4 (Minggu 16).** Docker + API FastAPI + dasbor Streamlit +
@@ -143,11 +154,13 @@ make_notebook.py       regenerasi notebook dari eda_run.py
 
 ## Tim
 
+Proyek mandiri (satu orang merangkap tiga peran sesuai struktur TDSP):
+
 | Peran | Nama |
 |---|---|
 | Project Lead & Data Scientist | Iqbal Ahdagita Elbadra (26MA41D022) |
-| Data Engineer | (bergabung segera) |
-| MLOps Engineer | (bergabung segera) |
+| Data Engineer | Iqbal Ahdagita Elbadra |
+| MLOps Engineer | Iqbal Ahdagita Elbadra |
 
 Proyek tugas mata kuliah **Data Science (PSIKS2W002)**, Magister Ilmu Komputer,
 Universitas Amikom Purwokerto. Dosen Pengampu: Giat Karyono.
