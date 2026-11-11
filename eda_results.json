@@ -584,5 +584,50 @@
   "primary_food_waste_driver_Sub-Optimal-Arrival-Temperature": 0.0356,
   "transit_time_minutes": 0.0308,
   "primary_food_waste_driver_Prior-Snack-Consumption": 0.0251
+ },
+ "leak_effective_cost_maxdiff": 0.5,
+ "waste_mean_predictor_mae": 4.443,
+ "corr_with_waste": {
+  "waste_adjusted_effective_cost_idr": 0.622,
+  "estimated_calories_kcal": -0.372,
+  "cost_to_nutrition_ratio": 0.28,
+  "food_arrival_temperature_celsius": -0.252,
+  "estimated_protein_grams": -0.221,
+  "spoilage_risk_index": 0.214,
+  "transit_time_minutes": 0.198,
+  "delivery_distance_km": 0.155,
+  "kitchen_daily_capacity_portions": -0.066,
+  "total_meal_cost_idr": 0.041,
+  "confidence_score": -0.029,
+  "raw_ingredient_cost_per_portion_idr": 0.025,
+  "student_attendance_rate_pct": 0.024,
+  "transit_cooling_rate_c_per_min": 0.009,
+  "local_farmer_sourcing_pct": -0.009,
+  "local_economic_multiplier_score": 0.008
+ },
+ "reg_ridge": {
+  "r2": 0.327,
+  "mae": 3.651,
+  "rmse": 4.577
+ },
+ "reg_hgb": {
+  "r2": 0.337,
+  "mae": 3.625,
+  "rmse": 4.544
+ },
+ "reg_rf": {
+  "r2": 0.318,
+  "mae": 3.677,
+  "rmse": 4.609
+ },
+ "reg_hgb_driver": {
+  "r2": 0.553,
+  "mae": 2.92,
+  "rmse": 3.734
+ },
+ "reg_hgb_leak_tier_demo": {
+  "r2": 0.682,
+  "mae": 2.363,
+  "rmse": 3.146
  }
 }

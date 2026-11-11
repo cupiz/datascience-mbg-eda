@@ -327,6 +327,55 @@ rf.fit(Xtr, ytr)
 importances = pd.Series(rf.feature_importances_, index=Xe.columns).sort_values(ascending=False).head(10)
 R["rf_top_features"] = importances.round(4).to_dict()
 
+# ---------- Proyek regresi (Tugas 1 final): target plate_waste_percentage ----------
+# Verifikasi kebocoran: waste_adjusted_effective_cost_idr = total/(1 - waste/100)
+calc_eff = df.total_meal_cost_idr / (1 - df.plate_waste_percentage / 100)
+R["leak_effective_cost_maxdiff"] = round(
+    float((calc_eff - df.waste_adjusted_effective_cost_idr).abs().max()), 4)
+
+yw = df.plate_waste_percentage.values
+R["waste_mean_predictor_mae"] = round(float(np.abs(yw - yw.mean()).mean()), 3)
+R["corr_with_waste"] = (df.select_dtypes(include=[np.number]).corr()["plate_waste_percentage"]
+                        .drop("plate_waste_percentage")
+                        .sort_values(key=abs, ascending=False).round(3).to_dict())
+
+from sklearn.model_selection import KFold, cross_validate
+from sklearn.linear_model import Ridge
+from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
+from sklearn.pipeline import make_pipeline
+
+num_w = [c for c in num_cols if c not in
+         ("plate_waste_percentage", "waste_adjusted_effective_cost_idr", "confidence_score")]
+cat4 = ["regional_cluster", "beneficiary_category", "protein_type", "delivery_transport_mode"]
+Xw = pd.get_dummies(df[num_w + cat4], columns=cat4, drop_first=True).astype(float)
+cvw = KFold(5, shuffle=True, random_state=42)
+SCORING = ["r2", "neg_mean_absolute_error", "neg_mean_squared_error"]
+
+def cv_run(model):
+    r = cross_validate(model, Xw, yw, cv=cvw, scoring=SCORING)
+    return {"r2": round(float(r["test_r2"].mean()), 3),
+            "mae": round(float(-r["test_neg_mean_absolute_error"].mean()), 3),
+            "rmse": round(float(np.sqrt(-r["test_neg_mean_squared_error"].mean())), 3)}
+
+R["reg_ridge"] = cv_run(make_pipeline(StandardScaler(), Ridge(alpha=1.0)))
+R["reg_hgb"] = cv_run(HistGradientBoostingRegressor(random_state=42, max_iter=300))
+R["reg_rf"] = cv_run(RandomForestRegressor(n_estimators=300, random_state=42, n_jobs=-1))
+
+# skenario fitur: +driver (post-hoc) dan +tier (DEMO kebocoran label, jangan dipakai)
+Xw2 = pd.concat([Xw, pd.get_dummies(df["primary_food_waste_driver"],
+                                    prefix="drv", drop_first=True).astype(float)], axis=1)
+_hgb = HistGradientBoostingRegressor(random_state=42, max_iter=300)
+_r = cross_validate(_hgb, Xw2, yw, cv=cvw, scoring=SCORING)
+R["reg_hgb_driver"] = {"r2": round(float(_r["test_r2"].mean()), 3),
+                       "mae": round(float(-_r["test_neg_mean_absolute_error"].mean()), 3),
+                       "rmse": round(float(np.sqrt(-_r["test_neg_mean_squared_error"].mean())), 3)}
+Xw3 = pd.concat([Xw2, pd.get_dummies(df["bgn_program_compliance_tier"],
+                                     prefix="tier", drop_first=True).astype(float)], axis=1)
+_r = cross_validate(_hgb, Xw3, yw, cv=cvw, scoring=SCORING)
+R["reg_hgb_leak_tier_demo"] = {"r2": round(float(_r["test_r2"].mean()), 3),
+                               "mae": round(float(-_r["test_neg_mean_absolute_error"].mean()), 3),
+                               "rmse": round(float(np.sqrt(-_r["test_neg_mean_squared_error"].mean())), 3)}
+
 with open(os.path.join(BASE, "eda_results.json"), "w", encoding="utf-8") as f:
     json.dump(R, f, indent=1, ensure_ascii=False, default=str)
 
