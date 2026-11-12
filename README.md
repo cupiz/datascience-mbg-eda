@@ -8,7 +8,7 @@ dapur dapat menyesuaikan porsi, menu, dan jadwal kirim SEBELUM makanan terbuang.
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Fase-3%20Modeling%20selesai-brightgreen)
+![Status](https://img.shields.io/badge/Fase-4%20Deployment%20%26%20Report%20Selesai-brightgreen)
 ![Data](https://img.shields.io/badge/Dataset-Kaggle%20MBG%202026%20v4-yellow)
 
 ---
@@ -99,21 +99,28 @@ risiko pembusukan (+0,21), waktu transit (+0,20).
 ## Quickstart
 
 ```bash
-# 1. siapkan environment (Anaconda direkomendasikan)
-conda install pandas numpy matplotlib seaborn scipy scikit-learn
-pip install kagglehub
+# 1. Siapkan environment (Anaconda direkomendasikan)
+pip install -r requirements.txt
 
-# 2. unduh dataset (publik, tanpa kredensial Kaggle)
+# 2. Unduh dataset (publik, tanpa kredensial Kaggle)
 python download_data.py
 
-# 3. jalankan seluruh pipeline EDA -> figures/ + eda_results.json
+# 3. Jalankan pipeline EDA -> figures/ + eda_results.json
 python eda_run.py
 
-# 4. bangun dataset siap latih (Fase 2): transform + split + guardrail leakage
+# 4. Bangun dataset siap latih (Fase 2): transform + split + guardrail leakage
 python etl_pipeline.py
-#    -> data/processed/{pra,posthoc}/{X,y}_{train,test}.csv + models/pipeline_*.joblib
 
-# atau buka eda_notebook.ipynb untuk versi interaktif
+# 5. Jalankan Microservice REST API (FastAPI)
+uvicorn api:app --host 0.0.0.0 --port 8000
+# Akses Swagger UI Dokumentasi Interaktif di: http://localhost:8000/docs
+
+# 6. Jalankan Dasbor Eksekutif Interaktif (Streamlit)
+streamlit run app.py
+# Akses Dasbor Interaktif di: http://localhost:8501
+
+# 7. Deployment Otomatis via Docker Compose
+docker-compose up --build
 ```
 
 ## Struktur Repositori
@@ -121,40 +128,38 @@ python etl_pipeline.py
 ```
 data/                  dataset CSV mentah (diunduh lokal, tidak di-commit)
 data/processed/        dataset siap latih per skenario (pra/posthoc, hasil Fase 2)
-download_data.py       unduh dataset via kagglehub
-eda_run.py             pipeline EDA + guardrail leakage + baseline regresi
-eda_notebook.ipynb     versi notebook (tereksekusi, interpretasi per sel)
-etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage + self-test
-fase3_modeling.ipynb   Fase 3: starter modeling utk Kaggle/Colab (Run All, 10-20 mnt)
-fase3_modeling_done.ipynb Fase 3: notebook tereksekusi penuh + interpretasi per sel
-figures/               10 figur EDA (PNG 150 dpi)
+figures/               10 figur EDA visualisasi distribusi & logistik (PNG 150 dpi)
 figures_fase3/         figur SHAP beeswarm & bar importance per skenario
 models/                artefak model terbaik (joblib), pipeline, dan metrik
-eda_results.json       seluruh angka terverifikasi (sumber laporan)
-make_notebook.py       generator + eksekutor notebook
-make_fase3_notebook.py generator fase3_modeling.ipynb
+download_data.py       unduh dataset via kagglehub
+eda_run.py             pipeline EDA + guardrail leakage + baseline regresi
+eda_notebook.ipynb     versi notebook EDA (tereksekusi, interpretasi per sel)
+etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage + self-test
+fase3_modeling_done.ipynb Fase 3: notebook modeling tereksekusi penuh + interpretasi
+api.py                 Fase 4: FastAPI REST API Microservice (Pra, Post-Hoc, Batch)
+app.py                 Fase 4: Streamlit Interactive Executive Dashboard (4 Tab)
+Dockerfile             Fase 4: Docker containerization multi-stage build
+docker-compose.yml     Fase 4: Orkestrasi FastAPI (port 8000) & Streamlit (port 8501)
+requirements.txt       Daftar dependensi Python produksi lengkap
+build_laporan_akhir.py Generator dokumen laporan akhir format IEEE
+Tugas3_Laporan_Akhir_IEEE/ Laporan Akhir IEEE UAS (DOCX 8 Halaman Lengkap)
+eda_results.json       seluruh angka statistik EDA terverifikasi
 ```
 
 ## Roadmap
 
-- [x] **Fase 1 (Minggu 2).** Project Charter + Laporan EDA Bab 1-9 + repositori ini.
-- [x] **Fase 2 (Minggu 7, selesai lebih awal).** `etl_pipeline.py`: ColumnTransformer
-      bebas leakage (log1p skew kanan, refleksi-log suhu, binning kuartil jarak,
-      one-hot, StandardScaler; state transformer di-fit pada train saja), split 80:20
-      terstratifikasi kuartil target, self-test guardrail. Output: 33 fitur (pra) /
-      37 fitur (post-hoc), 10.400 train / 2.600 test. Sanity holdout HGB:
-      pra MAE 3,66 R² 0,33; post-hoc MAE 2,95 R² 0,55 - konsisten dengan CV.
-- [x] **Fase 3 (Minggu 13, selesai).** XGBoost/LightGBM/HGB + Bayesian hyperparameter
-      tuning (Optuna 30 trial x 3-fold CV) + SHAP beeswarm & bar importance +
-      penyimpanan model serialisasi (`models/best_*.joblib`).
+- [x] **Fase 1 (Minggu 2).** Project Charter + Laporan Analisis EDA + repositori ini.
+- [x] **Fase 2 (Minggu 7).** `etl_pipeline.py`: ColumnTransformer bebas leakage (log1p skew kanan, refleksi-log suhu, binning kuartil jarak, one-hot, StandardScaler; state transformer di-fit pada train saja), split 80:20 terstratifikasi kuartil target, self-test guardrail. Output: 33 fitur (pra) / 37 fitur (post-hoc), 10.400 train / 2.600 test.
+- [x] **Fase 3 (Minggu 13).** XGBoost/LightGBM/HGB + Bayesian hyperparameter tuning (Optuna 30 trial x 3-fold CV) + SHAP beeswarm & bar importance + penyimpanan model serialisasi (`models/best_*.joblib`).
       Hasil holdout test (2.600 baris):
-      - **Pra-distribusi:** XGBoost (Optuna) MAE 3,65 pp, RMSE 4,58 pp, R² 0,333
-        (mengurangi galat 17,8% dibanding baseline mean-predictor 4,45 pp).
-      - **Post-Hoc:** XGBoost (Optuna) MAE 2,92 pp, RMSE 3,75 pp, R² 0,553
-        (seluruh target charter tercapai: MAE ≤ 3,0 pp, R² ≥ 0,35, RMSE ≤ 4,5 pp).
+      - **Pra-distribusi:** XGBoost (Optuna) MAE 3,65 pp, RMSE 4,58 pp, R² 0,333 (mengurangi galat 17,8% dibanding baseline mean-predictor 4,45 pp).
+      - **Post-Hoc:** XGBoost (Optuna) MAE 2,92 pp, RMSE 3,75 pp, R² 0,553 (seluruh target charter tercapai: MAE ≤ 3,0 pp, R² ≥ 0,35, RMSE ≤ 4,5 pp).
       Notebook tereksekusi penuh tersimpan di `fase3_modeling_done.ipynb`.
-- [ ] **Fase 4 (Minggu 16).** Docker + API FastAPI + dasbor Streamlit +
-      Technical Report IEEE 8 halaman.
+- [x] **Fase 4 (Minggu 16, Selesai - Siap UAS).**
+      - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/metrics`, dan `/health` dengan latensi < 40 ms.
+      - **Interactive Executive Dashboard (`app.py`):** 4 Tab analisis operasional (Executive Overview, What-If Simulator, SHAP Explainability & Root-Cause, Benchmark & Audit Integritas Data).
+      - **Containerization (`Dockerfile`, `docker-compose.yml`):** Orkestrasi kontainer terisolasi, non-root user, multi-service deployment.
+      - **IEEE Technical Report (`Tugas3_Laporan_Akhir_IEEE/`):** Naskah akademik 8 halaman komprehensif berstandar IEEE Computer Society.
 
 ## Dampak yang Dikejar
 
