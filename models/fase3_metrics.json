@@ -1,0 +1,20 @@
+{
+ "pra": {
+  "best_model": "[pra] XGBoost (Optuna)",
+  "MAE": 3.654,
+  "RMSE": 4.583,
+  "R2": 0.333,
+  "target_MAE<=3.0": false,
+  "target_R2>=0.35": false,
+  "target_RMSE<=4.5": false
+ },
+ "posthoc": {
+  "best_model": "[posthoc] XGBoost (Optuna)",
+  "MAE": 2.921,
+  "RMSE": 3.752,
+  "R2": 0.553,
+  "target_MAE<=3.0": true,
+  "target_R2>=0.35": true,
+  "target_RMSE<=4.5": true
+ }
+}

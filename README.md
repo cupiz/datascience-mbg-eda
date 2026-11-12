@@ -8,7 +8,7 @@ dapur dapat menyesuaikan porsi, menu, dan jadwal kirim SEBELUM makanan terbuang.
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Fase-1%20EDA%20selesai-orange)
+![Status](https://img.shields.io/badge/Fase-3%20Modeling%20selesai-brightgreen)
 ![Data](https://img.shields.io/badge/Dataset-Kaggle%20MBG%202026%20v4-yellow)
 
 ---
@@ -126,8 +126,10 @@ eda_run.py             pipeline EDA + guardrail leakage + baseline regresi
 eda_notebook.ipynb     versi notebook (tereksekusi, interpretasi per sel)
 etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage + self-test
 fase3_modeling.ipynb   Fase 3: starter modeling utk Kaggle/Colab (Run All, 10-20 mnt)
+fase3_modeling_done.ipynb Fase 3: notebook tereksekusi penuh + interpretasi per sel
 figures/               10 figur EDA (PNG 150 dpi)
-models/                pipeline ter-fit (joblib) per skenario
+figures_fase3/         figur SHAP beeswarm & bar importance per skenario
+models/                artefak model terbaik (joblib), pipeline, dan metrik
 eda_results.json       seluruh angka terverifikasi (sumber laporan)
 make_notebook.py       generator + eksekutor notebook
 make_fase3_notebook.py generator fase3_modeling.ipynb
@@ -142,11 +144,15 @@ make_fase3_notebook.py generator fase3_modeling.ipynb
       terstratifikasi kuartil target, self-test guardrail. Output: 33 fitur (pra) /
       37 fitur (post-hoc), 10.400 train / 2.600 test. Sanity holdout HGB:
       pra MAE 3,66 R² 0,33; post-hoc MAE 2,95 R² 0,55 - konsisten dengan CV.
-- [ ] **Fase 3 (Minggu 13).** XGBoost/LightGBM + Bayesian hyperparameter
-      tuning + MLflow + SHAP; target MAE ≤ 3,0 pp, R² ≥ 0,35.
-      **Starter siap jalan: buka `fase3_modeling.ipynb` di Kaggle (Internet On)
-      atau Colab, Run All** - sudah termasuk clone repo, install paket kurang,
-      Optuna 30 trial, SHAP, MLflow opsional, dan penyimpanan artefak.
+- [x] **Fase 3 (Minggu 13, selesai).** XGBoost/LightGBM/HGB + Bayesian hyperparameter
+      tuning (Optuna 30 trial x 3-fold CV) + SHAP beeswarm & bar importance +
+      penyimpanan model serialisasi (`models/best_*.joblib`).
+      Hasil holdout test (2.600 baris):
+      - **Pra-distribusi:** XGBoost (Optuna) MAE 3,65 pp, RMSE 4,58 pp, R² 0,333
+        (mengurangi galat 17,8% dibanding baseline mean-predictor 4,45 pp).
+      - **Post-Hoc:** XGBoost (Optuna) MAE 2,92 pp, RMSE 3,75 pp, R² 0,553
+        (seluruh target charter tercapai: MAE ≤ 3,0 pp, R² ≥ 0,35, RMSE ≤ 4,5 pp).
+      Notebook tereksekusi penuh tersimpan di `fase3_modeling_done.ipynb`.
 - [ ] **Fase 4 (Minggu 16).** Docker + API FastAPI + dasbor Streamlit +
       Technical Report IEEE 8 halaman.
 
