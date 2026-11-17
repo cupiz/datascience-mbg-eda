@@ -358,8 +358,6 @@ import mlflow
 TRACKING_URI = f"sqlite:///{os.path.abspath('mlruns.db')}"
 if mlflow.active_run() is not None:
     mlflow.end_run()
-if os.path.exists("mlruns.db"):
-    os.remove("mlruns.db")
 mlflow.set_tracking_uri(TRACKING_URI)
 mlflow.set_experiment("plateguard-mbg-training")
 
