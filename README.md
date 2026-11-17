@@ -55,11 +55,11 @@ Telemetri SPPG (CSV/API)
   [2] Feature engineering: biaya/kkal, kecepatan kirim, binning jarak,
       interaksi suhu x transit
         |
-  [3] Model: HistGradientBoosting / XGBoost regressor (CV 5-fold)
+  [3] Model: 6 kandidat regresi + province TargetEncoder (5-Fold CV & Optuna)
         |
-  [4] Skor plate waste + SHAP per distribusi
+  [4] Skor plate waste + SHAP per distribusi + logging MLflow
         |
-  [5] API (FastAPI) + dasbor prioritas (Streamlit) per provinsi/klaster
+  [5] API (FastAPI) + dasbor analitik & simulator (Streamlit) per provinsi/klaster
 ```
 
 ## Fitur Utama
@@ -98,7 +98,7 @@ risiko pembusukan (+0,21), waktu transit (+0,20).
 ## Quickstart
 
 ```bash
-# 1. Siapkan environment (Anaconda direkomendasikan)
+# 1. Siapkan environment (Anaconda direkomendasikan, NumPy < 2.0)
 pip install -r requirements.txt
 
 # 2. Unduh dataset (publik, tanpa kredensial Kaggle)
@@ -110,58 +110,68 @@ python eda_run.py
 # 4. Bangun dataset siap latih (Fase 2): transform + split + guardrail leakage
 python etl_pipeline.py
 
-# 5. Jalankan Microservice REST API (FastAPI)
-uvicorn api:app --host 0.0.0.0 --port 8000
-# Akses Swagger UI Dokumentasi Interaktif di: http://localhost:8000/docs
+# 5. Pelatihan model lengkap (6 kandidat + RandomForest, 5-fold CV per-fold,
+#    province TargetEncoder, Optuna 30 trial, SHAP, & logging MLflow)
+python train.py --n-trials 30 --cv-folds 5
+# Atau jalankan di Kaggle: unggah train_kaggle.ipynb (Internet On -> Run All)
+# Opsional buka UI pelacakan eksperimen MLflow:
+mlflow ui --backend-store-uri sqlite:///mlruns.db
 
-# 6. Jalankan Dasbor Eksekutif Interaktif (Streamlit)
-streamlit run app.py
+# 6. Jalankan Microservice REST API (FastAPI)
+uvicorn api:app --host 127.0.0.1 --port 8000
+# Akses Swagger UI Dokumentasi Interaktif di: http://127.0.0.1:8000/docs
+
+# 7. Jalankan Dasbor Eksekutif Interaktif & Simulator (Streamlit)
+streamlit run app.py --server.port 8501
 # Akses Dasbor Interaktif di: http://localhost:8501
 
-# 7. Deployment Otomatis via Docker Compose
+# 8. Deployment Otomatis via Docker Compose (pada mesin ber-Docker)
 docker-compose up --build
 ```
 
 ## Struktur Repositori
 
 ```
-data/                  dataset CSV mentah (diunduh lokal, tidak di-commit)
-data/processed/        dataset siap latih per skenario (pra/posthoc, hasil Fase 2)
-figures/               10 figur EDA visualisasi distribusi & logistik (PNG 150 dpi)
-figures_fase3/         figur SHAP beeswarm & bar importance per skenario
-models/                artefak model terbaik (joblib), pipeline, dan metrik
-download_data.py       unduh dataset via kagglehub
-eda_run.py             pipeline EDA + guardrail leakage + baseline regresi
-eda_notebook.ipynb     versi notebook EDA (tereksekusi, interpretasi per sel)
-etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage (+ opsional province TargetEncoder)
-train.py               Pelatihan lokal lengkap (6 model + RandomForest, 5-fold CV, province TE, Optuna, SHAP, MLflow)
-make_train_kaggle_notebook.py Generator notebook training Kaggle dari train.py
-train_kaggle.ipynb     Notebook Kaggle siap jalan (mirror train.py, inline SHAP, zip Output)
-fase3_modeling_done.ipynb Fase 3: notebook modeling terdahulu + interpretasi
-api.py                 Fase 4: FastAPI REST API Microservice (Pra, Post-Hoc, Batch)
-app.py                 Fase 4: Streamlit Dashboard 4 Tab (KPI, Simulator Pra/Post-Hoc, SHAP, Audit)
-Dockerfile             Fase 4: Konfigurasi container python:3.12-slim (non-root appuser)
-docker-compose.yml     Fase 4: Orkestrasi FastAPI (port 8000) & Streamlit (port 8501)
-requirements.txt       Daftar dependensi Python produksi lengkap
-build_laporan_akhir.py Generator dokumen laporan akhir format IEEE 2-kolom
-reports/               Salinan Laporan Akhir IEEE UAS (DOCX 2-kolom)
-eda_results.json       seluruh angka statistik EDA terverifikasi
+data/                         Dataset CSV mentah (unduh lokal, tidak di-commit)
+data/processed/               Dataset siap latih per skenario (pra/posthoc)
+figures/                      10 figur EDA (PNG 150 dpi)
+figures_fase3/                Figur SHAP beeswarm & bar importance per skenario
+models/                       Artefak model (.joblib/.pkl), pipeline, & metrik
+reports/                      Salinan Laporan Akhir IEEE UAS (DOCX 2-kolom)
+download_data.py              Unduh dataset via kagglehub
+eda_run.py                    Pipeline EDA + guardrail leakage + baseline regresi
+eda_notebook.ipynb            Notebook EDA tereksekusi penuh + interpretasi per sel
+make_notebook.py              Generator & eksekutor eda_notebook.ipynb
+etl_pipeline.py               Fase 2: ETL sklearn Pipeline (+ opsional province TE)
+train.py                      Training lokal (6 model, 5-fold CV, province TE, Optuna, SHAP, MLflow)
+make_train_kaggle_notebook.py Generator train_kaggle.ipynb dari train.py
+train_kaggle.ipynb            Notebook Kaggle siap Run All (inline SHAP + zip Output)
+make_fase3_notebook.py        Generator starter fase3_modeling.ipynb
+fase3_modeling.ipynb          Starter notebook Fase 3
+fase3_modeling_done.ipynb     Notebook Fase 3 tereksekusi penuh + interpretasi
+api.py                        Fase 4: FastAPI REST API (/predict/pra, /posthoc, /batch)
+app.py                        Fase 4: Streamlit Dashboard 4 Tab (KPI, Simulator, SHAP, Audit)
+build_laporan_akhir.py        Generator dokumen Laporan Akhir format IEEE 2-kolom
+Dockerfile                    Konfigurasi container python:3.12-slim (non-root appuser)
+docker-compose.yml            Orkestrasi layanan FastAPI (8000) & Streamlit (8501)
+requirements.txt              Daftar dependensi Python produksi lengkap
+eda_results.json              Seluruh angka statistik EDA terverifikasi
 ```
 
 ## Roadmap
 
-- [x] **Fase 1 (Minggu 2).** Project Charter + Laporan Analisis EDA + repositori ini.
-- [x] **Fase 2 (Minggu 7).** `etl_pipeline.py`: ColumnTransformer bebas leakage (log1p skew kanan, refleksi-log suhu, binning kuartil jarak, one-hot, StandardScaler; state transformer di-fit pada train saja), split 80:20 terstratifikasi kuartil target, self-test guardrail. Output: 33 fitur (pra) / 37 fitur (post-hoc), 10.400 train / 2.600 test.
-- [x] **Fase 3 (Minggu 13).** XGBoost/LightGBM/HGB + Bayesian hyperparameter tuning (Optuna 30 trial x 3-fold CV) + SHAP beeswarm & bar importance + penyimpanan model serialisasi (`models/best_*.joblib`).
-      Hasil holdout test (2.600 baris):
-      - **Pra-distribusi:** XGBoost (Optuna) MAE 3,65 pp, RMSE 4,58 pp, R² 0,333 (mengurangi galat 17,8% dibanding baseline mean-predictor 4,45 pp).
-      - **Post-Hoc:** XGBoost (Optuna) MAE 2,92 pp, RMSE 3,75 pp, R² 0,553 (seluruh target charter tercapai: MAE ≤ 3,0 pp, R² ≥ 0,35, RMSE ≤ 4,5 pp).
-      Notebook tereksekusi penuh tersimpan di `fase3_modeling_done.ipynb`.
+- [x] **Fase 1 (Minggu 2).** Project Charter + Laporan Analisis EDA + notebook [`eda_notebook.ipynb`](eda_notebook.ipynb).
+- [x] **Fase 2 (Minggu 7).** [`etl_pipeline.py`](etl_pipeline.py): ColumnTransformer bebas leakage (`Log1p`, `ReflectionLog`, `QuantileBinner`, one-hot, `StandardScaler`, serta dukungan opsional `TargetEncoder` untuk 38 provinsi), split 80:20 terstratifikasi kuartil target (10.400 train / 2.600 test), dan self-test guardrail.
+- [x] **Fase 3 (Minggu 13).** [`fase3_modeling_done.ipynb`](fase3_modeling_done.ipynb): XGBoost/LightGBM/HGB + Optuna (30 trial) + TreeSHAP + serialisasi artefak [`models/best_*.joblib`](models/).
+      Hasil holdout test tersimpan saat ini (2.600 baris):
+      - **Pra-distribusi:** XGBoost (Optuna) MAE 3,654 pp, RMSE 4,583 pp, R² 0,333 (-17,8% galat dibanding baseline 4,447 pp).
+      - **Post-Hoc:** XGBoost (Optuna) MAE 2,921 pp, RMSE 3,752 pp, R² 0,553 (seluruh target Charter tercapai: MAE <= 3,0 pp, R² >= 0,35, RMSE <= 4,5 pp).
+- [x] **Ekstensi Pipeline Pelatihan (`train.py` & `train_kaggle.ipynb`).** Skrip training lokal ([`train.py`](train.py)) dan notebook Kaggle siap jalan ([`train_kaggle.ipynb`](train_kaggle.ipynb)) yang menambahkan `RandomForest`, evaluasi **5-Fold CV per fold**, target-encoding 38 `province`, ekspor `.pkl` & `.joblib`, serta pelacakan eksperimen **MLflow** (`mlruns.db`).
 - [x] **Fase 4 (Minggu 16, Selesai Lokal).**
-      - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/metrics`, dan `/health` dengan latensi teruji 16–86 ms (target < 3 dtk).
-      - **Interactive Executive Dashboard (`app.py`):** 4 Tab analisis operasional (Executive Overview, What-If Simulator Pra & Post-Hoc + unduh prediksi 2.600 holdout CSV, SHAP Explainability, Benchmark & Audit Integritas Data).
+      - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/metrics`, dan `/health` tervalidasi Pydantic v2 (`Literal` sesuai kategori asli dataset + `38 provinsi`), latensi teruji 16–86 ms (target < 3 dtk).
+      - **Interactive Executive Dashboard (`app.py`):** 4 Tab operasional (Executive Overview berbasis JSON terverifikasi, Simulator What-If Pra & Post-Hoc + unduh 2.600 prediksi holdout CSV, TreeSHAP Explainability, Benchmark & Audit Leakage).
       - **Containerization (`Dockerfile`, `docker-compose.yml`):** Orkestrasi kontainer terisolasi dengan non-root user `appuser` & healthcheck (siap di-build di mesin ber-Docker).
-      - **IEEE Technical Report (`reports/`):** Naskah akademik format IEEE 2-kolom dengan data tersinkron ke JSON hasil eksperimen.
+      - **IEEE Technical Report (`reports/`):** Naskah akademik format IEEE 2-kolom (7 halaman, 9 gambar, 5 tabel) dengan seluruh data tersinkron ke JSON hasil eksperimen.
 
 ## Dampak yang Dikejar
 
@@ -192,5 +202,6 @@ UU PDP No. 27/2022. Lisensi kode: MIT; data mengikuti lisensi sumber.
 
 > Catatan metodologi: `confidence_score` dan `cot_nutrition_logistics_rationale`
 > adalah artefak anotasi dataset dan tidak pernah dipakai sebagai fitur.
-> Seluruh angka di README ini dihasilkan oleh `eda_run.py` dan tersimpan di
-> `eda_results.json` — tidak ada angka yang ditulis manual.
+> Seluruh angka di README ini berasal dari [`eda_results.json`](eda_results.json) (`eda_run.py`)
+> dan [`models/fase3_metrics.json`](models/fase3_metrics.json) (`fase3_modeling_done.ipynb`) —
+> tidak ada angka yang ditulis manual.
