@@ -273,6 +273,8 @@ def log_mlflow_run(
     extra_artifacts: List[str] | None = None,
 ) -> None:
     """Mencatat parameter, metrik per fold, holdout, dan artefak model ke MLflow."""
+    if mlflow.active_run() is not None:
+        mlflow.end_run()
     run_name = f"{scenario}-{model_name}".replace(" ", "_")
     with mlflow.start_run(run_name=run_name):
         mlflow.set_tags({
@@ -306,10 +308,19 @@ def log_mlflow_run(
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 sig_params = inspect.signature(mlflow.sklearn.log_model).parameters
+                log_kw: Dict[str, Any] = {}
+                if "serialization_format" in sig_params:
+                    # Hindari penolakan skops terhadap tipe LightGBM/XGBoost di MLflow >= 3.x
+                    log_kw["serialization_format"] = "cloudpickle"
+                if "pip_requirements" in sig_params:
+                    # Hindari jeda lama pemindaian pip freeze lingkungan Anaconda/Kaggle
+                    log_kw["pip_requirements"] = [
+                        "scikit-learn", "xgboost", "lightgbm", "joblib", "pandas", "numpy"
+                    ]
                 if "name" in sig_params:
-                    mlflow.sklearn.log_model(fitted_model, name="model")
+                    mlflow.sklearn.log_model(fitted_model, name="model", **log_kw)
                 else:
-                    mlflow.sklearn.log_model(fitted_model, artifact_path="model")
+                    mlflow.sklearn.log_model(fitted_model, artifact_path="model", **log_kw)
 
 
 def run_scenario_training(

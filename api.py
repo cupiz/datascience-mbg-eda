@@ -98,11 +98,15 @@ def load_artifacts() -> None:
         warnings.simplefilter("ignore", UserWarning)
         if os.path.exists(pra_model_path) and os.path.exists(pra_pipe_path):
             MODELS["pra_pipe"] = joblib.load(pra_pipe_path)
-            MODELS["pra_model"] = joblib.load(pra_model_path)["model"]
+            b_pra = joblib.load(pra_model_path)
+            MODELS["pra_model"] = b_pra["model"]
+            MODELS["pra_name"] = b_pra.get("name") or b_pra.get("algoritma") or type(b_pra["model"]).__name__
 
         if os.path.exists(post_model_path) and os.path.exists(post_pipe_path):
             MODELS["post_pipe"] = joblib.load(post_pipe_path)
-            MODELS["post_model"] = joblib.load(post_model_path)["model"]
+            b_post = joblib.load(post_model_path)
+            MODELS["post_model"] = b_post["model"]
+            MODELS["post_name"] = b_post.get("name") or b_post.get("algoritma") or type(b_post["model"]).__name__
 
     if os.path.exists(metrics_path):
         with open(metrics_path, "r", encoding="utf-8") as f:
@@ -391,7 +395,7 @@ def predict_pra_distribution(plan: DistributionPlanInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal melakukan inferensi: {str(e)}")
 
-    return _build_response("pra-distribusi", pred_waste, df_raw, "XGBoost-Optuna-Pra-v1.1", t0)
+    return _build_response("pra-distribusi", pred_waste, df_raw, str(MODELS.get("pra_name", "Optuna-Pra-v1.1")), t0)
 
 
 @app.post("/predict/posthoc", response_model=PredictionResponse, tags=["Inference"])
@@ -420,7 +424,7 @@ def predict_posthoc_audit(plan: PostHocAuditInput):
         "Low-Palatability-Menu": "AKAR MASALAH (Penerimaan Menu, 1,55% kasus): Lakukan survei preferensi rasa & variasi bumbu lokal.",
     }
     extra = [driver_notes[plan.primary_food_waste_driver]]
-    resp = _build_response("post-hoc", pred_waste, df_raw, "XGBoost-Optuna-PostHoc-v1.1", t0, extra_recs=extra)
+    resp = _build_response("post-hoc", pred_waste, df_raw, str(MODELS.get("post_name", "Optuna-PostHoc-v1.1")), t0, extra_recs=extra)
     resp.waste_category = f"Audit Mutu ({plan.primary_food_waste_driver})"
     return resp
 

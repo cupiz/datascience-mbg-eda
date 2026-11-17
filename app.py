@@ -141,10 +141,14 @@ def load_all_artifacts():
 
         if os.path.exists(pra_p) and os.path.exists(pra_m):
             store["pra_pipe"] = joblib.load(pra_p)
-            store["pra_model"] = joblib.load(pra_m)["model"]
+            b_pra = joblib.load(pra_m)
+            store["pra_model"] = b_pra["model"]
+            store["pra_name"] = b_pra.get("name") or b_pra.get("algoritma") or type(b_pra["model"]).__name__
         if os.path.exists(post_p) and os.path.exists(post_m):
             store["post_pipe"] = joblib.load(post_p)
-            store["post_model"] = joblib.load(post_m)["model"]
+            b_post = joblib.load(post_m)
+            store["post_model"] = b_post["model"]
+            store["post_name"] = b_post.get("name") or b_post.get("algoritma") or type(b_post["model"]).__name__
 
     metrics_path = os.path.join(BASE, "models", "fase3_metrics.json")
     if os.path.exists(metrics_path):
@@ -219,7 +223,8 @@ with st.sidebar:
     st.markdown("**Program:** Makan Bergizi Gratis (BGN)")
     st.markdown("**Akademik:** S2 Ilmu Komputer, Universitas Amikom Purwokerto")
     st.markdown("**Penyusun:** Iqbal Ahdagita Elbadra (26MA41D022)")
-    st.markdown("**Engine:** XGBoost (Optuna) + TreeSHAP")
+    engine_lbl = STORE.get("pra_name", "Gradient Boosting (Optuna)")
+    st.markdown(f"**Engine:** `{engine_lbl}` + TreeSHAP")
     st.markdown("---")
 
     st.markdown("### ⚙️ Status Sistem")
