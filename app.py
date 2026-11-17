@@ -8,6 +8,7 @@ tersimpan (pipeline_*.joblib & best_*.joblib), dengan dukungan opsional koneksi 
 Jalankan lokal:
   streamlit run app.py
 """
+import inspect
 import json
 import os
 import sys
@@ -106,6 +107,15 @@ DRIVER_LABELS = {
     "Delivery-Transit-Delay": "Delivery-Transit-Delay (Keterlambatan Kirim — 4,04%)",
     "Low-Palatability-Menu": "Low-Palatability-Menu (Penerimaan Rasa Menu — 1,55%)",
 }
+
+
+def render_image(path: str) -> None:
+    """Tampilkan gambar responsif kompatibel untuk Streamlit <=1.39 dan >=1.40."""
+    params = inspect.signature(st.image).parameters
+    if "use_container_width" in params:
+        st.image(path, use_container_width=True)
+    else:
+        st.image(path, use_column_width=True)
 
 
 @st.cache_resource
@@ -559,12 +569,12 @@ with tab3:
             st.markdown("##### SHAP Beeswarm Plot (Pra-distribusi)")
             p_bee = os.path.join(BASE, "figures_fase3", "shap_beeswarm_pra.png")
             if os.path.exists(p_bee):
-                st.image(p_bee, use_container_width=True)
+                render_image(p_bee)
         with c_shp2:
             st.markdown("##### SHAP Bar Importance (Pra-distribusi)")
             p_bar = os.path.join(BASE, "figures_fase3", "shap_bar_pra.png")
             if os.path.exists(p_bar):
-                st.image(p_bar, use_container_width=True)
+                render_image(p_bar)
         st.markdown("""
         **Temuan Kunci SHAP Pra-distribusi:**
         1. **Kandungan Kalori (`estimated_calories_kcal`):** Fitur paling dominan; titik merah (kalori cukup ~680–760 kkal) bergeser ke SHAP negatif (menurunkan sisa piring).
@@ -577,12 +587,12 @@ with tab3:
             st.markdown("##### SHAP Beeswarm Plot (Post-Hoc)")
             p_bee_post = os.path.join(BASE, "figures_fase3", "shap_beeswarm_posthoc.png")
             if os.path.exists(p_bee_post):
-                st.image(p_bee_post, use_container_width=True)
+                render_image(p_bee_post)
         with c_post2:
             st.markdown("##### SHAP Bar Importance (Post-Hoc)")
             p_bar_post = os.path.join(BASE, "figures_fase3", "shap_bar_posthoc.png")
             if os.path.exists(p_bar_post):
-                st.image(p_bar_post, use_container_width=True)
+                render_image(p_bar_post)
         st.markdown("""
         **Temuan Kunci SHAP Post-Hoc:**
         1. **`Prior-Snack-Consumption`:** Pemicu tunggal terkuat (terjadi pada 63,43% kasus); siswa yang sudah jajan sebelum jam makan menghasilkan lonjakan *plate waste* signifikan.
