@@ -89,8 +89,7 @@ Validasi silang 5-fold, 13.000 distribusi, tanpa fitur bocor:
 | HistGradientBoosting + pemicu | post-hoc | 0,55 | 2,92 | 3,73 |
 | ~~HGB + tier kepatuhan~~ | ~~ditolak: label bocor~~ | ~~0,68~~ | - | - |
 
-Angka ini hasil uji coba awal, bukan model final. Target proyek: MAE ≤ 3,0 pp
-dan R² ≥ 0,35 pada skenario pra-distribusi (lihat roadmap Fase 3).
+Angka tabel di atas merupakan baseline validasi silang 5-fold (`eda_run.py`) sebelum optimasi Fase 3. Evaluasi final holdout test set (2.600 baris) dapat dilihat pada Roadmap Fase 3 di bawah.
 
 Prediktor terkuat sinyal sisa makanan: kandungan kalori (r = -0,37), rasio
 biaya-gizi (+0,28), suhu makanan saat tiba (-0,25), protein (-0,22), indeks
@@ -137,12 +136,12 @@ eda_notebook.ipynb     versi notebook EDA (tereksekusi, interpretasi per sel)
 etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage + self-test
 fase3_modeling_done.ipynb Fase 3: notebook modeling tereksekusi penuh + interpretasi
 api.py                 Fase 4: FastAPI REST API Microservice (Pra, Post-Hoc, Batch)
-app.py                 Fase 4: Streamlit Interactive Executive Dashboard (4 Tab)
-Dockerfile             Fase 4: Docker containerization multi-stage build
+app.py                 Fase 4: Streamlit Dashboard 4 Tab (KPI, Simulator Pra/Post-Hoc, SHAP, Audit)
+Dockerfile             Fase 4: Konfigurasi container python:3.12-slim (non-root appuser)
 docker-compose.yml     Fase 4: Orkestrasi FastAPI (port 8000) & Streamlit (port 8501)
 requirements.txt       Daftar dependensi Python produksi lengkap
-build_laporan_akhir.py Generator dokumen laporan akhir format IEEE
-Tugas3_Laporan_Akhir_IEEE/ Laporan Akhir IEEE UAS (DOCX 8 Halaman Lengkap)
+build_laporan_akhir.py Generator dokumen laporan akhir format IEEE 2-kolom
+reports/               Salinan Laporan Akhir IEEE UAS (DOCX 2-kolom)
 eda_results.json       seluruh angka statistik EDA terverifikasi
 ```
 
@@ -155,11 +154,11 @@ eda_results.json       seluruh angka statistik EDA terverifikasi
       - **Pra-distribusi:** XGBoost (Optuna) MAE 3,65 pp, RMSE 4,58 pp, R² 0,333 (mengurangi galat 17,8% dibanding baseline mean-predictor 4,45 pp).
       - **Post-Hoc:** XGBoost (Optuna) MAE 2,92 pp, RMSE 3,75 pp, R² 0,553 (seluruh target charter tercapai: MAE ≤ 3,0 pp, R² ≥ 0,35, RMSE ≤ 4,5 pp).
       Notebook tereksekusi penuh tersimpan di `fase3_modeling_done.ipynb`.
-- [x] **Fase 4 (Minggu 16, Selesai - Siap UAS).**
-      - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/metrics`, dan `/health` dengan latensi < 40 ms.
-      - **Interactive Executive Dashboard (`app.py`):** 4 Tab analisis operasional (Executive Overview, What-If Simulator, SHAP Explainability & Root-Cause, Benchmark & Audit Integritas Data).
-      - **Containerization (`Dockerfile`, `docker-compose.yml`):** Orkestrasi kontainer terisolasi, non-root user, multi-service deployment.
-      - **IEEE Technical Report (`Tugas3_Laporan_Akhir_IEEE/`):** Naskah akademik 8 halaman komprehensif berstandar IEEE Computer Society.
+- [x] **Fase 4 (Minggu 16, Selesai Lokal).**
+      - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/metrics`, dan `/health` dengan latensi teruji 16–86 ms (target < 3 dtk).
+      - **Interactive Executive Dashboard (`app.py`):** 4 Tab analisis operasional (Executive Overview, What-If Simulator Pra & Post-Hoc + unduh prediksi 2.600 holdout CSV, SHAP Explainability, Benchmark & Audit Integritas Data).
+      - **Containerization (`Dockerfile`, `docker-compose.yml`):** Orkestrasi kontainer terisolasi dengan non-root user `appuser` & healthcheck (siap di-build di mesin ber-Docker).
+      - **IEEE Technical Report (`reports/`):** Naskah akademik format IEEE 2-kolom dengan data tersinkron ke JSON hasil eksperimen.
 
 ## Dampak yang Dikejar
 
