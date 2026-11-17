@@ -133,7 +133,7 @@ def load_all_artifacts():
     """Memuat artefak model serialisasi, metrik Fase 3, dan statistik terverifikasi EDA."""
     store = {}
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UserWarning)
+        warnings.simplefilter("ignore")
         pra_m = os.path.join(BASE, "models", "best_pra.joblib")
         pra_p = os.path.join(BASE, "models", "pipeline_pra.joblib")
         post_m = os.path.join(BASE, "models", "best_posthoc.joblib")

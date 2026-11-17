@@ -146,6 +146,7 @@ etl_pipeline.py               Fase 2: ETL sklearn Pipeline (+ opsional province 
 train.py                      Training lokal (6 model, 5-fold CV, province TE, Optuna, SHAP, MLflow)
 make_train_kaggle_notebook.py Generator train_kaggle.ipynb dari train.py
 train_kaggle.ipynb            Notebook Kaggle siap Run All (inline SHAP + zip Output)
+train-kaggle-done.ipynb       Arsip output lengkap eksekusi Kaggle (14 run MLflow, 5-Fold CV)
 make_fase3_notebook.py        Generator starter fase3_modeling.ipynb
 fase3_modeling.ipynb          Starter notebook Fase 3
 fase3_modeling_done.ipynb     Notebook Fase 3 tereksekusi penuh + interpretasi
@@ -162,16 +163,17 @@ eda_results.json              Seluruh angka statistik EDA terverifikasi
 
 - [x] **Fase 1 (Minggu 2).** Project Charter + Laporan Analisis EDA + notebook [`eda_notebook.ipynb`](eda_notebook.ipynb).
 - [x] **Fase 2 (Minggu 7).** [`etl_pipeline.py`](etl_pipeline.py): ColumnTransformer bebas leakage (`Log1p`, `ReflectionLog`, `QuantileBinner`, one-hot, `StandardScaler`, serta dukungan opsional `TargetEncoder` untuk 38 provinsi), split 80:20 terstratifikasi kuartil target (10.400 train / 2.600 test), dan self-test guardrail.
-- [x] **Fase 3 (Minggu 13).** [`fase3_modeling_done.ipynb`](fase3_modeling_done.ipynb): XGBoost/LightGBM/HGB + Optuna (30 trial) + TreeSHAP + serialisasi artefak [`models/best_*.joblib`](models/).
-      Hasil holdout test tersimpan saat ini (2.600 baris):
-      - **Pra-distribusi:** XGBoost (Optuna) MAE 3,654 pp, RMSE 4,583 pp, R² 0,333 (-17,8% galat dibanding baseline 4,447 pp).
-      - **Post-Hoc:** XGBoost (Optuna) MAE 2,921 pp, RMSE 3,752 pp, R² 0,553 (seluruh target Charter tercapai: MAE <= 3,0 pp, R² >= 0,35, RMSE <= 4,5 pp).
-- [x] **Ekstensi Pipeline Pelatihan (`train.py` & `train_kaggle.ipynb`).** Skrip training lokal ([`train.py`](train.py)) dan notebook Kaggle siap jalan ([`train_kaggle.ipynb`](train_kaggle.ipynb)) yang menambahkan `RandomForest`, evaluasi **5-Fold CV per fold**, target-encoding 38 `province`, ekspor `.pkl` & `.joblib`, serta pelacakan eksperimen **MLflow** (`mlruns.db`).
+- [x] **Fase 3 & Ekstensi Charter (Selesai Terverifikasi — [`train-kaggle-done.ipynb`](train-kaggle-done.ipynb)).**
+      Pipeline lengkap ([`train.py`](train.py) & [`train_kaggle.ipynb`](train_kaggle.ipynb)): **6 algoritma Charter** (`MeanPredictor`, `Ridge`, **`RandomForest`**, `HistGradientBoosting`, `LightGBM`, `XGBoost`), **5-Fold CV per fold** (`models/cv_per_fold_report.csv`), **`TargetEncoder` 38 provinsi** (`34` fitur pra / `38` fitur post-hoc), optimasi Bayesian **Optuna (30 trial × 5-Fold CV)**, plot **TreeSHAP** (`figures_fase3/`), ekspor **`.joblib` + `.pkl`**, serta pelacakan **14 eksperimen MLflow**.
+      Hasil evaluasi final (CV 5-Fold & Holdout 2.600 baris):
+      - **Pra-distribusi (34 fitur):** **`LightGBM (Optuna)`** (CV MAE `3,604 ± 0,042` pp, Holdout MAE **`3,658 pp`**, RMSE `4,586 pp`, R² `0,333`; `-17,7%` galat dibanding baseline `4,447 pp`; `RandomForest` MAE `3,658 pp` / RMSE `4,604 pp`).
+      - **Post-Hoc (38 fitur):** **`LightGBM (Optuna)`** (CV MAE `2,905 ± 0,046` pp, Holdout MAE **`2,929 pp`**, RMSE `3,761 pp`, R² `0,551`; **seluruh target Charter tercapai**: MAE <= 3,0 pp, R² >= 0,35, RMSE <= 4,5 pp).
+      - Notebook terdahulu tersimpan di [`fase3_modeling_done.ipynb`](fase3_modeling_done.ipynb).
 - [x] **Fase 4 (Minggu 16, Selesai Lokal).**
       - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/metrics`, dan `/health` tervalidasi Pydantic v2 (`Literal` sesuai kategori asli dataset + `38 provinsi`), latensi teruji 16–86 ms (target < 3 dtk).
       - **Interactive Executive Dashboard (`app.py`):** 4 Tab operasional (Executive Overview berbasis JSON terverifikasi, Simulator What-If Pra & Post-Hoc + unduh 2.600 prediksi holdout CSV, TreeSHAP Explainability, Benchmark & Audit Leakage).
       - **Containerization (`Dockerfile`, `docker-compose.yml`):** Orkestrasi kontainer terisolasi dengan non-root user `appuser` & healthcheck (siap di-build di mesin ber-Docker).
-      - **IEEE Technical Report (`reports/`):** Naskah akademik format IEEE 2-kolom (7 halaman, 9 gambar, 5 tabel) dengan seluruh data tersinkron ke JSON hasil eksperimen.
+      - **IEEE Technical Report (`reports/`):** Naskah akademik format IEEE 2-kolom dengan seluruh data & benchmark tersinkron penuh ke [`eda_results.json`](eda_results.json) dan [`models/fase3_metrics.json`](models/fase3_metrics.json).
 
 ## Dampak yang Dikejar
 
@@ -203,5 +205,5 @@ UU PDP No. 27/2022. Lisensi kode: MIT; data mengikuti lisensi sumber.
 > Catatan metodologi: `confidence_score` dan `cot_nutrition_logistics_rationale`
 > adalah artefak anotasi dataset dan tidak pernah dipakai sebagai fitur.
 > Seluruh angka di README ini berasal dari [`eda_results.json`](eda_results.json) (`eda_run.py`)
-> dan [`models/fase3_metrics.json`](models/fase3_metrics.json) (`fase3_modeling_done.ipynb`) —
+> dan [`models/fase3_metrics.json`](models/fase3_metrics.json) (`train-kaggle-done.ipynb`) —
 > tidak ada angka yang ditulis manual.

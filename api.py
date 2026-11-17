@@ -95,7 +95,7 @@ def load_artifacts() -> None:
     eda_path = os.path.join(BASE, "eda_results.json")
 
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UserWarning)
+        warnings.simplefilter("ignore")
         if os.path.exists(pra_model_path) and os.path.exists(pra_pipe_path):
             MODELS["pra_pipe"] = joblib.load(pra_pipe_path)
             b_pra = joblib.load(pra_model_path)

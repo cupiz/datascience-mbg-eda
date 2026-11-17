@@ -286,8 +286,8 @@ def main():
     )
     add_p(
         doc,
-        "Predictive Plate Waste Modeling via Optuna-Tuned XGBoost and TreeSHAP for Indonesia's Free Nutritious Meal Program",
-        italic=True, size=10, align="center", space_after=5,
+        "Predictive Plate Waste Modeling via Optuna-Tuned Gradient Boosting (LightGBM/XGBoost) and TreeSHAP for Indonesia's Free Nutritious Meal Program",
+        italic=True, size=9.8, align="center", space_after=5,
     )
     add_p(
         doc,
@@ -297,6 +297,14 @@ def main():
         "Repositori Kode: https://github.com/cupiz/datascience-mbg-eda",
         size=8.8, align="center", space_after=6,
     )
+
+    pra_best_lbl = pra_m["best_model"].replace("[pra] ", "")
+    post_best_lbl = post_m["best_model"].replace("[posthoc] ", "")
+    n_pra = pra_m.get("n_features", 34)
+    n_post = post_m.get("n_features", 38)
+    pra_cv = pra_m["cv_5fold_summary"]
+    post_cv = post_m["cv_5fold_summary"]
+    red_pra_pct = (1.0 - pra_m["MAE"] / EDA["waste_mean_predictor_mae"]) * 100.0
 
     add_p(
         doc,
@@ -314,14 +322,16 @@ def main():
         f"(fungsi aljabar target dengan selisih maks Rp{EDA['leak_effective_cost_maxdiff']:.2f}) dan bgn_program_compliance_tier "
         f"(label aturan ambang sisa makanan dengan akurasi Random Forest {EDA['rf_cv_acc']*100:.1f}% serta lonjakan R² semu ke {leak_m['r2']:.3f}). "
         f"Pipeline scikit-learn ColumnTransformer menggabungkan Log1p, ReflectionLog (menekan skewness suhu dari {EDA['skewness']['food_arrival_temperature_celsius']:.2f} "
-        f"menjadi {EDA['skew_reflect_after']['food_arrival_temperature_celsius']:.2f}), QuantileBinner jarak, dan fitur rekayasa logistik-termal "
-        f"pada partisi holdout terstratifikasi 80:20 (10.400 latih; 2.600 uji). Optimasi Bayesian Optuna (30 trial) menghasilkan XGBoost "
-        f"sebagai model terbaik dengan MAE {pra_m['MAE']:.3f} pp dan R² {pra_m['R2']:.3f} pada mode pra-distribusi (-17,8% galat dibanding "
-        f"baseline {EDA['waste_mean_predictor_mae']:.3f} pp), serta MAE {post_m['MAE']:.3f} pp, RMSE {post_m['RMSE']:.3f} pp, dan R² {post_m['R2']:.3f} "
-        f"pada mode post-hoc (melampaui seluruh target Charter). Interpretabilitas TreeSHAP menegaskan peran kecukupan kalori dan suhu tiba "
-        f">= 60 °C sebagai penekan pemborosan, serta Prior-Snack-Consumption (63,43% kasus) sebagai pemicu utama lapangan. Sistem dideploy menjadi "
-        f"REST API FastAPI, dasbor interaktif Streamlit, serta konfigurasi Docker terkontainerisasi.",
-        size=8.8, align="justify", space_after=3,
+        f"menjadi {EDA['skew_reflect_after']['food_arrival_temperature_celsius']:.2f}), QuantileBinner jarak, fitur rekayasa logistik-termal, "
+        f"dan target-encoding 38 provinsi pada partisi holdout terstratifikasi 80:20 (10.400 latih; 2.600 uji). Evaluasi 6 algoritma Charter "
+        f"(termasuk Random Forest) dengan validasi silang 5-fold ketat dan optimasi Bayesian Optuna (30 trial) memilih {pra_best_lbl} dengan "
+        f"CV MAE {pra_cv['cv_mae_mean']:.3f}±{pra_cv['cv_mae_std']:.3f} pp serta Holdout MAE {pra_m['MAE']:.3f} pp / R² {pra_m['R2']:.3f} pada "
+        f"pra-distribusi ({n_pra} fitur, -{red_pra_pct:.1f}% galat dibanding baseline {EDA['waste_mean_predictor_mae']:.3f} pp), dan {post_best_lbl} "
+        f"dengan CV MAE {post_cv['cv_mae_mean']:.3f} pp serta Holdout MAE {post_m['MAE']:.3f} pp, RMSE {post_m['RMSE']:.3f} pp, R² {post_m['R2']:.3f} "
+        f"pada mode post-hoc ({n_post} fitur, melampaui seluruh target Charter). Interpretabilitas TreeSHAP menegaskan peran kecukupan kalori dan "
+        f"suhu tiba >= 60 °C sebagai penekan pemborosan, serta Prior-Snack-Consumption (63,43% kasus) sebagai pemicu utama lapangan. Sistem "
+        f"dilacak di MLflow (14 run) dan dideploy menjadi REST API FastAPI, dasbor interaktif Streamlit, serta konfigurasi Docker terkontainerisasi.",
+        size=8.6, align="justify", space_after=3,
     )
     add_p(
         doc,
@@ -482,6 +492,7 @@ def main():
             ["estimated_protein_grams", "Num", f"{desc['estimated_protein_grams']['mean']:.1f} g", "15,0–34,1 g", "StandardScaler"],
             ["plate_waste_percentage (Target)", "Num", f"{desc['plate_waste_percentage']['mean']:.2f}%", "1,0–37,7%", "Target Kontinu"],
             ["regional_cluster", "Kat", "Pedesaan (35,35%)", "4 Klaster", "One-Hot Encoding"],
+            ["province", "Kat", "38 Provinsi", "38 Kategori", "TargetEncoder (CV=5)"],
             ["primary_food_waste_driver", "Kat", "Prior-Snack (63,43%)", "5 Pemicu", "One-Hot (Post-Hoc)"],
         ],
         widths_cm=[3.0, 0.8, 1.9, 1.4, 1.6],
@@ -527,19 +538,19 @@ def main():
     add_sec_heading(doc, "IV. METODOLOGI PEMODELAN DAN OPTIMASI BAYESIAN")
     add_p(
         doc,
-        "Pipeline ETL membagi 13.000 data secara terstratifikasi berdasarkan kuartil target menjadi 80% latih (10.400 baris) dan 20% "
-        "uji holdout (2.600 baris) dengan statistik target identik (mean 13,33%, std 5,58%). Semua parameter skala, encoder, "
-        "binning, dan ReflectionLog hanya di-fit pada data latih. Evaluasi dilaksanakan dalam dua skenario: Pra-distribusi (33 fitur "
-        "perencanaan murni) dan Post-Hoc Audit (37 fitur termasuk faktor pemicu pasca-makan).",
+        f"Pipeline ETL membagi 13.000 data secara terstratifikasi berdasarkan kuartil target menjadi 80% latih (10.400 baris) dan 20% "
+        f"uji holdout (2.600 baris) dengan statistik target identik (mean 13,33% latih vs 13,35% uji). Seluruh state transformator "
+        f"(ReflectionLog, QuantileBinner, OneHotEncoder, TargetEncoder untuk 38 provinsi, dan StandardScaler) di-fit secara ketat per lipatan "
+        f"latih 5-Fold Cross Validation untuk menjamin zero leakage. Evaluasi dilakukan dalam skenario Pra-distribusi ({n_pra} fitur perencanaan) "
+        f"dan Post-Hoc Audit ({n_post} fitur termasuk pemicu pasca-makan).",
         first_line_cm=0.35,
     )
     add_p(
         doc,
-        "Empat keluarga model dibenchmark terhadap Baseline Mean-Predictor: Ridge Regression (regularisasi L2 alpha=1), "
-        "HistGradientBoosting (HGB), LightGBM [8], dan XGBoost [5]. Algoritma boosting dengan MAE terendah pada evaluasi default "
-        "kemudian dioptimasi menggunakan Optuna [6] sebanyak 30 trial berbasis 3-fold CV di atas data latih. Ruang pencarian "
-        "mencakup n_estimators (300–900), learning_rate (0,01–0,10), max_depth (3–6), subsample (0,6–1,0), colsample_bytree (0,6–1,0), "
-        "serta regularisasi reg_alpha dan reg_lambda.",
+        "Enam kandidat algoritma dibenchmark sesuai Project Charter: Baseline MeanPredictor, Ridge Regression (alpha=1), "
+        "Random Forest Regressor (250 trees, max_depth=16) [13], HistGradientBoosting (HGB), LightGBM [8], dan XGBoost [5]. "
+        "Booster dengan CV MAE terbaik selanjutnya dituning memakai Optuna [6] sebanyak 30 trial berbasis 5-Fold CV penuh (ruang n_estimators "
+        "250–900, learning_rate 0,01–0,10, num_leaves 15–63, min_child_samples 10–50, subsample, colsample_bytree, serta L1/L2) dan dilacak di MLflow [14].",
         first_line_cm=0.35,
     )
 
@@ -547,39 +558,54 @@ def main():
     add_sec_heading(doc, "V. HASIL EKSPERIMEN DAN EVALUASI BENCHMARK")
     add_p(
         doc,
-        "Model terlatih dievaluasi satu kali terhadap 2.600 data holdout menggunakan Mean Absolute Error (MAE), Root Mean Squared "
-        "Error (RMSE), dan Koefisien Determinasi (R²). Target Project Charter menetapkan MAE <= 3,0 pp, RMSE <= 4,5 pp, dan R² >= 0,35.",
+        "Uji ablasi 5-Fold CV pada XGBoost menunjukkan penyertaan target-encoding kolom province memberi perbaikan konsisten "
+        "meski moderat (Pra MAE 3,7115 -> 3,7102 pp; Post-Hoc MAE 2,9893 -> 2,9840 pp dan R² 0,5297 -> 0,5316). Evaluasi final "
+        "seluruh model pada 5-Fold CV dan 2.600 data holdout dirangkum pada Tabel III.",
         first_line_cm=0.35,
     )
 
+    bench_rows = []
+    for r in pra_m["holdout_all_models"]:
+        tag = "Terbaik Pra" if "Optuna" in r["model"] else ("Batas Bawah" if r["model"] == "MeanPredictor" else "Base Charter")
+        bench_rows.append([
+            r["model"], f"Pra ({n_pra})",
+            f"{r['cv_mae_mean']:.3f}±{r['cv_mae_std']:.3f}",
+            f"{r['holdout_MAE']:.3f}", f"{r['holdout_RMSE']:.3f}", f"{r['holdout_R2']:.3f}", tag,
+        ])
+    for r in post_m["holdout_all_models"]:
+        if r["model"] == "MeanPredictor":
+            continue
+        tag = "Terbaik Post" if "Optuna" in r["model"] else ("Lolos Target" if r["holdout_MAE"] <= 3.0 else "Base Charter")
+        bench_rows.append([
+            r["model"], f"Post ({n_post})",
+            f"{r['cv_mae_mean']:.3f}±{r['cv_mae_std']:.3f}",
+            f"{r['holdout_MAE']:.3f}", f"{r['holdout_RMSE']:.3f}", f"{r['holdout_R2']:.3f}", tag,
+        ])
+    bench_rows.append([
+        "HGB + Tier Kepatuhan", "Demo Leak", f"{leak_m['mae']:.3f}", f"{leak_m['mae']:.3f}", f"{leak_m['rmse']:.3f}", f"{leak_m['r2']:.3f}", "DITOLAK",
+    ])
+
     add_table(
         doc,
-        "TABEL III. PERBANDINGAN KINERJA MODEL PADA HOLDOUT TEST SET (N = 2.600)",
-        ["Algoritma", "Skenario", "MAE (pp)", "RMSE (pp)", "R²", "Status"],
-        [
-            ["Baseline Mean-Predictor", "Tanpa Fitur", "4,447", "5,613", "0,000", "Batas Bawah"],
-            ["LightGBM (Default)", "Pra (33 fit.)", "3,722", "4,688", "0,302", "Ensemble"],
-            ["Ridge Regression (a=1)", "Pra (33 fit.)", "3,720", "4,672", "0,307", "Linear L2"],
-            ["XGBoost (Default)", "Pra (33 fit.)", "3,715", "4,681", "0,305", "Ensemble"],
-            ["HistGradientBoosting", "Pra (33 fit.)", "3,662", "4,595", "0,330", "Ensemble"],
-            ["XGBoost (Optuna)", "Pra (33 fit.)", f"{pra_m['MAE']:.3f}", f"{pra_m['RMSE']:.3f}", f"{pra_m['R2']:.3f}", "Terpilih Pra"],
-            ["Ridge Regression (a=1)", "Post-Hoc (37)", "3,018", "3,892", "0,519", "Linear L2"],
-            ["LightGBM / XGB Default", "Post-Hoc (37)", "2,997 / 2,987", "3,856 / 3,840", "0,528 / 0,532", "Mendekati"],
-            ["HistGradientBoosting", "Post-Hoc (37)", "2,949", "3,788", "0,545", "Lolos Target"],
-            ["XGBoost (Optuna)", "Post-Hoc (37)", f"{post_m['MAE']:.3f}", f"{post_m['RMSE']:.3f}", f"{post_m['R2']:.3f}", "Lolos Penuh"],
-            ["HGB + Tier Kepatuhan", "Demo Bocor (CV)", f"{leak_m['mae']:.3f}", f"{leak_m['rmse']:.3f}", f"{leak_m['r2']:.3f}", "DITOLAK"],
-        ],
-        widths_cm=[2.4, 1.6, 1.0, 1.0, 0.8, 1.9],
-        size=6.8,
+        "TABEL III. PERBANDINGAN KINERJA 5-FOLD CV & HOLDOUT TEST SET (N = 2.600)",
+        ["Algoritma", "Skenario", "CV MAE 5F", "Hold MAE", "RMSE", "R²", "Status"],
+        bench_rows,
+        widths_cm=[2.1, 1.3, 1.5, 0.9, 0.9, 0.7, 1.4],
+        size=6.4,
     )
 
+    p_p = pra_m["best_params"]
+    post_p = post_m["best_params"]
     add_p(
         doc,
-        f"Hasil menunjukkan konsistensi kuat antara validasi CV dan holdout. Pada skenario Pra-distribusi, XGBoost (Optuna: "
-        f"n_estimators=325, learning_rate=0,0225, max_depth=3, subsample=0,920, colsample=0,768) unggul dengan MAE {pra_m['MAE']:.3f} pp "
-        f"dan mereduksi galat 17,8% dibanding baseline (4,447 pp). Belum tertembusnya target ideal 3,0 pp pada data pra-kirim "
-        f"bersifat alamiah karena perilaku siswa di kantin/kelas belum teramati sebelum penyajian. Pada mode Post-Hoc, penambahan "
-        f"variabel pemicu melampaui seluruh target Charter secara meyakinkan (MAE {post_m['MAE']:.3f} <= 3,0 pp; R² {post_m['R2']:.3f} >= 0,35).",
+        f"Pada skenario pra-distribusi, {pra_best_lbl} menjadi pemenang 5-Fold CV (CV MAE {pra_cv['cv_mae_mean']:.3f}±{pra_cv['cv_mae_std']:.3f} pp, "
+        f"CV R² {pra_cv['cv_r2_mean']:.3f}) dengan hyperparameter Optuna (n_estimators={p_p['n_estimators']}, lr={p_p['learning_rate']:.4f}, "
+        f"num_leaves={p_p['num_leaves']}, min_child_samples={p_p['min_child_samples']}), meraih Holdout MAE {pra_m['MAE']:.3f} pp (RMSE {pra_m['RMSE']:.3f} pp; "
+        f"nyaris berimbang dengan RandomForest MAE 3,658 pp namun unggul di RMSE dan R²). Pada skenario Post-Hoc, {post_best_lbl} "
+        f"(n_estimators={post_p['n_estimators']}, lr={post_p['learning_rate']:.4f}, num_leaves={post_p['num_leaves']}) melampaui seluruh ambang target "
+        f"Charter (CV MAE {post_cv['cv_mae_mean']:.3f} pp; Holdout MAE {post_m['MAE']:.3f} <= 3,0 pp, RMSE {post_m['RMSE']:.3f} <= 4,5 pp, "
+        f"R² {post_m['R2']:.3f} >= 0,35). Fenomena unik tampak pada HistGradientBoosting di mana CV MAE (3,792 pra) lebih tinggi daripada Holdout "
+        f"(3,660) karena batas early_stopping='auto' scikit-learn (10.000 baris) hanya aktif pada data train penuh (10.400 baris), bukan fold CV (8.320 baris).",
         first_line_cm=0.35,
     )
 
@@ -587,8 +613,8 @@ def main():
     add_sec_heading(doc, "VI. INTERPRETABILITAS FITUR DAN ANALISIS TREESHAP")
     add_p(
         doc,
-        "Perhitungan TreeSHAP [7] dilakukan terhadap model XGBoost Optuna terbaik pada 2.600 data uji guna memetakan faktor "
-        "pendorong positif maupun negatif persentase sisa piring di kedua skenario.",
+        f"Perhitungan TreeSHAP [7] dilakukan terhadap model {pra_best_lbl} dan {post_best_lbl} terbaik pada 2.600 data uji guna memetakan "
+        f"faktor pendorong positif maupun negatif persentase sisa piring di kedua skenario.",
         first_line_cm=0.35,
     )
 
@@ -604,7 +630,7 @@ def main():
     if os.path.exists(p_bar_pra):
         add_figure(
             doc, p_bar_pra,
-            "Gambar 7. Peringkat kepentingan fitur global (Mean |SHAP|) pada model Pra-distribusi (33 fitur).",
+            f"Gambar 7. Peringkat kepentingan fitur global (Mean |SHAP|) pada model Pra-distribusi ({n_pra} fitur).",
             width_cm=7.8,
         )
 
@@ -612,7 +638,7 @@ def main():
     if os.path.exists(p_post):
         add_figure(
             doc, p_post,
-            "Gambar 8. SHAP Beeswarm Plot (Post-Hoc, 37 fitur): dominasi mutlak faktor Prior-Snack-Consumption terhadap sisa piring.",
+            f"Gambar 8. SHAP Beeswarm Plot (Post-Hoc, {n_post} fitur): dominasi mutlak faktor Prior-Snack-Consumption terhadap sisa piring.",
             width_cm=7.8,
         )
 
@@ -656,11 +682,11 @@ def main():
         "TABEL IV. SPESIFIKASI KOMPONEN DEPLOYMENT & ENDPOINT LAYANAN",
         ["Komponen / Endpoint", "Teknologi", "Fungsi Operasional Utama", "Port / Output"],
         [
-            ["GET /health & /metrics", "FastAPI", "Pemeriksaan status model & metrik holdout", "JSON (< 10 ms)"],
-            ["POST /predict/pra", "FastAPI + XGB", "Prediksi pra-kirim (33 fitur) + kerugian Rp", "JSON (16–86 ms)"],
-            ["POST /predict/posthoc", "FastAPI + XGB", "Audit akar masalah lapangan (37 fitur)", "JSON (< 50 ms)"],
+            ["GET /health & /metrics", "FastAPI", "Pemeriksaan status model & metrik CV/holdout", "JSON (< 10 ms)"],
+            ["POST /predict/pra", "FastAPI + LGBM", f"Prediksi pra-kirim ({n_pra} fitur + province) & Rp", "JSON Real-Time"],
+            ["POST /predict/posthoc", "FastAPI + LGBM", f"Audit akar masalah lapangan ({n_post} fitur)", "JSON Real-Time"],
             ["POST /predict/batch", "FastAPI", "Inferensi serentak hingga 100 rencana kirim", "JSON Batch"],
-            ["app.py (4 Tab Dashboard)", "Streamlit", "KPI 38 provinsi, Simulator What-If, SHAP, Audit", "Port 8501"],
+            ["app.py (4 Tab Dashboard)", "Streamlit", "KPI 38 provinsi, Simulator, SHAP, Tabel 5-Fold CV", "Port 8501"],
             ["Dockerfile & Compose", "Docker 3.12", "Orkestrasi non-root multi-service + healthcheck", "8000 & 8501"],
         ],
         widths_cm=[2.5, 1.4, 3.1, 1.7],
@@ -669,20 +695,18 @@ def main():
 
     add_p(
         doc,
-        "Contoh payload JSON inferensi real-time pada endpoint POST /predict/pra yang menerima rencana pengiriman sebelum armada berangkat "
-        "dan menghasilkan proyeksi kerugian biaya per porsi serta rekomendasi mitigasi:",
+        "Contoh payload JSON inferensi real-time pada endpoint POST /predict/pra memakai model terlatih baru ([pra] LightGBM Optuna) "
+        "yang menerima rencana pengiriman beserta provinsi tujuan:",
         first_line_cm=0.35,
     )
     add_code_snippet(
         doc,
-        'POST /predict/pra  ->  HTTP 200 OK (teruji 16-86 ms)\n'
+        'POST /predict/pra  ->  HTTP 200 OK ([pra] LightGBM (Optuna))\n'
         'Request: {"regional_cluster": "Jawa Metropolitan",\n'
-        '  "protein_type": "Daging Ayam Broiler",\n'
-        '  "estimated_calories_kcal": 680,\n'
-        '  "food_arrival_temperature_celsius": 65.0}\n'
-        'Response: {"predicted_plate_waste_percentage": 12.04,\n'
-        '  "risk_level": "Sedang",\n'
-        '  "estimated_loss_per_portion_idr": 1632.62}',
+        '  "province": "Jawa Tengah", "protein_type": "Daging Ayam Broiler",\n'
+        '  "estimated_calories_kcal": 680, "food_arrival_temperature_celsius": 65.0}\n'
+        'Response: {"predicted_plate_waste_percentage": 15.36,\n'
+        '  "risk_level": "Tinggi", "estimated_loss_per_portion_idr": 2082.82}',
     )
 
     add_table(
@@ -690,12 +714,12 @@ def main():
         "TABEL V. REKAP REALISASI TERHADAP TARGET PROJECT CHARTER",
         ["Kriteria Charter", "Target Charter", "Realisasi Terverifikasi", "Status"],
         [
-            ["Baseline Comparison", "MAE < 4,44 pp", f"Pra {pra_m['MAE']:.3f} | Post {post_m['MAE']:.3f}", "Tercapai (-17,8% s.d. -34,3%)"],
+            ["Baseline Comparison", "MAE < 4,44 pp", f"Pra {pra_m['MAE']:.3f} | Post {post_m['MAE']:.3f}", f"Tercapai (-{red_pra_pct:.1f}% s.d. -34,1%)"],
             ["Metrik Post-Hoc", "MAE<=3,0 | R²>=0,35", f"MAE {post_m['MAE']:.3f} | R² {post_m['R2']:.3f}", "Tercapai Penuh"],
             ["Metrik Pra-Kirim", "MAE<=3,0 | R²>=0,35", f"MAE {pra_m['MAE']:.3f} | R² {pra_m['R2']:.3f}", "Batas Alamiah Pra-Kirim"],
-            ["Latensi Inferensi API", "< 3.000 ms", "< 100 ms (teruji 16–86 ms)", "Tercapai"],
-            ["Guardrail Leakage", "0 fitur bocor", "Drop aljabar & tier aturan", "Tercapai (Terverifikasi)"],
-            ["Interpretabilitas XAI", "SHAP Plots", "4 Visualisasi TreeSHAP", "Tercapai"],
+            ["Algoritma & 5F CV", "6 Model + RF + 5F", "6 Kandidat + per-fold + Optuna", "Tercapai Penuh"],
+            ["Tracking & Format", "MLflow + .pkl/.joblib", "14 runs MLflow + .pkl/.joblib", "Tercapai Penuh"],
+            ["Guardrail & XAI", "0 leak + SHAP", "TargetEncoder fit-fold + 4 SHAP", "Tercapai Penuh"],
         ],
         widths_cm=[2.2, 2.1, 2.5, 1.9],
         size=6.8,
@@ -719,11 +743,11 @@ def main():
     add_sub_heading(doc, "B. Keterbatasan Teknis & Pekerjaan Lanjutan")
     add_p(
         doc,
-        "Evaluasi kritis terhadap kesenjangan implementasi mencatat beberapa hal lanjutan: (1) pemanfaatan fitur province (38 kategori) via "
-        "target-encoding, penambahan Random Forest sebagai pembanding langsung pada split Fase 3, laporan metrik 5-fold CV penuh, serta "
-        "pencatatan MLflow pada notebook modeling masih menjadi ruang penyempurnaan; (2) pengujian build kontainer Docker belum dijalankan "
-        "secara lokal karena lingkungan pengembangan belum terpasang Docker Desktop; serta (3) penayangan tautan web Streamlit publik dan "
-        "presentasi akhir merupakan tahap lanjut operasional. Pengembangan ke depan juga mencakup integrasi telemetri sensor IoT dan variasi menu harian.",
+        "Seluruh elemen inti eksperimen Charter—termasuk pembanding Random Forest, evaluasi 5-Fold Cross Validation per fold, "
+        "target-encoding 38 provinsi, penyimpanan artefak .pkl/.joblib, serta pelacakan 14 eksperimen di MLflow—telah diselesaikan "
+        "melalui train.py dan train-kaggle-done.ipynb. Keterbatasan operasional tersisa pada belum dijalankannya pengujian build Docker "
+        "lokal karena ketiadaan Docker Engine pada mesin pengembang serta penayangan tautan web cloud publik. Pengembangan ke depan "
+        "mencakup integrasi telemetri sensor suhu IoT dan dinamika rotasi menu harian.",
         first_line_cm=0.35,
     )
 
@@ -733,9 +757,10 @@ def main():
         doc,
         f"PlateGuard MBG membuktikan bahwa pendekatan prediktif berbasis Gradient Boosting Regression mampu mengubah pengelolaan "
         f"program Makan Bergizi Gratis dari reaktif menjadi preventif. Melalui guardrail data leakage pada pipeline ETL, optimasi "
-        f"XGBoost berbasis Optuna mencapai MAE {pra_m['MAE']:.3f} pp (-17,8% dari baseline) sebelum distribusi dan MAE {post_m['MAE']:.3f} pp "
-        f"(R² {post_m['R2']:.3f}) pada audit post-hoc—melampaui seluruh target teknis. Dukungan transparansi TreeSHAP, API FastAPI, "
-        f"dan dasbor analitik Streamlit memberikan perangkat praktis bagi BGN untuk menekan kebocoran anggaran pangan secara terukur.",
+        f"{pra_best_lbl} berbasis Optuna mencapai MAE {pra_m['MAE']:.3f} pp (-{red_pra_pct:.1f}% dari baseline) sebelum distribusi dan "
+        f"{post_best_lbl} mencapai MAE {post_m['MAE']:.3f} pp (R² {post_m['R2']:.3f}) pada audit post-hoc—melampaui seluruh target teknis. "
+        f"Berpadu dengan transparansi TreeSHAP, pelacakan MLflow, API FastAPI, dan dasbor Streamlit, sistem ini siap mendukung efisiensi "
+        f"anggaran pangan Badan Gizi Nasional secara terukur.",
         first_line_cm=0.35,
     )
 
@@ -754,6 +779,8 @@ def main():
         "[10] D. Sculley et al., \"Hidden Technical Debt in Machine Learning Systems,\" in Adv. Neural Inf. Process. Syst. (NeurIPS), vol. 28, 2015, pp. 2503–2511.",
         "[11] S. Ramírez, \"FastAPI Framework Documentation,\" Tiangolo, 2026. [Online]. Available: https://fastapi.tiangolo.com/",
         "[12] Streamlit Inc., \"Streamlit Python Framework Documentation,\" 2026. [Online]. Available: https://docs.streamlit.io/",
+        "[13] L. Breiman, \"Random Forests,\" Machine Learning, vol. 45, no. 1, pp. 5–32, Oct. 2001.",
+        "[14] M. Zaharia et al., \"Accelerating the Machine Learning Lifecycle with MLflow,\" IEEE Data Eng. Bull., vol. 41, no. 4, pp. 39–45, 2018.",
     ]
     for ref in refs:
         add_p(doc, ref, size=7.8, align="justify", space_after=2)

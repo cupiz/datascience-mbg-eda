@@ -12,5 +12,6 @@ venv/
 *.log
 mlruns/
 mlruns.db
+*.zip
 data/indonesia_*.csv
 .pytest_cache/

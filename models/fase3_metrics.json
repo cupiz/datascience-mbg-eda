@@ -1,20 +1,308 @@
 {
  "pra": {
-  "best_model": "[pra] XGBoost (Optuna)",
-  "MAE": 3.654,
-  "RMSE": 4.583,
+  "scenario": "pra",
+  "best_model": "[pra] LightGBM (Optuna)",
+  "MAE": 3.658,
+  "RMSE": 4.586,
   "R2": 0.333,
   "target_MAE<=3.0": false,
   "target_R2>=0.35": false,
-  "target_RMSE<=4.5": false
+  "target_RMSE<=4.5": false,
+  "n_features": 34,
+  "use_province_te": true,
+  "best_params": {
+   "n_estimators": 320,
+   "learning_rate": 0.013272464743316144,
+   "subsample": 0.6781409707063616,
+   "colsample_bytree": 0.661679266915142,
+   "reg_alpha": 0.47694154050889437,
+   "reg_lambda": 0.0015628484037241322,
+   "num_leaves": 15,
+   "min_child_samples": 27
+  },
+  "cv_5fold_summary": {
+   "cv_mae_mean": 3.6044,
+   "cv_mae_std": 0.0417,
+   "cv_rmse_mean": 4.5096,
+   "cv_rmse_std": 0.0302,
+   "cv_r2_mean": 0.3452,
+   "cv_r2_std": 0.0076
+  },
+  "cv_per_fold": [
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 1,
+    "MAE": 3.5441,
+    "RMSE": 4.4522,
+    "R2": 0.3558
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 2,
+    "MAE": 3.6192,
+    "RMSE": 4.525,
+    "R2": 0.3382
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 3,
+    "MAE": 3.5673,
+    "RMSE": 4.5063,
+    "R2": 0.343
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 4,
+    "MAE": 3.6422,
+    "RMSE": 4.5304,
+    "R2": 0.3523
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 5,
+    "MAE": 3.6494,
+    "RMSE": 4.5339,
+    "R2": 0.3366
+   }
+  ],
+  "holdout_all_models": [
+   {
+    "model": "RandomForest",
+    "cv_mae_mean": 3.6361,
+    "cv_mae_std": 0.0396,
+    "cv_rmse_mean": 4.5505,
+    "cv_rmse_std": 0.029,
+    "cv_r2_mean": 0.3332,
+    "cv_r2_std": 0.0084,
+    "holdout_MAE": 3.6575,
+    "holdout_RMSE": 4.6036,
+    "holdout_R2": 0.3272
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "cv_mae_mean": 3.6044,
+    "cv_mae_std": 0.0417,
+    "cv_rmse_mean": 4.5096,
+    "cv_rmse_std": 0.0302,
+    "cv_r2_mean": 0.3452,
+    "cv_r2_std": 0.0076,
+    "holdout_MAE": 3.6583,
+    "holdout_RMSE": 4.5856,
+    "holdout_R2": 0.3325
+   },
+   {
+    "model": "HistGradientBoosting",
+    "cv_mae_mean": 3.792,
+    "cv_mae_std": 0.0362,
+    "cv_rmse_mean": 4.7367,
+    "cv_rmse_std": 0.023,
+    "cv_r2_mean": 0.2776,
+    "cv_r2_std": 0.0037,
+    "holdout_MAE": 3.6604,
+    "holdout_RMSE": 4.5923,
+    "holdout_R2": 0.3305
+   },
+   {
+    "model": "LightGBM",
+    "cv_mae_mean": 3.6874,
+    "cv_mae_std": 0.0336,
+    "cv_rmse_mean": 4.6113,
+    "cv_rmse_std": 0.0273,
+    "cv_r2_mean": 0.3153,
+    "cv_r2_std": 0.0057,
+    "holdout_MAE": 3.7058,
+    "holdout_RMSE": 4.6467,
+    "holdout_R2": 0.3146
+   },
+   {
+    "model": "XGBoost",
+    "cv_mae_mean": 3.7102,
+    "cv_mae_std": 0.0342,
+    "cv_rmse_mean": 4.6376,
+    "cv_rmse_std": 0.0306,
+    "cv_r2_mean": 0.3075,
+    "cv_r2_std": 0.0071,
+    "holdout_MAE": 3.7117,
+    "holdout_RMSE": 4.665,
+    "holdout_R2": 0.3092
+   },
+   {
+    "model": "Ridge",
+    "cv_mae_mean": 3.6832,
+    "cv_mae_std": 0.0372,
+    "cv_rmse_mean": 4.6193,
+    "cv_rmse_std": 0.0341,
+    "cv_r2_mean": 0.3129,
+    "cv_r2_std": 0.0116,
+    "holdout_MAE": 3.7205,
+    "holdout_RMSE": 4.672,
+    "holdout_R2": 0.3071
+   },
+   {
+    "model": "MeanPredictor",
+    "cv_mae_mean": 4.4427,
+    "cv_mae_std": 0.0435,
+    "cv_rmse_mean": 5.5764,
+    "cv_rmse_std": 0.0309,
+    "cv_r2_mean": -0.0013,
+    "cv_r2_std": 0.0015,
+    "holdout_MAE": 4.4469,
+    "holdout_RMSE": 5.6127,
+    "holdout_R2": -0.0
+   }
+  ]
  },
  "posthoc": {
-  "best_model": "[posthoc] XGBoost (Optuna)",
-  "MAE": 2.921,
-  "RMSE": 3.752,
-  "R2": 0.553,
+  "scenario": "posthoc",
+  "best_model": "[posthoc] LightGBM (Optuna)",
+  "MAE": 2.929,
+  "RMSE": 3.761,
+  "R2": 0.551,
   "target_MAE<=3.0": true,
   "target_R2>=0.35": true,
-  "target_RMSE<=4.5": true
+  "target_RMSE<=4.5": true,
+  "n_features": 38,
+  "use_province_te": true,
+  "best_params": {
+   "n_estimators": 350,
+   "learning_rate": 0.010428253596958125,
+   "subsample": 0.769810490763503,
+   "colsample_bytree": 0.6399125626413396,
+   "reg_alpha": 0.9235784336659716,
+   "reg_lambda": 0.006246222037806818,
+   "num_leaves": 29,
+   "min_child_samples": 14
+  },
+  "cv_5fold_summary": {
+   "cv_mae_mean": 2.9051,
+   "cv_mae_std": 0.0464,
+   "cv_rmse_mean": 3.7099,
+   "cv_rmse_std": 0.0348,
+   "cv_r2_mean": 0.5568,
+   "cv_r2_std": 0.0064
+  },
+  "cv_per_fold": [
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 1,
+    "MAE": 2.9053,
+    "RMSE": 3.705,
+    "R2": 0.5539
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 2,
+    "MAE": 2.8478,
+    "RMSE": 3.6578,
+    "R2": 0.5676
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 3,
+    "MAE": 2.8589,
+    "RMSE": 3.6912,
+    "R2": 0.5591
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 4,
+    "MAE": 2.9541,
+    "RMSE": 3.7553,
+    "R2": 0.555
+   },
+   {
+    "model": "LightGBM (Optuna)",
+    "fold": 5,
+    "MAE": 2.9594,
+    "RMSE": 3.7401,
+    "R2": 0.5485
+   }
+  ],
+  "holdout_all_models": [
+   {
+    "model": "LightGBM (Optuna)",
+    "cv_mae_mean": 2.9051,
+    "cv_mae_std": 0.0464,
+    "cv_rmse_mean": 3.7099,
+    "cv_rmse_std": 0.0348,
+    "cv_r2_mean": 0.5568,
+    "cv_r2_std": 0.0064,
+    "holdout_MAE": 2.9295,
+    "holdout_RMSE": 3.7613,
+    "holdout_R2": 0.5509
+   },
+   {
+    "model": "HistGradientBoosting",
+    "cv_mae_mean": 3.0457,
+    "cv_mae_std": 0.0261,
+    "cv_rmse_mean": 3.8902,
+    "cv_rmse_std": 0.0262,
+    "cv_r2_mean": 0.5127,
+    "cv_r2_std": 0.0049,
+    "holdout_MAE": 2.9401,
+    "holdout_RMSE": 3.7728,
+    "holdout_R2": 0.5482
+   },
+   {
+    "model": "RandomForest",
+    "cv_mae_mean": 2.9429,
+    "cv_mae_std": 0.0377,
+    "cv_rmse_mean": 3.754,
+    "cv_rmse_std": 0.0305,
+    "cv_r2_mean": 0.5462,
+    "cv_r2_std": 0.0057,
+    "holdout_MAE": 2.9616,
+    "holdout_RMSE": 3.7969,
+    "holdout_R2": 0.5424
+   },
+   {
+    "model": "LightGBM",
+    "cv_mae_mean": 2.9642,
+    "cv_mae_std": 0.0323,
+    "cv_rmse_mean": 3.7783,
+    "cv_rmse_std": 0.0328,
+    "cv_r2_mean": 0.5403,
+    "cv_r2_std": 0.0062,
+    "holdout_MAE": 2.9774,
+    "holdout_RMSE": 3.8192,
+    "holdout_R2": 0.537
+   },
+   {
+    "model": "XGBoost",
+    "cv_mae_mean": 2.984,
+    "cv_mae_std": 0.0366,
+    "cv_rmse_mean": 3.8139,
+    "cv_rmse_std": 0.0409,
+    "cv_r2_mean": 0.5316,
+    "cv_r2_std": 0.007,
+    "holdout_MAE": 2.979,
+    "holdout_RMSE": 3.8061,
+    "holdout_R2": 0.5401
+   },
+   {
+    "model": "Ridge",
+    "cv_mae_mean": 2.9969,
+    "cv_mae_std": 0.0327,
+    "cv_rmse_mean": 3.8471,
+    "cv_rmse_std": 0.0154,
+    "cv_r2_mean": 0.5234,
+    "cv_r2_std": 0.0044,
+    "holdout_MAE": 3.0181,
+    "holdout_RMSE": 3.892,
+    "holdout_R2": 0.5191
+   },
+   {
+    "model": "MeanPredictor",
+    "cv_mae_mean": 4.4427,
+    "cv_mae_std": 0.0435,
+    "cv_rmse_mean": 5.5764,
+    "cv_rmse_std": 0.0309,
+    "cv_r2_mean": -0.0013,
+    "cv_r2_std": 0.0015,
+    "holdout_MAE": 4.4469,
+    "holdout_RMSE": 5.6127,
+    "holdout_R2": -0.0
+   }
+  ]
  }
 }
