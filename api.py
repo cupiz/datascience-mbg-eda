@@ -71,6 +71,16 @@ VALID_DRIVER = Literal[
     "Delivery-Transit-Delay",
     "Low-Palatability-Menu",
 ]
+VALID_PROVINCE = Literal[
+    "Aceh", "Bali", "Bangka Belitung", "Banten", "Bengkulu", "DI Yogyakarta",
+    "DKI Jakarta", "Gorontalo", "Jambi", "Jawa Barat", "Jawa Tengah", "Jawa Timur",
+    "Kalimantan Barat", "Kalimantan Selatan", "Kalimantan Tengah", "Kalimantan Timur",
+    "Kalimantan Utara", "Kepulauan Riau", "Lampung", "Maluku", "Maluku Utara",
+    "Nusa Tenggara Barat", "Nusa Tenggara Timur", "Papua", "Papua Barat",
+    "Papua Barat Daya", "Papua Pegunungan", "Papua Selatan", "Papua Tengah", "Riau",
+    "Sulawesi Barat", "Sulawesi Selatan", "Sulawesi Tengah", "Sulawesi Tenggara",
+    "Sulawesi Utara", "Sumatera Barat", "Sumatera Selatan", "Sumatera Utara",
+]
 
 MODELS: Dict = {}
 
@@ -156,6 +166,9 @@ class DistributionPlanInput(BaseModel):
     )
     regional_cluster: VALID_CLUSTER = Field(
         "Jawa Metropolitan", description="Klaster geografis wilayah"
+    )
+    province: VALID_PROVINCE = Field(
+        "Jawa Tengah", description="Nama provinsi distribusi (38 provinsi, target-encoded)"
     )
     beneficiary_category: VALID_BENEFICIARY = Field(
         "Siswa SD / Madrasah Ibtidaiyah", description="Kelompok penerima manfaat"

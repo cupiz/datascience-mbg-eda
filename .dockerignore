@@ -11,4 +11,6 @@ venv/
 .gitignore
 *.log
 mlruns/
+mlruns.db
+data/indonesia_*.csv
 .pytest_cache/

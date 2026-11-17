@@ -100,6 +100,16 @@ DRIVERS = [
     "Delivery-Transit-Delay",
     "Low-Palatability-Menu",
 ]
+PROVINCES = [
+    "Aceh", "Bali", "Bangka Belitung", "Banten", "Bengkulu", "DI Yogyakarta",
+    "DKI Jakarta", "Gorontalo", "Jambi", "Jawa Barat", "Jawa Tengah", "Jawa Timur",
+    "Kalimantan Barat", "Kalimantan Selatan", "Kalimantan Tengah", "Kalimantan Timur",
+    "Kalimantan Utara", "Kepulauan Riau", "Lampung", "Maluku", "Maluku Utara",
+    "Nusa Tenggara Barat", "Nusa Tenggara Timur", "Papua", "Papua Barat",
+    "Papua Barat Daya", "Papua Pegunungan", "Papua Selatan", "Papua Tengah", "Riau",
+    "Sulawesi Barat", "Sulawesi Selatan", "Sulawesi Tengah", "Sulawesi Tenggara",
+    "Sulawesi Utara", "Sumatera Barat", "Sumatera Selatan", "Sumatera Utara",
+]
 DRIVER_LABELS = {
     "Prior-Snack-Consumption": "Prior-Snack-Consumption (Jajan Sebelum Makan — 63,43%)",
     "Excessive-Portion-Size": "Excessive-Portion-Size (Porsi Terlalu Besar — 22,40%)",
@@ -379,6 +389,7 @@ with tab2:
         with c_wil:
             st.markdown("##### 📍 Wilayah & Penerima")
             cluster = st.selectbox("Klaster Wilayah", CLUSTERS, index=0)
+            province = st.selectbox("Provinsi Tujuan", PROVINCES, index=PROVINCES.index("Jawa Tengah"))
             beneficiary = st.selectbox("Kategori Penerima Manfaat", BENEFICIARIES, index=0)
             kitchen_cap = st.slider("Kapasitas Dapur SPPG (porsi/hari)", 500, 3600, 1780, step=50)
             sourcing_pct = st.slider("Pasokan Petani Lokal (%)", 35.0, 100.0, 73.7, step=1.0)
@@ -427,6 +438,7 @@ with tab2:
             "transit_cooling_rate_c_per_min": derived["transit_cooling_rate_c_per_min"],
             "food_arrival_temperature_celsius": float(temperature),
             "regional_cluster": cluster,
+            "province": province,
             "beneficiary_category": beneficiary,
             "protein_type": protein,
             "delivery_transport_mode": transport,
@@ -607,18 +619,63 @@ with tab4:
     post_m = METRICS.get("posthoc", {"MAE": 2.921, "RMSE": 3.752, "R2": 0.553})
     leak_demo = EDA.get("reg_hgb_leak_tier_demo", {"mae": 2.363, "rmse": 3.146, "r2": 0.682})
 
-    st.markdown("#### 🏆 Komparasi Kinerja Holdout Test Set (2.600 Sampel Fase 3)")
-    eval_table = pd.DataFrame([
-        {"Algoritma": "Baseline (Mean-Predictor)", "Skenario": "Tanpa Fitur", "MAE (pp)": 4.447, "RMSE (pp)": 5.613, "R²": 0.000, "Status Charter": "Batas Bawah Acuan"},
-        {"Algoritma": "LightGBM (Default)", "Skenario": "Pra-distribusi (33 Fitur)", "MAE (pp)": 3.722, "RMSE (pp)": 4.688, "R²": 0.302, "Status Charter": "Tree Ensemble"},
-        {"Algoritma": "Ridge Regression (alpha=1)", "Skenario": "Pra-distribusi (33 Fitur)", "MAE (pp)": 3.720, "RMSE (pp)": 4.672, "R²": 0.307, "Status Charter": "Model Linear"},
-        {"Algoritma": "XGBoost (Default)", "Skenario": "Pra-distribusi (33 Fitur)", "MAE (pp)": 3.715, "RMSE (pp)": 4.681, "R²": 0.305, "Status Charter": "Tree Ensemble"},
-        {"Algoritma": "HistGradientBoosting", "Skenario": "Pra-distribusi (33 Fitur)", "MAE (pp)": 3.662, "RMSE (pp)": 4.595, "R²": 0.330, "Status Charter": "Tree Ensemble"},
-        {"Algoritma": "XGBoost (Optuna Tuned)", "Skenario": "Pra-distribusi (33 Fitur)", "MAE (pp)": pra_m["MAE"], "RMSE (pp)": pra_m["RMSE"], "R²": pra_m["R2"], "Status Charter": "⭐ Terbaik Pra-Kirim (-17,8% Galat vs Baseline)"},
-        {"Algoritma": "XGBoost (Optuna Tuned)", "Skenario": "Post-Hoc (+Driver, 37 Fitur)", "MAE (pp)": post_m["MAE"], "RMSE (pp)": post_m["RMSE"], "R²": post_m["R2"], "Status Charter": "✅ Lolos Semua Target (MAE<=3,0 | R²>=0,35 | RMSE<=4,5)"},
-        {"Algoritma": "HGB + Tier Kepatuhan (CV EDA)", "Skenario": "Demo Kebocoran Data", "MAE (pp)": leak_demo["mae"], "RMSE (pp)": leak_demo["rmse"], "R²": leak_demo["r2"], "Status Charter": "❌ DITOLAK (Target Leakage)"},
-    ])
+    n_feat_pra = pra_m.get("n_features", 33)
+    n_feat_post = post_m.get("n_features", 37)
+    te_tag = " + Province TE" if pra_m.get("use_province_te") else ""
+
+    st.markdown(f"#### 🏆 Komparasi Kinerja Holdout Test Set (2.600 Sampel{te_tag})")
+    dyn_rows = []
+    if "holdout_all_models" in pra_m and "holdout_all_models" in post_m:
+        for r in pra_m["holdout_all_models"]:
+            dyn_rows.append({
+                "Algoritma": r["model"],
+                "Skenario": f"Pra-distribusi ({n_feat_pra} Fitur)",
+                "CV MAE 5-Fold": f"{r['cv_mae_mean']:.3f} ± {r['cv_mae_std']:.3f}",
+                "Holdout MAE (pp)": round(r["holdout_MAE"], 3),
+                "Holdout RMSE (pp)": round(r["holdout_RMSE"], 3),
+                "Holdout R²": round(r["holdout_R2"], 3),
+                "Catatan": "⭐ Terbaik Pra-Kirim" if "Optuna" in r["model"] else "Benchmark Charter",
+            })
+        for r in post_m["holdout_all_models"]:
+            if r["model"] == "MeanPredictor":
+                continue
+            dyn_rows.append({
+                "Algoritma": r["model"],
+                "Skenario": f"Post-Hoc ({n_feat_post} Fitur)",
+                "CV MAE 5-Fold": f"{r['cv_mae_mean']:.3f} ± {r['cv_mae_std']:.3f}",
+                "Holdout MAE (pp)": round(r["holdout_MAE"], 3),
+                "Holdout RMSE (pp)": round(r["holdout_RMSE"], 3),
+                "Holdout R²": round(r["holdout_R2"], 3),
+                "Catatan": "✅ Lolos Semua Target" if r["holdout_MAE"] <= 3.0 else "Benchmark Charter",
+            })
+        dyn_rows.append({
+            "Algoritma": "HGB + Tier Kepatuhan (CV EDA)",
+            "Skenario": "Demo Kebocoran Data",
+            "CV MAE 5-Fold": f"{leak_demo['mae']:.3f}",
+            "Holdout MAE (pp)": leak_demo["mae"],
+            "Holdout RMSE (pp)": leak_demo["rmse"],
+            "Holdout R²": leak_demo["r2"],
+            "Catatan": "❌ DITOLAK (Target Leakage)",
+        })
+        eval_table = pd.DataFrame(dyn_rows)
+    else:
+        eval_table = pd.DataFrame([
+            {"Algoritma": "Baseline (Mean-Predictor)", "Skenario": "Tanpa Fitur", "MAE (pp)": 4.447, "RMSE (pp)": 5.613, "R²": 0.000, "Status Charter": "Batas Bawah Acuan"},
+            {"Algoritma": "LightGBM (Default)", "Skenario": "Pra-distribusi", "MAE (pp)": 3.722, "RMSE (pp)": 4.688, "R²": 0.302, "Status Charter": "Tree Ensemble"},
+            {"Algoritma": "Ridge Regression (alpha=1)", "Skenario": "Pra-distribusi", "MAE (pp)": 3.720, "RMSE (pp)": 4.672, "R²": 0.307, "Status Charter": "Model Linear"},
+            {"Algoritma": "XGBoost (Default)", "Skenario": "Pra-distribusi", "MAE (pp)": 3.715, "RMSE (pp)": 4.681, "R²": 0.305, "Status Charter": "Tree Ensemble"},
+            {"Algoritma": "HistGradientBoosting", "Skenario": "Pra-distribusi", "MAE (pp)": 3.662, "RMSE (pp)": 4.595, "R²": 0.330, "Status Charter": "Tree Ensemble"},
+            {"Algoritma": pra_m["best_model"], "Skenario": f"Pra-distribusi ({n_feat_pra} Fitur)", "MAE (pp)": pra_m["MAE"], "RMSE (pp)": pra_m["RMSE"], "R²": pra_m["R2"], "Status Charter": "⭐ Terbaik Pra-Kirim"},
+            {"Algoritma": post_m["best_model"], "Skenario": f"Post-Hoc ({n_feat_post} Fitur)", "MAE (pp)": post_m["MAE"], "RMSE (pp)": post_m["RMSE"], "R²": post_m["R2"], "Status Charter": "✅ Lolos Semua Target"},
+            {"Algoritma": "HGB + Tier Kepatuhan (CV EDA)", "Skenario": "Demo Kebocoran Data", "MAE (pp)": leak_demo["mae"], "RMSE (pp)": leak_demo["rmse"], "R²": leak_demo["r2"], "Status Charter": "❌ DITOLAK (Target Leakage)"},
+        ])
     st.dataframe(eval_table, use_container_width=True, hide_index=True)
+
+    cv_csv = os.path.join(BASE, "models", "cv_per_fold_report.csv")
+    if os.path.exists(cv_csv):
+        with st.expander("📊 Detail Evaluasi 5-Fold Cross Validation Per-Fold (models/cv_per_fold_report.csv)"):
+            df_cv = pd.read_csv(cv_csv)
+            st.dataframe(df_cv, use_container_width=True, hide_index=True)
 
     st.markdown("---")
     st.markdown("#### 🛡️ Audit Guardrail Anti-Kebocoran Data (Data Leakage)")

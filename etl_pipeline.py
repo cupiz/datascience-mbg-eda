@@ -27,7 +27,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, TargetEncoder
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(BASE, "data", "indonesia_mbg_nationwide_enriched_2026.csv")
@@ -119,9 +119,9 @@ class QuantileBinner(BaseEstimator, TransformerMixin):
         return np.asarray([f"bin_{input_features[0]}"])
 
 
-def build_pipeline(scenario):
+def build_pipeline(scenario, use_province_te=False):
     cats = CAT_BASE + ([DRIVER] if scenario == "posthoc" else [])
-    ct = ColumnTransformer(transformers=[
+    transformers = [
         ("num", "passthrough", NUM_PASS),
         ("log", Log1p(), NUM_LOG),
         ("temp", ReflectionLog(), [TEMP]),
@@ -129,7 +129,13 @@ def build_pipeline(scenario):
         ("fe", "passthrough", FE_COLS),
         ("cat", OneHotEncoder(handle_unknown="ignore", drop="first",
                               sparse_output=False), cats),
-    ])
+    ]
+    if use_province_te:
+        transformers.append(
+            ("prov_te", TargetEncoder(target_type="continuous", smooth="auto",
+                                      cv=5, random_state=42), ["province"])
+        )
+    ct = ColumnTransformer(transformers=transformers)
     return Pipeline([
         ("fe", FeatureBuilder()),
         ("ct", ct),
@@ -152,12 +158,11 @@ def stratified_split(df, test_size=0.2, random_state=42):
     return df[~mask].reset_index(drop=True), df[mask].reset_index(drop=True)
 
 
-def run_scenario(df, scenario):
+def run_scenario(df, scenario, use_province_te=False):
     train_df, test_df = stratified_split(df)
-    pipe = build_pipeline(scenario)
-    pipe.fit(train_df.drop(columns=[TARGET]), train_df[TARGET])
-    X_tr = pd.DataFrame(pipe.transform(train_df.drop(columns=[TARGET])),
-                        columns=pipe[-2].get_feature_names_out())
+    pipe = build_pipeline(scenario, use_province_te=use_province_te)
+    X_tr_arr = pipe.fit_transform(train_df.drop(columns=[TARGET]), train_df[TARGET])
+    X_tr = pd.DataFrame(X_tr_arr, columns=pipe[-2].get_feature_names_out())
     X_te = pd.DataFrame(pipe.transform(test_df.drop(columns=[TARGET])),
                         columns=X_tr.columns)
 

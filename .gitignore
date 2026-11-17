@@ -6,3 +6,5 @@ rerun.log
 build_tugas1.py
 build_tugas2.py
 tugas_docx_lib.py
+mlruns/
+mlruns.db

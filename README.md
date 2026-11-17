@@ -133,8 +133,11 @@ models/                artefak model terbaik (joblib), pipeline, dan metrik
 download_data.py       unduh dataset via kagglehub
 eda_run.py             pipeline EDA + guardrail leakage + baseline regresi
 eda_notebook.ipynb     versi notebook EDA (tereksekusi, interpretasi per sel)
-etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage + self-test
-fase3_modeling_done.ipynb Fase 3: notebook modeling tereksekusi penuh + interpretasi
+etl_pipeline.py        Fase 2: ETL sklearn Pipeline bebas leakage (+ opsional province TargetEncoder)
+train.py               Pelatihan lokal lengkap (6 model + RandomForest, 5-fold CV, province TE, Optuna, SHAP, MLflow)
+make_train_kaggle_notebook.py Generator notebook training Kaggle dari train.py
+train_kaggle.ipynb     Notebook Kaggle siap jalan (mirror train.py, inline SHAP, zip Output)
+fase3_modeling_done.ipynb Fase 3: notebook modeling terdahulu + interpretasi
 api.py                 Fase 4: FastAPI REST API Microservice (Pra, Post-Hoc, Batch)
 app.py                 Fase 4: Streamlit Dashboard 4 Tab (KPI, Simulator Pra/Post-Hoc, SHAP, Audit)
 Dockerfile             Fase 4: Konfigurasi container python:3.12-slim (non-root appuser)
