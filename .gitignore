@@ -9,3 +9,8 @@ tugas_docx_lib.py
 mlruns/
 mlruns.db
 *.zip
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+static/
+.env

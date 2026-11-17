@@ -15,3 +15,7 @@ mlruns.db
 *.zip
 data/indonesia_*.csv
 .pytest_cache/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+static/

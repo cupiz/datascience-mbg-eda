@@ -1,4 +1,16 @@
-# PlateGuard MBG
+---
+title: PlateGuard MBG
+emoji: 🍱
+colorFrom: green
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+short_description: Prediksi & Audit Sisa Makanan MBG (LightGBM Optuna + TreeSHAP)
+---
+
+# PlateGuard MBG v2
 
 ### Prediksi sisa makanan sebelum truk berangkat.
 
@@ -6,10 +18,12 @@
 *plate waste* per rencana distribusi, sehingga Badan Gizi Nasional (BGN) dan mitra
 dapur dapat menyesuaikan porsi, menu, dan jadwal kirim SEBELUM makanan terbuang.
 
-![Python](https://img.shields.io/badge/Python-3.12-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Fase-4%20Deployment%20%26%20Report%20Selesai-brightgreen)
-![Data](https://img.shields.io/badge/Dataset-Kaggle%20MBG%202026%20v4-yellow)
+[![Next.js](https://img.shields.io/badge/Next.js-16-06525C?logo=nextdotjs)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.12-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Status](https://img.shields.io/badge/v2-Frontend%20%2B%20Backend%20Siap-brightgreen)](#arsitektur-v2)
+[![Data](https://img.shields.io/badge/Dataset-Kaggle%20MBG%202026%20v4-yellow)](https://www.kaggle.com/datasets/luthfimuthathohirin/indonesia-makan-bergizi-gratis-mbg-telemetry)
 
 ---
 
@@ -117,29 +131,43 @@ python train.py --n-trials 30 --cv-folds 5
 # Opsional buka UI pelacakan eksperimen MLflow:
 mlflow ui --backend-store-uri sqlite:///mlruns.db
 
-# 6. Jalankan Microservice REST API (FastAPI)
+# 6. Bangun Frontend Next.js & jalankan Unified FastAPI + UI v2
+cd frontend && npm install && npm run build && cd ..
+# Salin static export ke folder static/ (PowerShell: Copy-Item -Recurse frontend\out static)
 uvicorn api:app --host 127.0.0.1 --port 8000
-# Akses Swagger UI Dokumentasi Interaktif di: http://127.0.0.1:8000/docs
+# Akses Web App v2: http://127.0.0.1:8000/ | Swagger Docs: http://127.0.0.1:8000/docs
 
-# 7. Jalankan Dasbor Eksekutif Interaktif & Simulator (Streamlit)
+# 7. Opsional: Jalankan Dasbor Streamlit legacy (v1)
 streamlit run app.py --server.port 8501
-# Akses Dasbor Interaktif di: http://localhost:8501
 
-# 8. Deployment Otomatis via Docker Compose (pada mesin ber-Docker)
+# 8. Deployment Otomatis Hugging Face Spaces / Docker (port 7860)
+docker build -t plateguard-mbg-v2 . && docker run -p 7860:7860 plateguard-mbg-v2
+# Atau orkestrasi lokal API + Streamlit:
 docker-compose up --build
 ```
+
+## Arsitektur v2 (Frontend Next.js + Backend FastAPI)
+
+Dirancang siap-deploy untuk **Hugging Face Spaces (`sdk: docker`, port `7860`)**:
+
+1. **Frontend (`frontend/`):** Dibangun dengan **Next.js 16 (App Router, `output: "export"`)**, React 19, dan Tailwind CSS v4 bertema publik-kesehatan *Teal-on-Paper & Botanical Sage*:
+   - `/` (**Executive Briefing**): Live Quick-Probe Simulator hero, uji integritas *anti-leakage*, arsitektur pipeline 5 tahap, komparasi 7 model 5-Fold CV & Holdout, serta ablasi `TargetEncoder` 38 provinsi.
+   - `/workspace` (**Operational Command Workspace**): Simulator Pra & Post-Hoc lengkap beserta **TreeSHAP lokal SVG**, kalkulator dampak rupiah bulanan, Analitik 38 Provinsi + galeri 10 grafik EDA, Audit Browser 2.600 sampel Holdout dengan fitur muat satu-klik, dan Batch CSV Scorer.
+2. **Backend (`api.py`):** Layanan **FastAPI** terintegrasi yang melayani endpoint inferensi (`/predict/*`, `/api/explain/*`, `/api/overview`, `/api/benchmark`, `/api/holdout-samples`), aset grafik (`/figures/`, `/figures-fase3/`), sekaligus static bundle frontend dari `static/` pada origin tunggal.
 
 ## Struktur Repositori
 
 ```
+frontend/                     Antarmuka Next.js 16 + Tailwind v4 (static export ke out/)
 data/                         Dataset CSV mentah (unduh lokal, tidak di-commit)
-data/processed/               Dataset siap latih per skenario (pra/posthoc)
+data/processed/               Dataset siap latih + overview_aggregates.json + holdout_audit.csv
 figures/                      10 figur EDA (PNG 150 dpi)
 figures_fase3/                Figur SHAP beeswarm & bar importance per skenario
 models/                       Artefak model (.joblib/.pkl), pipeline, & metrik
 reports/                      Salinan Laporan Akhir IEEE UAS (DOCX 2-kolom)
 download_data.py              Unduh dataset via kagglehub
 eda_run.py                    Pipeline EDA + guardrail leakage + baseline regresi
+build_v2_aggregates.py        Generator agregat nasional & audit holdout ringkas (v2)
 eda_notebook.ipynb            Notebook EDA tereksekusi penuh + interpretasi per sel
 make_notebook.py              Generator & eksekutor eda_notebook.ipynb
 etl_pipeline.py               Fase 2: ETL sklearn Pipeline (+ opsional province TE)
@@ -150,10 +178,10 @@ train-kaggle-done.ipynb       Arsip output lengkap eksekusi Kaggle (14 run MLflo
 make_fase3_notebook.py        Generator starter fase3_modeling.ipynb
 fase3_modeling.ipynb          Starter notebook Fase 3
 fase3_modeling_done.ipynb     Notebook Fase 3 tereksekusi penuh + interpretasi
-api.py                        Fase 4: FastAPI REST API (/predict/pra, /posthoc, /batch)
-app.py                        Fase 4: Streamlit Dashboard 4 Tab (KPI, Simulator, SHAP, Audit)
+api.py                        Backend FastAPI v2 (/api/*, /predict/*, TreeSHAP lokal, static UI)
+app.py                        Streamlit Dashboard v1 (KPI, Simulator, SHAP, Audit)
 build_laporan_akhir.py        Generator dokumen Laporan Akhir format IEEE 2-kolom
-Dockerfile                    Konfigurasi container python:3.12-slim (non-root appuser)
+Dockerfile                    Multi-stage Node 20 + Python 3.12-slim (UID 1000, port 7860 HF Spaces)
 docker-compose.yml            Orkestrasi layanan FastAPI (8000) & Streamlit (8501)
 requirements.txt              Daftar dependensi Python produksi lengkap
 eda_results.json              Seluruh angka statistik EDA terverifikasi
@@ -169,11 +197,12 @@ eda_results.json              Seluruh angka statistik EDA terverifikasi
       - **Pra-distribusi (34 fitur):** **`LightGBM (Optuna)`** (CV MAE `3,604 ± 0,042` pp, Holdout MAE **`3,658 pp`**, RMSE `4,586 pp`, R² `0,333`; `-17,7%` galat dibanding baseline `4,447 pp`; `RandomForest` MAE `3,658 pp` / RMSE `4,604 pp`).
       - **Post-Hoc (38 fitur):** **`LightGBM (Optuna)`** (CV MAE `2,905 ± 0,046` pp, Holdout MAE **`2,929 pp`**, RMSE `3,761 pp`, R² `0,551`; **seluruh target Charter tercapai**: MAE <= 3,0 pp, R² >= 0,35, RMSE <= 4,5 pp).
       - Notebook terdahulu tersimpan di [`fase3_modeling_done.ipynb`](fase3_modeling_done.ipynb).
-- [x] **Fase 4 (Minggu 16, Selesai Lokal).**
-      - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/metrics`, dan `/health` tervalidasi Pydantic v2 (`Literal` sesuai kategori asli dataset + `38 provinsi`), latensi teruji 16–86 ms (target < 3 dtk).
-      - **Interactive Executive Dashboard (`app.py`):** 4 Tab operasional (Executive Overview berbasis JSON terverifikasi, Simulator What-If Pra & Post-Hoc + unduh 2.600 prediksi holdout CSV, TreeSHAP Explainability, Benchmark & Audit Leakage).
-      - **Containerization (`Dockerfile`, `docker-compose.yml`):** Orkestrasi kontainer terisolasi dengan non-root user `appuser` & healthcheck (siap di-build di mesin ber-Docker).
-      - **IEEE Technical Report (`reports/`):** Naskah akademik format IEEE 2-kolom dengan seluruh data & benchmark tersinkron penuh ke [`eda_results.json`](eda_results.json) dan [`models/fase3_metrics.json`](models/fase3_metrics.json).
+- [x] **Fase 4 & Platform v2 (Selesai Lokal — Siap Hugging Face Spaces).**
+      - **Web App v2 (`frontend/` + `api.py`):** Antarmuka Next.js 16 + Tailwind v4 terpisah (static export) disajikan bersama FastAPI `/api/*` + TreeSHAP lokal real-time, analitik 38 provinsi, audit 2.600 sampel holdout, dan batch CSV scorer.
+      - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/api/explain/pra`, `/api/explain/posthoc`, `/api/overview`, `/api/benchmark`, `/api/holdout-samples`, dan `/health`.
+      - **Legacy Dashboard (`app.py`):** Streamlit Dashboard v1 tetap dipertahankan penuh.
+      - **Containerization (`Dockerfile`, `docker-compose.yml`):** Multi-stage build Node 20 + Python 3.12-slim siap Hugging Face Spaces (`sdk: docker`, port `7860`, UID 1000).
+      - **IEEE Technical Report (`reports/`):** Naskah akademik format IEEE 2-kolom tersinkron ke [`eda_results.json`](eda_results.json) dan [`models/fase3_metrics.json`](models/fase3_metrics.json).
 
 ## Dampak yang Dikejar
 
