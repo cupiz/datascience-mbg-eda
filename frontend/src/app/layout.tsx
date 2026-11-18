@@ -17,9 +17,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PlateGuard MBG: Prediksi sisa makanan SPPG untuk Badan Gizi Nasional",
+  title: "PlateGuard MBG — Aplikasi Prediksi & Audit Sisa Makanan SPPG",
   description:
-    "Platform analitik dan simulasi prediksi plate waste Makan Bergizi Gratis (MBG) berbasis LightGBM Optuna dan TreeSHAP di 38 provinsi.",
+    "Aplikasi operasional pra-distribusi, TreeSHAP, analitik 38 provinsi, dan audit holdout Makan Bergizi Gratis (MBG).",
 };
 
 export default function RootLayout({

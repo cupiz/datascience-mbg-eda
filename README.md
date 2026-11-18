@@ -150,9 +150,12 @@ docker-compose up --build
 
 Dirancang siap-deploy untuk **Hugging Face Spaces (`sdk: docker`, port `7860`)**:
 
-1. **Frontend (`frontend/`):** Dibangun dengan **Next.js 16 (App Router, `output: "export"`)**, React 19, dan Tailwind CSS v4 bertema publik-kesehatan *Teal-on-Paper & Botanical Sage*:
-   - `/` (**Executive Briefing**): Live Quick-Probe Simulator hero, uji integritas *anti-leakage*, arsitektur pipeline 5 tahap, komparasi 7 model 5-Fold CV & Holdout, serta ablasi `TargetEncoder` 38 provinsi.
-   - `/workspace` (**Operational Command Workspace**): Simulator Pra & Post-Hoc lengkap beserta **TreeSHAP lokal SVG**, kalkulator dampak rupiah bulanan, Analitik 38 Provinsi + galeri 10 grafik EDA, Audit Browser 2.600 sampel Holdout dengan fitur muat satu-klik, dan Batch CSV Scorer.
+1. **Frontend (`frontend/`):** Dibangun langsung sebagai antarmuka aplikasi **Next.js 16 (App Router, `output: "export"`)**, React 19, dan Tailwind CSS v4 bertema *Teal-on-Paper & Botanical Sage*:
+   - **App Shell (`/`, `/workspace`):** Sidebar persisten (menu modul kerja, skenario cepat, dan riwayat simulasi tersimpan via `localStorage`), top command bar + modal pencarian cepat (`/` atau `Ctrl+K`), serta 4 modul terpadu:
+     * **Simulator & TreeSHAP:** Mode Pra-Distribusi (34F) & Post-Hoc (38F), kalkulator kebocoran rupiah harian/22 hari, **TreeSHAP lokal SVG**, saran aksi SPPG, serta trace engine inferensi.
+     * **Analitik 38 Provinsi:** Ringkasan 13.000 layanan, suhu `<60°C`, peringkat interaktif 38 provinsi, dan galeri 10 figur EDA.
+     * **Audit Model & Holdout:** Komparasi 7 model 5-Fold CV & Holdout, plot SHAP global, arsitektur pipeline `DROP_LEAK`, dan browser 2.600 baris holdout dengan muat satu-klik.
+     * **Batch CSV & API:** Upload CSV hingga 100 baris atau uji cepat sampel holdout, ekspor skor CSV, dan dokumentasi Swagger.
 2. **Backend (`api.py`):** Layanan **FastAPI** terintegrasi yang melayani endpoint inferensi (`/predict/*`, `/api/explain/*`, `/api/overview`, `/api/benchmark`, `/api/holdout-samples`), aset grafik (`/figures/`, `/figures-fase3/`), sekaligus static bundle frontend dari `static/` pada origin tunggal.
 
 ## Struktur Repositori

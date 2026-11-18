@@ -41,8 +41,8 @@ export default function ShapWaterfallSvg({
           const isPositive = item.shap_pp >= 0;
           const widthPct = Math.min(100, (Math.abs(item.shap_pp) / maxAbs) * 100);
           return (
-            <div key={item.key} className="grid grid-cols-1 gap-1.5 sm:grid-cols-12 sm:items-center sm:gap-3">
-              <div className="sm:col-span-5">
+            <div key={item.key} className="grid grid-cols-1 gap-1.5 sm:grid-cols-12 sm:items-center sm:gap-2.5">
+              <div className="sm:col-span-4">
                 <div className="truncate text-[13px] font-medium text-[#0d2429]">
                   {item.label}
                 </div>
@@ -72,9 +72,9 @@ export default function ShapWaterfallSvg({
                 </div>
               </div>
 
-              <div className="sm:col-span-2 sm:text-right">
+              <div className="sm:col-span-3 sm:text-right">
                 <span
-                  className={`t-mono text-[13px] font-medium ${
+                  className={`t-mono whitespace-nowrap text-[12.5px] font-medium ${
                     isPositive ? "text-[#b93815]" : "text-[#06525c]"
                   }`}
                 >
