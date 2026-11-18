@@ -7,7 +7,7 @@ sdk: docker
 app_port: 7860
 pinned: false
 license: mit
-short_description: Prediksi & Audit Sisa Makanan MBG (LightGBM Optuna + TreeSHAP)
+short_description: Prediksi Sisa Makanan MBG (LightGBM Optuna + SHAP)
 ---
 
 # PlateGuard MBG v2
