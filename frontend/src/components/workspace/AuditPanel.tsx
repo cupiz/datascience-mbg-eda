@@ -10,18 +10,21 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import {
-  assetUrl,
   BenchmarkResponse,
+  EdaInteractiveResponse,
   fetchBenchmark,
+  fetchEdaInteractive,
   fetchHoldoutSamples,
   formatIdr,
   formatPct,
   getApiBaseUrl,
   HoldoutItem,
   HoldoutResponse,
+  ModelMetricRow,
 } from "@/lib/api";
 import { VALID_CLUSTERS, VALID_PROVINCES } from "@/lib/constants";
 import PipelineArchitecture from "@/components/PipelineArchitecture";
+import InteractiveAuditCharts from "@/components/charts/InteractiveAuditCharts";
 
 interface AuditPanelProps {
   plainMode?: boolean;
@@ -36,8 +39,9 @@ export default function AuditPanel({
 }: AuditPanelProps) {
   const [subTab, setSubTab] = useState<AuditSubTab>("benchmark");
   const [bench, setBench] = useState<BenchmarkResponse | null>(null);
+  const [interactive, setInteractive] = useState<EdaInteractiveResponse | null>(null);
   const [scenario, setScenario] = useState<"pra" | "posthoc">("pra");
-  const [shapType, setShapType] = useState<"beeswarm" | "bar">("beeswarm");
+  const [hoveredModel, setHoveredModel] = useState<ModelMetricRow | null>(null);
   const [leakView, setLeakView] = useState<"valid" | "leaked">("valid");
 
   const [holdout, setHoldout] = useState<HoldoutResponse | null>(null);
@@ -51,6 +55,7 @@ export default function AuditPanel({
 
   useEffect(() => {
     fetchBenchmark().then(setBench).catch(() => {});
+    fetchEdaInteractive().then(setInteractive).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -91,6 +96,11 @@ export default function AuditPanel({
   })();
 
   const maxMae = Math.max(4.5, ...modelRows.map((m) => m.holdout_MAE));
+  const activeModel =
+    hoveredModel ??
+    modelRows.find((m) => m.model.includes("Optuna")) ??
+    modelRows[0] ??
+    null;
 
   return (
     <div className="space-y-5">
@@ -153,7 +163,10 @@ export default function AuditPanel({
           <div className="inline-flex rounded-full border border-white/90 bg-white/60 p-0.5">
             <button
               type="button"
-              onClick={() => setScenario("pra")}
+              onClick={() => {
+                setHoveredModel(null);
+                setScenario("pra");
+              }}
               className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
                 scenario === "pra" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
               }`}
@@ -162,7 +175,10 @@ export default function AuditPanel({
             </button>
             <button
               type="button"
-              onClick={() => setScenario("posthoc")}
+              onClick={() => {
+                setHoveredModel(null);
+                setScenario("posthoc");
+              }}
               className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
                 scenario === "posthoc" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
               }`}
@@ -173,7 +189,7 @@ export default function AuditPanel({
         )}
       </div>
 
-      {/* VIEW 1: Benchmark 7 Model, CV & SHAP */}
+      {/* VIEW 1: Benchmark 7 Model, CV, Interactive SHAP & Calibration Scatter */}
       {subTab === "benchmark" && (
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
@@ -183,11 +199,21 @@ export default function AuditPanel({
                   ? "Ketepatan 7 Model Uji (makin pendek makin jitu)"
                   : "Holdout MAE & R² 7 model"}
               </h3>
-              <div className="mt-4 space-y-3">
+              <p className="mt-0.5 text-[12px] text-[#3d525c]">
+                Arahkan kursor pada batang model untuk melihat detail CV &amp; RMSE.
+              </p>
+              <div className="mt-3 space-y-2">
                 {modelRows.map((m) => {
                   const isSelected = m.model.includes("Optuna");
+                  const isActive = activeModel?.model === m.model;
                   return (
-                    <div key={m.model} className="space-y-1">
+                    <div
+                      key={m.model}
+                      onMouseEnter={() => setHoveredModel(m)}
+                      className={`space-y-1 rounded-xl px-2.5 py-1.5 transition-colors cursor-default ${
+                        isActive ? "bg-white/80" : "hover:bg-white/55"
+                      }`}
+                    >
                       <div className="flex items-center justify-between text-[13px]">
                         <span
                           className={
@@ -214,6 +240,22 @@ export default function AuditPanel({
                   );
                 })}
               </div>
+
+              {activeModel && (
+                <div className="glass-field mt-3 p-3 text-[12px]">
+                  <div className="flex justify-between font-bold text-[#141414]">
+                    <span>{activeModel.model}</span>
+                    <span className="t-mono text-[#0f5257]">
+                      R² {activeModel.holdout_R2.toFixed(3).replace(".", ",")}
+                    </span>
+                  </div>
+                  <div className="t-mono mt-1 text-[#3d525c]">
+                    CV 5-Fold: {activeModel.cv_mae_mean.toFixed(3).replace(".", ",")} &plusmn;{" "}
+                    {activeModel.cv_mae_std.toFixed(3).replace(".", ",")} pp · Holdout RMSE:{" "}
+                    {activeModel.holdout_RMSE.toFixed(3).replace(".", ",")} pp
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="hairline-card overflow-hidden p-5 lg:col-span-7">
@@ -271,50 +313,13 @@ export default function AuditPanel({
             </div>
           </div>
 
-          <div className="hairline-card p-5">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div>
-                <h3 className="text-[16px] font-bold text-[#141414]">
-                  {plainMode
-                    ? `Faktor Paling Berpengaruh (${scenario === "pra" ? "Sebelum Kirim" : "Setelah Makan"})`
-                    : `Global TreeSHAP (${scenario === "pra" ? "Pra-Distribusi" : "Post-Hoc"})`}
-                </h3>
-                <p className="text-[12.5px] text-[#3d525c]">
-                  Urutan pengaruh fitur pada model terbaik Optuna LightGBM di seluruh 2.600 data uji.
-                </p>
-              </div>
-              <div className="inline-flex rounded-full border border-white/90 bg-white/60 p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setShapType("beeswarm")}
-                  className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
-                    shapType === "beeswarm" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
-                  }`}
-                >
-                  Sebaran Titik
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShapType("bar")}
-                  className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
-                    shapType === "bar" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
-                  }`}
-                >
-                  Peringkat Batang
-                </button>
-              </div>
-            </div>
-
-            <div className="sage-frame mt-4 p-3">
-              <div className="overflow-hidden rounded-[18px] border border-white bg-white p-3">
-                <img
-                  src={assetUrl(`/figures-fase3/shap_${shapType}_${scenario}.png`)}
-                  alt={`SHAP ${shapType} ${scenario}`}
-                  className="mx-auto max-h-[460px] w-full object-contain"
-                />
-              </div>
-            </div>
-          </div>
+          <InteractiveAuditCharts
+            scenario={scenario}
+            globalShap={interactive?.global_shap[scenario] ?? []}
+            scatterPoints={interactive?.scatter_points ?? []}
+            plainMode={plainMode}
+            onInspectSample={onLoadToSimulator}
+          />
         </div>
       )}
 

@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpenText, Search, ThermometerSnowflake } from "lucide-react";
+import { ArrowUpRight, BookOpenText, Search, ThermometerSnowflake } from "lucide-react";
 import {
-  assetUrl,
+  EdaInteractiveResponse,
+  fetchEdaInteractive,
   fetchOverview,
   formatIdr,
   formatPct,
   GroupStat,
+  HoldoutItem,
   OverviewResponse,
 } from "@/lib/api";
-import { EDA_FIGURES_CATALOG } from "@/lib/constants";
+import InteractiveEdaExplorer from "@/components/charts/InteractiveEdaExplorer";
 
 const DRIVER_LABELS_PLAIN: Record<string, string> = {
   "Prior-Snack-Consumption": "Jajan sebelum jam makan",
@@ -26,26 +28,44 @@ function SimpleBarList({
   unit = "%",
   highlightAbove,
   plainMode = true,
+  selectedName,
+  onSelect,
+  onHover,
 }: {
   items: GroupStat[];
   metric: "bermasalah_pct" | "mean_waste_pct" | "share_pct";
   unit?: string;
   highlightAbove?: number;
   plainMode?: boolean;
+  selectedName?: string | null;
+  onSelect?: (item: GroupStat) => void;
+  onHover?: (item: GroupStat) => void;
 }) {
   const maxVal = Math.max(1, ...items.map((x) => x[metric]));
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {items.map((item) => {
         const val = item[metric];
         const widthPct = Math.max(2, (val / maxVal) * 100);
         const isWarn = highlightAbove !== undefined && val >= highlightAbove;
+        const isSel = selectedName === item.name;
         const displayName =
           plainMode && DRIVER_LABELS_PLAIN[item.name]
             ? DRIVER_LABELS_PLAIN[item.name]
             : item.name;
         return (
-          <div key={item.name} className="space-y-1">
+          <div
+            key={item.name}
+            onMouseEnter={() => onHover?.(item)}
+            onClick={() => onSelect?.(item)}
+            className={`space-y-1 rounded-xl px-2.5 py-1.5 transition-colors ${
+              onSelect ? "cursor-pointer" : "cursor-default"
+            } ${
+              isSel
+                ? "bg-[#0f5257]/12 ring-1 ring-[#0f5257]/30"
+                : "hover:bg-white/60"
+            }`}
+          >
             <div className="flex items-center justify-between gap-2 text-[13px]">
               <span className="truncate font-semibold text-[#141414]">
                 {displayName}
@@ -80,18 +100,25 @@ function SimpleBarList({
 
 export default function AnalyticsPanel({
   plainMode = true,
+  onLoadToSimulator,
+  onSelectProvince,
 }: {
   plainMode?: boolean;
+  onLoadToSimulator?: (item: HoldoutItem) => void;
+  onSelectProvince?: (province: string) => void;
 }) {
   const [data, setData] = useState<OverviewResponse | null>(null);
+  const [interactive, setInteractive] = useState<EdaInteractiveResponse | null>(null);
+  const [hoveredCluster, setHoveredCluster] = useState<GroupStat | null>(null);
+  const [hoveredDriver, setHoveredDriver] = useState<GroupStat | null>(null);
   const [provQuery, setProvQuery] = useState<string>("");
   const [provSort, setProvSort] = useState<"bermasalah_pct" | "mean_waste_pct" | "below_60c_pct">(
     "bermasalah_pct"
   );
-  const [selectedFigure, setSelectedFigure] = useState(EDA_FIGURES_CATALOG[1]);
 
   useEffect(() => {
     fetchOverview().then(setData).catch(() => {});
+    fetchEdaInteractive().then(setInteractive).catch(() => {});
   }, []);
 
   const agg = data?.aggregates;
@@ -113,6 +140,8 @@ export default function AnalyticsPanel({
   }
 
   const s = agg.summary;
+  const activeCluster = hoveredCluster ?? agg.clusters[0];
+  const activeDriver = hoveredDriver ?? agg.drivers[0];
 
   return (
     <div className="space-y-5">
@@ -191,82 +220,87 @@ export default function AnalyticsPanel({
         </div>
       </div>
 
-      {/* Cluster & Root Cause Drivers */}
+      {/* Interactive Cluster & Root Cause Drivers (Hover Tooltip Cards) */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
         <div className="hairline-card p-6 lg:col-span-6">
           <h3 className="text-[17px] font-bold text-[#141414]">
             {plainMode ? "Wilayah Mana yang Paling Rawan?" : "Kerentanan per klaster geografis"}
           </h3>
-          <p className="mt-1 mb-5 text-[13px] text-[#3d525c]">
-            {plainMode
-              ? "Persentase pengiriman yang butuh perbaikan (wilayah 3T jauh lebih rentan dibanding kota besar di Jawa)."
-              : "Persentase layanan bermasalah (Marginal-Quality & Non-Compliant) per zona nasional."}
+          <p className="mt-1 mb-4 text-[13px] text-[#3d525c]">
+            Arahkan kursor pada zona untuk melihat lama perjalanan, suhu rata-rata, dan persentase sisa.
           </p>
           <SimpleBarList
             items={agg.clusters}
             metric="bermasalah_pct"
             highlightAbove={25}
             plainMode={plainMode}
+            selectedName={activeCluster?.name}
+            onHover={setHoveredCluster}
+            onSelect={setHoveredCluster}
           />
-          <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[rgba(15,82,87,0.1)] pt-4 text-[12.5px]">
-            {agg.clusters.slice(0, 2).map((c) => (
-              <div key={c.name} className="glass-field p-3">
-                <div className="truncate font-semibold text-[#141414]">{c.name}</div>
-                <div className="t-mono mt-1 text-[11.5px] text-[#3d525c]">
-                  Jalan {String(c.mean_transit_min).replace(".", ",")} mnt · Suhu{" "}
-                  {String(c.mean_temp_c).replace(".", ",")}°C
-                </div>
+          {activeCluster && (
+            <div className="glass-field mt-4 p-3.5 text-[12.5px]">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <strong className="text-[#141414]">{activeCluster.name}</strong>
+                <span className="t-mono font-bold text-[#0f5257]">
+                  Sisa rata-rata {formatPct(activeCluster.mean_waste_pct)}
+                </span>
               </div>
-            ))}
-          </div>
+              <div className="t-mono mt-1 text-[11.5px] text-[#3d525c]">
+                {activeCluster.count.toLocaleString("id-ID")} kiriman · Waktu jalan{" "}
+                {String(activeCluster.mean_transit_min).replace(".", ",")} mnt · Suhu{" "}
+                {String(activeCluster.mean_temp_c).replace(".", ",")}°C · Kiriman dingin{" "}
+                {formatPct(activeCluster.below_60c_pct, 1)}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="hairline-card p-6 lg:col-span-6">
           <h3 className="text-[17px] font-bold text-[#141414]">
             {plainMode ? "Mengapa Anak Tidak Menghabiskan Makanan?" : "Proporsi akar masalah utama (Post-Hoc)"}
           </h3>
-          <p className="mt-1 mb-5 text-[13px] text-[#3d525c]">
-            {plainMode
-              ? "Lima alasan tersering makanan tersisa di lapangan selama distribusi 2026."
-              : "Pangsa kejadian lima pemicu sisa makanan di seluruh layanan 2026."}
+          <p className="mt-1 mb-4 text-[13px] text-[#3d525c]">
+            Arahkan kursor pada tiap alasan untuk membandingkan rata-rata sisa piring &amp; suhu tiba.
           </p>
-          <SimpleBarList items={agg.drivers} metric="share_pct" plainMode={plainMode} />
-          <div className="mt-5 grid grid-cols-1 gap-3 border-t border-[rgba(15,82,87,0.1)] pt-4 sm:grid-cols-2">
-            <div className="glass-field p-3">
-              <div className="mb-2 text-[12px] font-bold text-[#0f5257]">
-                Rataan sisa per lauk protein
+          <SimpleBarList
+            items={agg.drivers}
+            metric="share_pct"
+            plainMode={plainMode}
+            selectedName={activeDriver?.name}
+            onHover={setHoveredDriver}
+            onSelect={setHoveredDriver}
+          />
+          {activeDriver && (
+            <div className="glass-field mt-4 p-3.5 text-[12.5px]">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <strong className="text-[#141414]">
+                  {plainMode && DRIVER_LABELS_PLAIN[activeDriver.name]
+                    ? DRIVER_LABELS_PLAIN[activeDriver.name]
+                    : activeDriver.name}
+                </strong>
+                <span className="t-mono font-bold text-[#b53418]">
+                  Bermasalah {formatPct(activeDriver.bermasalah_pct, 1)}
+                </span>
               </div>
-              <div className="space-y-1.5 text-[12.5px]">
-                {agg.proteins.map((p) => (
-                  <div key={p.name} className="flex justify-between">
-                    <span className="truncate pr-2 font-medium text-[#141414]">{p.name}</span>
-                    <span className="t-mono font-bold text-[#0f5257]">
-                      {formatPct(p.mean_waste_pct)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="glass-field p-3">
-              <div className="mb-2 text-[12px] font-bold text-[#0f5257]">
-                Rataan sisa per jenjang sekolah
-              </div>
-              <div className="space-y-1.5 text-[12.5px]">
-                {agg.beneficiaries.map((b) => (
-                  <div key={b.name} className="flex justify-between">
-                    <span className="truncate pr-2 font-medium text-[#141414]">{b.name}</span>
-                    <span className="t-mono font-bold text-[#0f5257]">
-                      {formatPct(b.mean_waste_pct)}
-                    </span>
-                  </div>
-                ))}
+              <div className="t-mono mt-1 text-[11.5px] text-[#3d525c]">
+                Rataan sisa {formatPct(activeDriver.mean_waste_pct)} · Suhu tiba{" "}
+                {String(activeDriver.mean_temp_c).replace(".", ",")}°C · Biaya efektif{" "}
+                {formatIdr(activeDriver.mean_effective_cost_idr)}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* 38 Provinces Explorer */}
+      {/* INTERACTIVE EDA EXPLORER (Scatter, Temp Bins, Correlations + Fallback Original 10 PNGs) */}
+      <InteractiveEdaExplorer
+        interactive={interactive}
+        plainMode={plainMode}
+        onInspectSample={onLoadToSimulator}
+      />
+
+      {/* 38 Provinces Explorer with Instant Test in Simulator Button */}
       <div className="hairline-card p-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
@@ -274,7 +308,7 @@ export default function AnalyticsPanel({
               Peringkat 38 Provinsi di Indonesia
             </h3>
             <p className="mt-1 text-[13px] text-[#3d525c]">
-              Urutkan provinsi berdasarkan tingkat masalah, rata-rata sisa makanan, atau kiriman yang tiba dingin.
+              Klik tombol <strong>Uji</strong> pada provinsi mana pun untuk mencoba kondisi daerah tersebut.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
@@ -306,12 +340,13 @@ export default function AnalyticsPanel({
               <tr>
                 <th className="px-4 py-3 font-semibold">#</th>
                 <th className="px-4 py-3 font-semibold">Provinsi</th>
-                <th className="px-4 py-3 text-right font-semibold">Jumlah SPPG</th>
+                <th className="px-4 py-3 text-right font-semibold">SPPG</th>
                 <th className="px-4 py-3 text-right font-semibold">Rataan Sisa</th>
                 <th className="px-4 py-3 text-right font-semibold">Bermasalah</th>
                 <th className="px-4 py-3 text-right font-semibold">Tiba &lt;60°C</th>
-                <th className="px-4 py-3 text-right font-semibold">Transit (mnt)</th>
+                <th className="px-4 py-3 text-right font-semibold">Transit</th>
                 <th className="px-4 py-3 text-right font-semibold">Biaya Efektif</th>
+                {onSelectProvince && <th className="px-4 py-3 text-right font-semibold">Aksi</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-[rgba(15,82,87,0.08)]">
@@ -341,48 +376,21 @@ export default function AnalyticsPanel({
                   <td className="t-mono px-4 py-2.5 text-right font-medium text-[#141414]">
                     {formatIdr(p.mean_effective_cost_idr)}
                   </td>
+                  {onSelectProvince && (
+                    <td className="px-4 py-2.5 text-right">
+                      <button
+                        type="button"
+                        onClick={() => onSelectProvince(p.name)}
+                        className="inline-flex items-center gap-1 rounded-full border border-white/90 bg-white/80 px-2.5 py-1 text-[11.5px] font-semibold text-[#0f5257] hover:bg-[#0f5257] hover:text-white transition-colors cursor-pointer"
+                      >
+                        Uji <ArrowUpRight className="h-3 w-3" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* EDA High-Res Figures Inspector */}
-      <div className="hairline-card p-6">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-          <div>
-            <h3 className="text-[17px] font-bold text-[#141414]">
-              Galeri 10 Grafik Statistik (<code className="t-mono text-[15px]">eda_run.py</code>)
-            </h3>
-            <p className="mt-1 text-[13px] text-[#3d525c]">
-              Pilih grafik dari daftar untuk melihat pola distribusi suhu, jarak, dan korelasi data.
-            </p>
-          </div>
-          <select
-            value={selectedFigure.file}
-            onChange={(e) => {
-              const found = EDA_FIGURES_CATALOG.find((x) => x.file === e.target.value);
-              if (found) setSelectedFigure(found);
-            }}
-            className="rounded-full border border-white/90 bg-white/85 px-4 py-2 text-[13px] font-semibold text-[#141414]"
-          >
-            {EDA_FIGURES_CATALOG.map((fig) => (
-              <option key={fig.file} value={fig.file}>
-                {fig.title}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="sage-frame mt-5 p-3 sm:p-4">
-          <div className="overflow-hidden rounded-[18px] border border-white bg-white p-3 sm:p-4">
-            <img
-              src={assetUrl(`/figures/${selectedFigure.file}`)}
-              alt={selectedFigure.title}
-              className="mx-auto h-auto max-h-[540px] w-full object-contain"
-            />
-          </div>
         </div>
       </div>
     </div>

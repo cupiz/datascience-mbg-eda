@@ -580,7 +580,28 @@ export default function AppShell() {
               onSaveRun={handleSaveRun}
             />
           )}
-          {activeView === "analytics" && <AnalyticsPanel plainMode={plainMode} />}
+          {activeView === "analytics" && (
+            <AnalyticsPanel
+              plainMode={plainMode}
+              onLoadToSimulator={handleLoadHoldoutRow}
+              onSelectProvince={(prov) => {
+                setLoadedHoldoutRow(null);
+                setLoadedRun({
+                  id: `prov-${prov}`,
+                  createdAt: Date.now(),
+                  title: prov,
+                  mode: "pra",
+                  province: prov,
+                  cluster: "Luar Jawa Urban",
+                  predictedWastePct: 13.34,
+                  riskLevel: "Sedang",
+                  lossPerPortionIdr: 2000,
+                  payload: { province: prov },
+                });
+                switchView("simulator");
+              }}
+            />
+          )}
           {activeView === "audit" && (
             <AuditPanel
               plainMode={plainMode}

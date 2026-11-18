@@ -584,10 +584,12 @@ def api_info():
         "endpoints": {
             "health": "/health",
             "overview": "/api/overview",
+            "eda_interactive": "/api/eda-interactive",
             "benchmark": "/api/benchmark",
             "holdout_samples": "/api/holdout-samples",
             "explain_pra": "/api/explain/pra",
             "explain_posthoc": "/api/explain/posthoc",
+            "what_if_curve": "/api/what-if-curve",
             "predict_pra": "/predict/pra",
             "predict_posthoc": "/predict/posthoc",
             "predict_batch": "/predict/batch",
@@ -664,6 +666,267 @@ def get_benchmark():
             {"scenario": "posthoc", "config": "Tanpa Province TE (37 fitur)", "cv_mae": 2.9893, "cv_rmse": 3.8217, "cv_r2": 0.5297},
             {"scenario": "posthoc", "config": "Dengan Province TE (38 fitur)", "cv_mae": 2.9840, "cv_rmse": 3.8139, "cv_r2": 0.5316},
         ],
+    }
+
+
+_CORR_PLAIN_META: Dict[str, tuple] = {
+    "estimated_calories_kcal": ("Kandungan Kalori Menu", "Porsi berkalori memadai cenderung dimakan lebih habis."),
+    "cost_to_nutrition_ratio": ("Rasio Biaya per Protein", "Biaya mahal per gram protein berkorelasi dengan sisa lebih besar."),
+    "food_arrival_temperature_celsius": ("Suhu Makanan Tiba", "Makin hangat makanan tiba (>=60°C), makin sedikit yang tersisa."),
+    "estimated_protein_grams": ("Kandungan Protein Lauk", "Menu berprotein lebih tinggi umumnya lebih disukai penerima."),
+    "spoilage_risk_index": ("Indeks Risiko Basi", "Indeks pembusukan naik saat perjalanan lama dan suhu turun."),
+    "transit_time_minutes": ("Durasi Perjalanan", "Makin lama waktu tempuh di jalan, makin besar risiko makanan tersisa."),
+    "delivery_distance_km": ("Jarak Pengantaran", "Rute pengantaran jauh berpeluang menaikkan sisa makanan."),
+    "kitchen_daily_capacity_portions": ("Kapasitas Dapur SPPG", "Dapur berskala besar sedikit lebih efisien menekan sisa."),
+    "total_meal_cost_idr": ("Total Pagu Harga Porsi", "Pengaruh langsung harga porsi mentah terhadap sisa sangat kecil."),
+    "raw_ingredient_cost_per_portion_idr": ("Biaya Bahan Baku", "Biaya bahan baku saja hampir tidak membedakan besar sisa."),
+    "student_attendance_rate_pct": ("Kehadiran Penerima", "Hubungan langsung tingkat kehadiran ke sisa per porsi tergolong lemah."),
+    "transit_cooling_rate_c_per_min": ("Laju Penurunan Suhu", "Laju susut panas per menit bekerja bersama suhu akhir tiba."),
+    "local_farmer_sourcing_pct": ("Serapan Petani Lokal", "Belanja bahan lokal tidak menambah pemborosan di piring."),
+    "local_economic_multiplier_score": ("Dampak Ekonomi Lokal", "Dampak ekonomi lokal netral terhadap sisa piring siswa."),
+}
+
+_GLOBAL_SHAP_GROUP_META: Dict[str, tuple] = {
+    "num__estimated_calories_kcal": ("Kandungan Kalori Menu", "Ukuran kecukupan energi per kotak menentukan seberapa tuntas porsi dihabiskan."),
+    "temp__refllog_food_arrival_temperature_celsius": ("Suhu Makanan Saat Tiba", "Suhu di bawah 60°C menurunkan selera makan dan menaikkan risiko basi."),
+    "num__cost_to_nutrition_ratio": ("Rasio Biaya per Protein", "Keseimbangan harga menu dibanding jumlah protein yang diterima anak."),
+    "grp_beneficiary_category": ("Jenjang Sekolah Penerima", "Pola habis makanan berbeda antara anak SD, SMP, SMA, santri, dan balita."),
+    "grp_regional_cluster": ("Zona Geografis Wilayah", "Perbedaan infrastruktur pengantaran antara kota di Jawa dan zona 3T."),
+    "prov_te__province": ("Karakteristik Provinsi", "Kebiasaan makan lokal serta tantangan logistik khas di 38 provinsi."),
+    "grp_primary_food_waste_driver": ("Pemicu Utama Lapangan (Post-Hoc)", "Catatan lapangan apakah anak sudah jajan dulu, porsi kebesaran, atau dingin."),
+    "num__estimated_protein_grams": ("Kandungan Protein Lauk", "Kadar protein membantu rasa kenyang dan kualitas lauk utama."),
+    "log__log_transit_time_minutes": ("Durasi Transit Pengiriman", "Lama perjalanan dari dapur SPPG ke sekolah tujuan."),
+    "grp_distance": ("Jarak Pengantaran Armada", "Panjang rute pengiriman dari dapur ke titik penerima."),
+    "num__kitchen_daily_capacity_portions": ("Skala Produksi Dapur", "Banyak porsi harian yang diproduksi oleh dapur SPPG."),
+    "grp_protein_type": ("Jenis Sumber Protein", "Preferensi penerima terhadap daging ayam, telur, ikan, sapi, atau susu."),
+    "grp_delivery_transport_mode": ("Moda Kendaraan Pengantar", "Jenis armada box motor, van, pickup termal, atau perahu sungai."),
+    "log__log_spoilage_risk_index": ("Indeks Risiko Basi", "Indikator penurunan mutu pangan sepanjang pengiriman."),
+    "log__log_transit_cooling_rate_c_per_min": ("Laju Penurunan Suhu", "Kecepatan turunnya suhu makanan setiap menit sepanjang perjalanan."),
+    "num__local_farmer_sourcing_pct": ("Belanja Bahan Petani Lokal", "Persentase bahan pangan dapur yang dipasok petani setempat."),
+    "num__local_economic_multiplier_score": ("Skor Dampak Ekonomi Lokal", "Perputaran ekonomi setempat dari aktivitas pengadaan dapur SPPG."),
+    "num__raw_ingredient_cost_per_portion_idr": ("Biaya Bahan Baku", "Ongkos pembelian bahan makanan mentah per kotak porsi."),
+    "num__total_meal_cost_idr": ("Total Pagu Harga Porsi", "Keseluruhan anggaran per kotak makan berikut biaya masak dan kirim."),
+    "num__student_attendance_rate_pct": ("Kehadiran Siswa Penerima", "Persentase kehadiran penerima manfaat saat hari pengantaran."),
+    "fe__biaya_per_kkal": ("Biaya per Energi", "Efisiensi anggaran per kilokalori makanan yang dikirim."),
+    "fe__kecepatan_km_jam": ("Kecepatan Rata-rata Kirim", "Kecepatan tempuh armada di lapangan."),
+    "fe__interaksi_suhu_transit": ("Gabungan Suhu dan Durasi", "Efek bersama antara perjalanan panjang dan suhu saat tiba."),
+}
+
+
+def _compute_global_shap_summary(sample_df: pd.DataFrame) -> Dict[str, List[Dict[str, Any]]]:
+    """Hitung rata-rata pengaruh |TreeSHAP| global terkelompok dari sampel holdout."""
+    cat_prefixes = {
+        "cat__regional_cluster_": "grp_regional_cluster",
+        "cat__beneficiary_category_": "grp_beneficiary_category",
+        "cat__protein_type_": "grp_protein_type",
+        "cat__delivery_transport_mode_": "grp_delivery_transport_mode",
+        "cat__primary_food_waste_driver_": "grp_primary_food_waste_driver",
+    }
+    prepared_rows = [
+        preprocess_payload(
+            PostHocAuditInput(
+                **{
+                    k: row[k]
+                    for k in DistributionPlanInput.model_fields
+                    if k in row and pd.notna(row[k])
+                },
+                primary_food_waste_driver=str(row.get("primary_food_waste_driver", "Prior-Snack-Consumption")),
+            )
+        ).iloc[0].to_dict()
+        for _, row in sample_df.iterrows()
+    ]
+    df_full = pd.DataFrame(prepared_rows)
+    df_full["primary_food_waste_driver"] = sample_df["primary_food_waste_driver"].values
+
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    for scen, pipe_k, exp_k, cols_k in (
+        ("pra", "pra_pipe", "pra_explainer", "pra_feat_cols"),
+        ("posthoc", "post_pipe", "post_explainer", "post_feat_cols"),
+    ):
+        if pipe_k not in MODELS or exp_k not in MODELS:
+            out[scen] = []
+            continue
+        X_tr = MODELS[pipe_k].transform(df_full)
+        sv = np.asarray(MODELS[exp_k].shap_values(X_tr))
+        feat_cols = MODELS.get(cols_k, [])
+        bucket_idx: Dict[str, List[int]] = {}
+        for idx, col in enumerate(feat_cols):
+            grp = None
+            for pref, gname in cat_prefixes.items():
+                if col.startswith(pref):
+                    grp = gname
+                    break
+            if grp is None:
+                grp = "grp_distance" if "delivery_distance_km" in col else col
+            bucket_idx.setdefault(grp, []).append(idx)
+
+        items = []
+        for grp, idxs in bucket_idx.items():
+            grp_sv = sv[:, idxs].sum(axis=1)
+            mean_abs = float(np.abs(grp_sv).mean())
+            lbl, note = _GLOBAL_SHAP_GROUP_META.get(grp, (grp.replace("num__", "").replace("log__", ""), "Faktor operasional pengiriman."))
+            items.append({
+                "key": grp,
+                "label": lbl,
+                "mean_abs_shap_pp": round(mean_abs, 3),
+                "plain_note": note,
+            })
+        items.sort(key=lambda x: x["mean_abs_shap_pp"], reverse=True)
+        out[scen] = items[:10]
+    return out
+
+
+def _get_interactive_payload() -> Dict[str, Any]:
+    if "interactive_eda" in MODELS:
+        return MODELS["interactive_eda"]
+    if "holdout_audit" not in MODELS or "eda" not in MODELS:
+        load_artifacts()
+
+    df = MODELS.get("holdout_audit")
+    eda = MODELS.get("eda", {})
+    if df is None:
+        raise HTTPException(status_code=503, detail="Data holdout belum tersedia.")
+
+    # 1) Korelasi terhadap plate waste dari 13.000 baris (eda_results.json)
+    raw_corr = eda.get("corr_with_waste", {})
+    correlations = []
+    for k, r_val in raw_corr.items():
+        if k in ("confidence_score", "waste_adjusted_effective_cost_idr"):
+            continue
+        lbl, plain = _CORR_PLAIN_META.get(k, (k, "Hubungan statistik dengan sisa makanan."))
+        correlations.append({
+            "key": k,
+            "label": lbl,
+            "r": round(float(r_val), 3),
+            "plain_note": plain,
+        })
+    correlations.sort(key=lambda x: abs(x["r"]), reverse=True)
+
+    # 2) Kelompok suhu tiba pada 2.600 sampel uji nyata
+    temp_specs = [
+        ("< 45°C", -1e9, 45.0, True),
+        ("45–55°C", 45.0, 55.0, True),
+        ("55–60°C", 55.0, 60.0, True),
+        ("60–65°C", 60.0, 65.0, False),
+        ("65–68°C", 65.0, 68.0, False),
+        (">= 68°C", 68.0, 1e9, False),
+    ]
+    temp_bins = []
+    for label, lo, hi, is_cold in temp_specs:
+        sub = df[(df["food_arrival_temperature_celsius"] >= lo) & (df["food_arrival_temperature_celsius"] < hi)]
+        if len(sub) > 0:
+            temp_bins.append({
+                "label": label,
+                "count": int(len(sub)),
+                "mean_waste_pct": round(float(sub["actual_waste_pct"].mean()), 2),
+                "mean_transit_min": round(float(sub["transit_time_minutes"].mean()), 1),
+                "is_cold": is_cold,
+            })
+
+    # 3) Sebaran persentase sisa makanan (histogram)
+    waste_specs = [
+        ("0–5%", 0.0, 5.0),
+        ("5–10%", 5.0, 10.0),
+        ("10–15%", 10.0, 15.0),
+        ("15–20%", 15.0, 20.0),
+        ("20–25%", 20.0, 25.0),
+        ("25–30%", 25.0, 30.0),
+        (">= 30%", 30.0, 100.0),
+    ]
+    waste_histogram = []
+    total_n = max(1, len(df))
+    for label, lo, hi in waste_specs:
+        sub = df[(df["actual_waste_pct"] >= lo) & (df["actual_waste_pct"] < hi)]
+        waste_histogram.append({
+            "label": label,
+            "count": int(len(sub)),
+            "share_pct": round(float(len(sub) / total_n * 100.0), 1),
+        })
+
+    # 4) 240 titik sampel berstratifikasi penuh (urutan sisa piring) untuk Scatter Interaktif
+    df_sorted = df.sort_values("actual_waste_pct").reset_index(drop=True)
+    idx_pick = np.linspace(0, len(df_sorted) - 1, min(240, len(df_sorted)), dtype=int)
+    scatter_df = df_sorted.iloc[np.unique(idx_pick)].copy()
+    scatter_df["abs_error_pra"] = (scatter_df["actual_waste_pct"] - scatter_df["pred_pra_pct"]).abs().round(2)
+    scatter_df["abs_error_posthoc"] = (scatter_df["actual_waste_pct"] - scatter_df["pred_posthoc_pct"]).abs().round(2)
+
+    # 5) Ringkasan Global TreeSHAP terkelompok pada 240 titik sampel
+    global_shap = _compute_global_shap_summary(scatter_df)
+
+    payload = {
+        "n_holdout": int(len(df)),
+        "correlations": correlations,
+        "temp_bins": temp_bins,
+        "waste_histogram": waste_histogram,
+        "scatter_points": scatter_df.to_dict(orient="records"),
+        "global_shap": global_shap,
+    }
+    MODELS["interactive_eda"] = payload
+    return payload
+
+
+@app.get("/api/eda-interactive", tags=["Analytics"])
+def get_eda_interactive():
+    """Data teragregasi untuk grafik EDA, Scatter Holdout, dan Global TreeSHAP interaktif."""
+    return _get_interactive_payload()
+
+
+class WhatIfRequest(BaseModel):
+    plan: DistributionPlanInput
+    axis: Literal["temperature", "calories", "transit"] = "temperature"
+
+
+@app.post("/api/what-if-curve", tags=["Inference"])
+def post_what_if_curve(req: WhatIfRequest):
+    """Hitung kurva sensitivitas What-If real-time dari LightGBM Optuna (Pra-Distribusi)."""
+    if "pra_pipe" not in MODELS or "pra_model" not in MODELS:
+        load_artifacts()
+
+    base_row = preprocess_payload(req.plan).iloc[0].to_dict()
+    if req.axis == "temperature":
+        grid = [38.0, 44.0, 50.0, 55.0, 58.0, 60.0, 64.0, 68.0, 72.0]
+        unit = "°C"
+        current_val = float(req.plan.food_arrival_temperature_celsius)
+    elif req.axis == "calories":
+        grid = [450.0, 500.0, 550.0, 600.0, 650.0, 680.0, 720.0, 780.0, 840.0]
+        unit = "kkal"
+        current_val = float(req.plan.estimated_calories_kcal)
+    else:
+        grid = [10.0, 20.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0, 120.0]
+        unit = "menit"
+        current_val = float(req.plan.transit_time_minutes)
+
+    rows = []
+    for val in grid:
+        d = req.plan.model_dump()
+        if req.axis == "temperature":
+            d["food_arrival_temperature_celsius"] = val
+        elif req.axis == "calories":
+            d["estimated_calories_kcal"] = val
+        else:
+            d["transit_time_minutes"] = val
+        rows.append(preprocess_payload(DistributionPlanInput(**d)).iloc[0].to_dict())
+
+    df_batch = pd.DataFrame(rows)
+    X_tr = MODELS["pra_pipe"].transform(df_batch)
+    preds = np.clip(MODELS["pra_model"].predict(X_tr), 0.0, 100.0)
+    cost_total = float(base_row["total_meal_cost_idr"])
+
+    points = []
+    for val, pred in zip(grid, preds):
+        p_round = round(float(pred), 2)
+        points.append({
+            "value": float(val),
+            "label": f"{int(val) if float(val).is_integer() else val}{unit}",
+            "predicted_waste_pct": p_round,
+            "loss_per_portion_idr": round(cost_total * (p_round / 100.0), 0),
+        })
+
+    return {
+        "axis": req.axis,
+        "unit": unit,
+        "current_value": current_val,
+        "points": points,
     }
 
 

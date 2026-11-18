@@ -190,6 +190,60 @@ export interface HoldoutResponse {
   items: HoldoutItem[];
 }
 
+export interface EdaInteractiveCorrelation {
+  key: string;
+  label: string;
+  r: number;
+  plain_note: string;
+}
+
+export interface EdaTempBin {
+  label: string;
+  count: number;
+  mean_waste_pct: number;
+  mean_transit_min: number;
+  is_cold: boolean;
+}
+
+export interface EdaWasteBin {
+  label: string;
+  count: number;
+  share_pct: number;
+}
+
+export interface GlobalShapItem {
+  key: string;
+  label: string;
+  mean_abs_shap_pp: number;
+  plain_note: string;
+}
+
+export interface EdaInteractiveResponse {
+  n_holdout: number;
+  correlations: EdaInteractiveCorrelation[];
+  temp_bins: EdaTempBin[];
+  waste_histogram: EdaWasteBin[];
+  scatter_points: HoldoutItem[];
+  global_shap: {
+    pra: GlobalShapItem[];
+    posthoc: GlobalShapItem[];
+  };
+}
+
+export interface WhatIfPoint {
+  value: number;
+  label: string;
+  predicted_waste_pct: number;
+  loss_per_portion_idr: number;
+}
+
+export interface WhatIfResponse {
+  axis: "temperature" | "calories" | "transit";
+  unit: string;
+  current_value: number;
+  points: WhatIfPoint[];
+}
+
 export function getApiBaseUrl(): string {
   if (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
@@ -232,6 +286,25 @@ export async function fetchHealth(): Promise<HealthResponse | null> {
 
 export async function fetchOverview(): Promise<OverviewResponse> {
   const res = await fetch(`${getApiBaseUrl()}/api/overview`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+export async function fetchEdaInteractive(): Promise<EdaInteractiveResponse> {
+  const res = await fetch(`${getApiBaseUrl()}/api/eda-interactive`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+export async function fetchWhatIfCurve(
+  plan: Record<string, unknown>,
+  axis: "temperature" | "calories" | "transit"
+): Promise<WhatIfResponse> {
+  const res = await fetch(`${getApiBaseUrl()}/api/what-if-curve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan, axis }),
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return await res.json();
 }

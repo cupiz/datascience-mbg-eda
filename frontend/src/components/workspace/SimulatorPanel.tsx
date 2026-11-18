@@ -1,23 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   BookmarkPlus,
   BookOpenText,
   CheckCircle2,
   Flame,
+  GitCompare,
   Loader2,
   RotateCcw,
   Terminal,
   ThermometerSnowflake,
+  Zap,
 } from "lucide-react";
 import {
   explainPrediction,
   ExplainResponse,
+  fetchWhatIfCurve,
   formatIdr,
   formatPct,
   HoldoutItem,
+  WhatIfResponse,
 } from "@/lib/api";
 import {
   SIMULATOR_PRESETS,
@@ -30,6 +34,7 @@ import {
 } from "@/lib/constants";
 import { SimulationRunRecord } from "@/lib/history";
 import ShapWaterfallSvg from "@/components/ShapWaterfallSvg";
+import WhatIfCurveCard from "@/components/charts/WhatIfCurveCard";
 
 interface SimulatorPanelProps {
   initialPresetId?: string | null;
@@ -39,6 +44,13 @@ interface SimulatorPanelProps {
   onTogglePlainMode?: () => void;
   onClearLoadedRow?: () => void;
   onSaveRun?: (run: SimulationRunRecord) => void;
+}
+
+interface BaselineSnapshot {
+  label: string;
+  wastePct: number;
+  lossPerPortionIdr: number;
+  monthlyLossIdr: number;
 }
 
 const DEFAULT_FORM = {
@@ -75,26 +87,35 @@ export default function SimulatorPanel({
   const [schoolDays, setSchoolDays] = useState<number>(22);
   const [result, setResult] = useState<ExplainResponse | null>(null);
   const [prevWastePct, setPrevWastePct] = useState<number | null>(null);
+  const [autoSimulate, setAutoSimulate] = useState<boolean>(true);
+  const [baseline, setBaseline] = useState<BaselineSnapshot | null>(null);
+  const [whatIfAxis, setWhatIfAxis] = useState<"temperature" | "calories" | "transit">("temperature");
+  const [whatIfData, setWhatIfData] = useState<WhatIfResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [savedFeedback, setSavedFeedback] = useState<boolean>(false);
 
-  const runPredict = async (targetMode: "pra" | "posthoc", targetForm = form) => {
+  const hydratedRef = useRef(false);
+
+  const runPredict = async (
+    targetMode: "pra" | "posthoc",
+    targetForm = form,
+    targetAxis = whatIfAxis
+  ) => {
     setLoading(true);
     setErrorMsg(null);
     if (result) {
       setPrevWastePct(result.predicted_plate_waste_percentage);
     }
     try {
-      const payload =
-        targetMode === "pra"
-          ? (() => {
-              const { primary_food_waste_driver: _omit, ...rest } = targetForm;
-              return rest;
-            })()
-          : targetForm;
-      const res = await explainPrediction(targetMode, payload);
+      const { primary_food_waste_driver: _omit, ...praOnly } = targetForm;
+      const payload = targetMode === "pra" ? praOnly : targetForm;
+      const [res, curve] = await Promise.all([
+        explainPrediction(targetMode, payload),
+        fetchWhatIfCurve(praOnly, targetAxis).catch(() => null),
+      ]);
       setResult(res);
+      if (curve) setWhatIfData(curve);
     } catch (err) {
       setErrorMsg(
         err instanceof Error
@@ -107,6 +128,7 @@ export default function SimulatorPanel({
   };
 
   useEffect(() => {
+    hydratedRef.current = false;
     if (loadedRun) {
       const next = {
         ...DEFAULT_FORM,
@@ -115,7 +137,9 @@ export default function SimulatorPanel({
       setMode(loadedRun.mode);
       setForm(next);
       setPortionsToEvaluate(next.kitchen_daily_capacity_portions);
-      runPredict(loadedRun.mode, next);
+      runPredict(loadedRun.mode, next).then(() => {
+        hydratedRef.current = true;
+      });
       return;
     }
 
@@ -140,7 +164,9 @@ export default function SimulatorPanel({
       };
       setForm(next);
       setPortionsToEvaluate(loadedHoldoutRow.kitchen_daily_capacity_portions);
-      runPredict(mode, next);
+      runPredict(mode, next).then(() => {
+        hydratedRef.current = true;
+      });
       return;
     }
 
@@ -154,14 +180,28 @@ export default function SimulatorPanel({
         };
         setForm(next);
         setPortionsToEvaluate(next.kitchen_daily_capacity_portions);
-        runPredict(mode, next);
+        runPredict(mode, next).then(() => {
+          hydratedRef.current = true;
+        });
         return;
       }
     }
 
-    runPredict(mode, form);
+    runPredict(mode, form).then(() => {
+      hydratedRef.current = true;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPresetId, loadedHoldoutRow, loadedRun]);
+
+  // Live Auto-Update Debounced on Form Change
+  useEffect(() => {
+    if (!hydratedRef.current || !autoSimulate) return;
+    const timer = setTimeout(() => {
+      runPredict(mode, form, whatIfAxis);
+    }, 260);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, autoSimulate]);
 
   const applyPreset = (id: string) => {
     if (onClearLoadedRow) onClearLoadedRow();
@@ -174,19 +214,26 @@ export default function SimulatorPanel({
     };
     setForm(next);
     setPortionsToEvaluate(next.kitchen_daily_capacity_portions);
-    runPredict(mode, next);
+    runPredict(mode, next, whatIfAxis);
   };
 
   const resetDefaults = () => {
     if (onClearLoadedRow) onClearLoadedRow();
     setForm({ ...DEFAULT_FORM });
     setPortionsToEvaluate(DEFAULT_FORM.kitchen_daily_capacity_portions);
-    runPredict(mode, DEFAULT_FORM);
+    runPredict(mode, DEFAULT_FORM, whatIfAxis);
   };
 
   const handleModeSwitch = (nextMode: "pra" | "posthoc") => {
     setMode(nextMode);
-    runPredict(nextMode, form);
+    runPredict(nextMode, form, whatIfAxis);
+  };
+
+  const handleAxisSwitch = async (nextAxis: "temperature" | "calories" | "transit") => {
+    setWhatIfAxis(nextAxis);
+    const { primary_food_waste_driver: _omit, ...praOnly } = form;
+    const curve = await fetchWhatIfCurve(praOnly, nextAxis).catch(() => null);
+    if (curve) setWhatIfData(curve);
   };
 
   const handleSaveCurrentRun = () => {
@@ -242,17 +289,30 @@ export default function SimulatorPanel({
       ? result.plain_recommendations
       : result?.recommendations ?? [];
 
+  const handleToggleBaseline = () => {
+    if (!result) return;
+    if (baseline) {
+      setBaseline(null);
+      return;
+    }
+    setBaseline({
+      label: `${form.province} · ${form.food_arrival_temperature_celsius.toFixed(0)}°C · ${form.estimated_calories_kcal} kkal`,
+      wastePct,
+      lossPerPortionIdr: result.estimated_loss_per_portion_idr,
+      monthlyLossIdr,
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
       {/* LEFT GLASS WINDOW: Rencana Distribusi Parameters */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          runPredict(mode, form);
+          runPredict(mode, form, whatIfAxis);
         }}
         className="glass-strong flex w-full shrink-0 flex-col overflow-hidden rounded-[24px] lg:w-[410px] xl:w-[426px]"
       >
-        {/* Top Mode Pill & Quick Presets */}
         <div className="border-b border-[rgba(15,82,87,0.1)] bg-white/40 p-4 space-y-2.5">
           <div className="grid grid-cols-2 gap-1 rounded-full border border-white/85 bg-white/55 p-1">
             <button
@@ -292,8 +352,21 @@ export default function SimulatorPanel({
             ))}
             <button
               type="button"
+              onClick={() => setAutoSimulate((v) => !v)}
+              title="Hitung otomatis saat menggeser slider"
+              className={`ml-auto inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold cursor-pointer ${
+                autoSimulate
+                  ? "border-[#0f5257]/30 bg-[#0f5257]/12 text-[#0f5257]"
+                  : "border-white/90 bg-white/70 text-[#3d525c]"
+              }`}
+            >
+              <Zap className="h-3 w-3" />
+              {autoSimulate ? "Auto" : "Manual"}
+            </button>
+            <button
+              type="button"
               onClick={resetDefaults}
-              className="ml-auto inline-flex items-center gap-1 rounded-full border border-white/90 bg-white/70 px-2.5 py-1 text-[11.5px] font-semibold text-[#3d525c] hover:text-[#141414] cursor-pointer"
+              className="inline-flex items-center gap-1 rounded-full border border-white/90 bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#3d525c] hover:text-[#141414] cursor-pointer"
               title="Kembalikan nilai awal"
             >
               <RotateCcw className="h-3 w-3" />
@@ -309,7 +382,6 @@ export default function SimulatorPanel({
           )}
         </div>
 
-        {/* Inputs in Translucent Frosted Fields */}
         <div className="space-y-3 p-4">
           <div className="space-y-2">
             <div className="t-mono text-[11px] font-semibold uppercase tracking-wider text-[#3d525c]">
@@ -585,7 +657,6 @@ export default function SimulatorPanel({
           )}
         </div>
 
-        {/* Sticky Pill Action Footer */}
         <div className="flex items-center gap-2 border-t border-[rgba(15,82,87,0.1)] bg-white/45 p-3.5">
           <button
             type="submit"
@@ -666,6 +737,21 @@ export default function SimulatorPanel({
                       </span>
                     )}
                   </div>
+
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={handleToggleBaseline}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11.5px] font-semibold cursor-pointer transition-colors ${
+                        baseline
+                          ? "border-[#0f5257] bg-[#0f5257] text-white"
+                          : "border-white/90 bg-white/80 text-[#0f5257] hover:bg-white"
+                      }`}
+                    >
+                      <GitCompare className="h-3.5 w-3.5" />
+                      {baseline ? "Lepas Patokan A" : "Kunci Sebagai Patokan (A)"}
+                    </button>
+                  </div>
                 </div>
 
                 {/* 4 Spatial Mini Glass Tiles */}
@@ -729,21 +815,42 @@ export default function SimulatorPanel({
                   </div>
                 </div>
               </div>
+
+              {/* A vs B Comparison Bar when Baseline Pinned */}
+              {baseline && (
+                <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white bg-white/80 px-4 py-2.5 text-[12.5px]">
+                  <span className="text-[#3d525c]">
+                    Patokan A (<strong className="text-[#141414]">{baseline.label}</strong>):{" "}
+                    <strong className="t-mono text-[#141414]">{formatPct(baseline.wastePct)}</strong>
+                  </span>
+                  <span className="t-mono font-bold">
+                    {wastePct <= baseline.wastePct ? (
+                      <span className="text-[#137242]">
+                        Perubahan {(wastePct - baseline.wastePct).toFixed(2).replace(".", ",")} pp · Hemat{" "}
+                        {formatIdr(Math.max(0, baseline.monthlyLossIdr - monthlyLossIdr))}/bulan
+                      </span>
+                    ) : (
+                      <span className="text-[#b53418]">
+                        Naik +{(wastePct - baseline.wastePct).toFixed(2).replace(".", ",")} pp (+
+                        {formatIdr(monthlyLossIdr - baseline.monthlyLossIdr)}/bulan)
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* HUMANIZER AI PLAIN-LANGUAGE CARD */}
             {result.humanizer_summary && (
               <div className="hairline-card p-5">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[rgba(15,82,87,0.1)]">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(15,82,87,0.1)] pb-2.5">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#0f5257] text-white">
                       <BookOpenText className="h-3.5 w-3.5" />
                     </span>
-                    <div>
-                      <h3 className="text-[14.5px] font-bold text-[#141414]">
-                        Ringkasan Bahasa Sederhana (Mudah Dipahami Awam)
-                      </h3>
-                    </div>
+                    <h3 className="text-[14.5px] font-bold text-[#141414]">
+                      Ringkasan Bahasa Sederhana (Mudah Dipahami Awam)
+                    </h3>
                   </div>
                   {onTogglePlainMode && (
                     <button
@@ -776,6 +883,14 @@ export default function SimulatorPanel({
                 </div>
               </div>
             )}
+
+            {/* LIVE WHAT-IF SENSITIVITY CURVE */}
+            <WhatIfCurveCard
+              whatIf={whatIfData}
+              axis={whatIfAxis}
+              onAxisChange={handleAxisSwitch}
+              plainMode={plainMode}
+            />
 
             {/* BUDGET IMPACT CALCULATOR */}
             <div className="hairline-card p-5">

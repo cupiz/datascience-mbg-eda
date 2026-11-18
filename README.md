@@ -152,11 +152,11 @@ Dirancang siap pakai untuk **Hugging Face Spaces (`sdk: docker`, port `7860`)**:
 
 1. **Frontend (`frontend/`):** Antarmuka aplikasi **Next.js 16 (App Router, `output: "export"`)**, React 19, dan Tailwind CSS v4 dengan desain **Spatial Frosted Glass (Desain 5)** bernuansa kaca cerah *swap-pastels* (`Host Grotesk` & `JetBrains Mono`):
    - **App Shell (`/`, `/workspace`):** Bilah kapsul mengambang di atas + dok kaca vertikal kiri + laci riwayat & skenario cepat + modal pencarian cepat (`/` atau `Ctrl+K`), dilengkapi **sakelar Bahasa Awam / Teknis** serta 4 modul terpadu:
-     * **Simulator & TreeSHAP:** Mode Sebelum Kirim (34F) & Evaluasi Selesai (38F), **kartu Ringkasan Bahasa Sederhana (`humanizer-id`)**, kalkulator rupiah harian/22 hari, **TreeSHAP lokal SVG dengan keterangan awam**, saran praktis SPPG, serta ringkasan perhitungan mesin.
-     * **Analitik 38 Provinsi:** Ringkasan mudah 13.000 layanan, suhu `<60°C`, peringkat interaktif 38 provinsi, dan galeri 10 grafik statistik EDA.
-     * **Audit Model & Holdout:** Komparasi 7 model 5-Fold CV & Holdout, plot SHAP global, arsitektur anti-leakage `DROP_LEAK`, dan penjelajah 2.600 sampel uji nyata.
+     * **Simulator & TreeSHAP:** Mode Sebelum Kirim (34F) & Evaluasi Selesai (38F), **Auto-Simulasi slider**, **Kunci Patokan (A vs B)**, **Kurva *What-If* suhu/kalori/durasi** (`/api/what-if-curve`), **kartu Ringkasan Bahasa Sederhana (`humanizer-id`)**, kalkulator rupiah harian/22 hari, **TreeSHAP lokal SVG dengan keterangan awam**, serta saran praktis SPPG.
+     * **Analitik 38 Provinsi & EDA Interaktif:** Ringkasan mudah 13.000 layanan, hover tooltip klaster/pemicu, **Explorer EDA interaktif** (scatter 240 titik dengan klik-ke-Simulator, zona suhu dingin vs hangat, histogram target, peta korelasi Pearson interaktif, plus 10 PNG asli `eda_run.py`), serta tabel 38 provinsi dengan tombol `Uji`.
+     * **Audit Model & Holdout:** Komparasi 7 model dengan hover CV/RMSE, **Global TreeSHAP interaktif** (+ gambar Matplotlib cadangan), **Scatter Kalibrasi Prediksi vs Aktual**, arsitektur anti-leakage `DROP_LEAK`, serta penjelajah 2.600 sampel uji nyata.
      * **Batch CSV & API:** Unggah CSV hingga 100 baris atau uji cepat 12 data nyata, ekspor skor CSV, dan dokumentasi Swagger.
-2. **Backend (`api.py` + `humanizer_explainer.py`):** Layanan **FastAPI** terpadu yang menyajikan endpoint inferensi (`/predict/*`, `/api/explain/*` lengkap dengan `humanizer_summary`, `/api/overview`, `/api/benchmark`, `/api/holdout-samples`), aset grafik (`/figures/`, `/figures-fase3/`), serta static bundle frontend dari `static/` pada origin tunggal.
+2. **Backend (`api.py` + `humanizer_explainer.py`):** Layanan **FastAPI** terpadu yang menyajikan endpoint inferensi (`/predict/*`, `/api/explain/*`, `/api/what-if-curve`, `/api/overview`, `/api/eda-interactive`, `/api/benchmark`, `/api/holdout-samples`), aset grafik (`/figures/`, `/figures-fase3/`), serta static bundle frontend dari `static/` pada origin tunggal.
 
 ## Struktur Repositori
 
