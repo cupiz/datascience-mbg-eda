@@ -73,9 +73,8 @@ function SimpleBarList({
               <div className="t-mono shrink-0 flex items-center gap-3 text-[12px]">
                 <span className="text-[#3d525c]">n={item.count.toLocaleString("id-ID")}</span>
                 <span
-                  className={`font-bold ${
-                    isWarn ? "text-[#b53418]" : "text-[#0f5257]"
-                  }`}
+                  className={`font-bold ${isWarn ? "text-[#b53418]" : "text-[#0f5257]"
+                    }`}
                 >
                   {val.toFixed(2).replace(".", ",")}
                   {unit}
@@ -117,7 +116,7 @@ export default function AnalyticsPanel({
   );
 
   useEffect(() => {
-    fetchOverview().then(setData).catch(() => {});
+    fetchOverview().then(setData).catch(() => { });
     fetchEdaInteractive().then(setInteractive).catch(() => {});
   }, []);
 
@@ -361,9 +360,8 @@ export default function AnalyticsPanel({
                     {formatPct(p.mean_waste_pct)}
                   </td>
                   <td
-                    className={`t-mono px-4 py-2.5 text-right font-bold ${
-                      p.bermasalah_pct >= 30 ? "text-[#b53418]" : "text-[#0f5257]"
-                    }`}
+                    className={`t-mono px-4 py-2.5 text-right font-bold ${p.bermasalah_pct >= 30 ? "text-[#b53418]" : "text-[#0f5257]"
+                      }`}
                   >
                     {formatPct(p.bermasalah_pct, 1)}
                   </td>

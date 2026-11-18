@@ -166,7 +166,7 @@
   - **Keputusan Retensi Pencilan:** Sebanyak `1.459` baris pencilan IQR indeks pembusukan dan `975` baris waktu transit **tidak dihapus** karena kasus ekstrem wilayah 3T itulah inti masalah yang justru harus dikenali model.
 
 ### Narasi Presenter
-"Sebagaimana tampak pada histogram serta diagram kotak di layar, data operasional tidak berdistribusi normal. Lama transit dan indeks pembusukan miring ke kanan kuat, sementara suhu tiba justru miring ekstrem ke kiri. Kami mengambil keputusan metodologis mempertahankan seluruh pencilan tersebut; membuang pengiriman berdurasi 120 menit berarti menghapus kenyataan distribusi di daerah terpencil sehingga kami memilih model berbasis pohon yang tangguh menghadapi pencilan."
+"Sebagaimana tampak pada histogram serta diagram kotak di layar, data operasional tidak berdistribusi normal. Lama transit dan indeks pembusukan miring ke kanan kuat, sementara suhu tiba justru miring ekstrem ke kiri. Kami mengambil keputusan metodologis mempertahankan seluruh pencilan tersebut; membuang pengiriman berdurasi 120 menit berarti menghapus kenyataan distribusi di daerah terpencil. Oleh karena itu, model berbasis pohon dipilih karena tangguh menghadapi pencilan."
 
 ---
 
@@ -216,7 +216,7 @@
   - **Multikolinearitas Kuat:** Jarak dan waktu tempuh berkorelasi **`r = 0,928`** (`p < 0,001`), menuntut ketahanan algoritmik pada model berbasis pohon gradien.
 
 ### Narasi Presenter
-"Heatmap korelasi ini menjelaskan mengapa tebakan sederhana tidak memadai. Tidak ada satu variabel tunggal pun yang memonopoli sisa makanan; sinyalnya tersebar antara energi kalori sebesar minus 0,372 dan rasio biaya gizi hingga suhu tiba. Selain itu, jarak dan waktu tempuh sangat berhimpitan dengan korelasi 0,928. Pola multivariabel berinteraksi kuat inilah yang mendorong kami beralih ke algoritma peningkatan gradien berbasis pohon."
+"Heatmap korelasi ini menjelaskan mengapa tebakan sederhana tidak memadai. Tidak ada satu variabel tunggal pun yang memonopoli sisa makanan; sinyalnya tersebar pada energi kalori sebesar minus 0,372, rasio biaya gizi, hingga suhu tiba. Selain itu, jarak dan waktu tempuh bertaut sangat kuat pada korelasi 0,928. Pola multivariabel berinteraksi kuat inilah yang mendorong kami beralih ke algoritma peningkatan gradien berbasis pohon."
 
 ---
 
