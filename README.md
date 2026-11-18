@@ -15,7 +15,7 @@ short_description: Prediksi & Audit Sisa Makanan MBG (LightGBM Optuna + TreeSHAP
 ### Prediksi sisa makanan sebelum truk berangkat.
 
 **PlateGuard MBG** mengubah telemetri operasional dapur SPPG menjadi skor prediksi
-*plate waste* per rencana distribusi, sehingga Badan Gizi Nasional (BGN) dan mitra
+*plate waste* per rencana distribusi sehingga Badan Gizi Nasional (BGN) dan mitra
 dapur dapat menyesuaikan porsi, menu, dan jadwal kirim SEBELUM makanan terbuang.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-06525C?logo=nextdotjs)](https://nextjs.org/)
@@ -103,7 +103,7 @@ Validasi silang 5-fold, 13.000 distribusi, tanpa fitur bocor:
 | HistGradientBoosting + pemicu | post-hoc | 0,55 | 2,92 | 3,73 |
 | ~~HGB + tier kepatuhan~~ | ~~ditolak: label bocor~~ | ~~0,68~~ | - | - |
 
-Angka tabel di atas merupakan baseline validasi silang 5-fold (`eda_run.py`) sebelum optimasi Fase 3. Evaluasi final holdout test set (2.600 baris) dapat dilihat pada Roadmap Fase 3 di bawah.
+Angka kinerja awal tersebut merupakan baseline validasi silang 5-fold (`eda_run.py`) sebelum optimasi Fase 3. Evaluasi final holdout test set (2.600 baris) dapat dilihat pada Roadmap Fase 3 di bawah.
 
 Prediktor terkuat sinyal sisa makanan: kandungan kalori (r = -0,37), rasio
 biaya-gizi (+0,28), suhu makanan saat tiba (-0,25), protein (-0,22), indeks
@@ -148,15 +148,15 @@ docker-compose up --build
 
 ## Arsitektur v2 (Frontend Next.js + Backend FastAPI)
 
-Dirancang siap-deploy untuk **Hugging Face Spaces (`sdk: docker`, port `7860`)**:
+Dirancang siap pakai untuk **Hugging Face Spaces (`sdk: docker`, port `7860`)**:
 
-1. **Frontend (`frontend/`):** Dibangun langsung sebagai antarmuka aplikasi **Next.js 16 (App Router, `output: "export"`)**, React 19, dan Tailwind CSS v4 bertema *Teal-on-Paper & Botanical Sage*:
-   - **App Shell (`/`, `/workspace`):** Sidebar persisten (menu modul kerja, skenario cepat, dan riwayat simulasi tersimpan via `localStorage`), top command bar + modal pencarian cepat (`/` atau `Ctrl+K`), serta 4 modul terpadu:
-     * **Simulator & TreeSHAP:** Mode Pra-Distribusi (34F) & Post-Hoc (38F), kalkulator kebocoran rupiah harian/22 hari, **TreeSHAP lokal SVG**, saran aksi SPPG, serta trace engine inferensi.
-     * **Analitik 38 Provinsi:** Ringkasan 13.000 layanan, suhu `<60°C`, peringkat interaktif 38 provinsi, dan galeri 10 figur EDA.
-     * **Audit Model & Holdout:** Komparasi 7 model 5-Fold CV & Holdout, plot SHAP global, arsitektur pipeline `DROP_LEAK`, dan browser 2.600 baris holdout dengan muat satu-klik.
-     * **Batch CSV & API:** Upload CSV hingga 100 baris atau uji cepat sampel holdout, ekspor skor CSV, dan dokumentasi Swagger.
-2. **Backend (`api.py`):** Layanan **FastAPI** terintegrasi yang melayani endpoint inferensi (`/predict/*`, `/api/explain/*`, `/api/overview`, `/api/benchmark`, `/api/holdout-samples`), aset grafik (`/figures/`, `/figures-fase3/`), sekaligus static bundle frontend dari `static/` pada origin tunggal.
+1. **Frontend (`frontend/`):** Antarmuka aplikasi **Next.js 16 (App Router, `output: "export"`)**, React 19, dan Tailwind CSS v4 dengan desain **Spatial Frosted Glass (Desain 5)** bernuansa kaca cerah *swap-pastels* (`Host Grotesk` & `JetBrains Mono`):
+   - **App Shell (`/`, `/workspace`):** Bilah kapsul mengambang di atas + dok kaca vertikal kiri + laci riwayat & skenario cepat + modal pencarian cepat (`/` atau `Ctrl+K`), dilengkapi **sakelar Bahasa Awam / Teknis** serta 4 modul terpadu:
+     * **Simulator & TreeSHAP:** Mode Sebelum Kirim (34F) & Evaluasi Selesai (38F), **kartu Ringkasan Bahasa Sederhana (`humanizer-id`)**, kalkulator rupiah harian/22 hari, **TreeSHAP lokal SVG dengan keterangan awam**, saran praktis SPPG, serta ringkasan perhitungan mesin.
+     * **Analitik 38 Provinsi:** Ringkasan mudah 13.000 layanan, suhu `<60°C`, peringkat interaktif 38 provinsi, dan galeri 10 grafik statistik EDA.
+     * **Audit Model & Holdout:** Komparasi 7 model 5-Fold CV & Holdout, plot SHAP global, arsitektur anti-leakage `DROP_LEAK`, dan penjelajah 2.600 sampel uji nyata.
+     * **Batch CSV & API:** Unggah CSV hingga 100 baris atau uji cepat 12 data nyata, ekspor skor CSV, dan dokumentasi Swagger.
+2. **Backend (`api.py` + `humanizer_explainer.py`):** Layanan **FastAPI** terpadu yang menyajikan endpoint inferensi (`/predict/*`, `/api/explain/*` lengkap dengan `humanizer_summary`, `/api/overview`, `/api/benchmark`, `/api/holdout-samples`), aset grafik (`/figures/`, `/figures-fase3/`), serta static bundle frontend dari `static/` pada origin tunggal.
 
 ## Struktur Repositori
 
@@ -201,7 +201,7 @@ eda_results.json              Seluruh angka statistik EDA terverifikasi
       - **Post-Hoc (38 fitur):** **`LightGBM (Optuna)`** (CV MAE `2,905 ± 0,046` pp, Holdout MAE **`2,929 pp`**, RMSE `3,761 pp`, R² `0,551`; **seluruh target Charter tercapai**: MAE <= 3,0 pp, R² >= 0,35, RMSE <= 4,5 pp).
       - Notebook terdahulu tersimpan di [`fase3_modeling_done.ipynb`](fase3_modeling_done.ipynb).
 - [x] **Fase 4 & Platform v2 (Selesai Lokal — Siap Hugging Face Spaces).**
-      - **Web App v2 (`frontend/` + `api.py`):** Antarmuka Next.js 16 + Tailwind v4 terpisah (static export) disajikan bersama FastAPI `/api/*` + TreeSHAP lokal real-time, analitik 38 provinsi, audit 2.600 sampel holdout, dan batch CSV scorer.
+      - **Web App v2 (`frontend/` + `api.py` + `humanizer_explainer.py`):** Antarmuka Next.js 16 (Desain 5 *Spatial Frosted Glass*) terpadu bersama FastAPI `/api/*`, TreeSHAP lokal, modul penjelas bahasa awam `humanizer-id`, analitik 38 provinsi, audit 2.600 sampel uji, serta skoring CSV serentak.
       - **REST API FastAPI (`api.py`):** Endpoint inferensi `/predict/pra`, `/predict/posthoc`, `/predict/batch`, `/api/explain/pra`, `/api/explain/posthoc`, `/api/overview`, `/api/benchmark`, `/api/holdout-samples`, dan `/health`.
       - **Legacy Dashboard (`app.py`):** Streamlit Dashboard v1 tetap dipertahankan penuh.
       - **Containerization (`Dockerfile`, `docker-compose.yml`):** Multi-stage build Node 20 + Python 3.12-slim siap Hugging Face Spaces (`sdk: docker`, port `7860`, UID 1000).

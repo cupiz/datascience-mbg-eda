@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Manrope } from "next/font/google";
+import { Host_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
+const hostGrotesk = Host_Grotesk({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-manrope",
+  variable: "--font-host-grotesk",
   display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600"],
   variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "PlateGuard MBG — Aplikasi Prediksi & Audit Sisa Makanan SPPG",
+  title: "PlateGuard MBG — Aplikasi Spatial Glass & Penjelasan Bahasa Sederhana",
   description:
-    "Aplikasi operasional pra-distribusi, TreeSHAP, analitik 38 provinsi, dan audit holdout Makan Bergizi Gratis (MBG).",
+    "Aplikasi prediksi sisa makanan MBG dengan TreeSHAP, ringkasan bahasa awam humanizer-id, analitik 38 provinsi, dan audit holdout.",
 };
 
 export default function RootLayout({
@@ -31,9 +31,9 @@ export default function RootLayout({
     <html
       lang="id"
       data-type="software"
-      data-radius="soft"
-      data-ground="sage"
-      className={`${manrope.variable} ${jetbrainsMono.variable}`}
+      data-radius="round"
+      data-theme="spatial-glass"
+      className={`${hostGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <body>{children}</body>
     </html>

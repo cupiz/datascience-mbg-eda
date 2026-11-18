@@ -34,6 +34,7 @@ if BASE not in sys.path:
 import __main__
 import etl_pipeline
 from etl_pipeline import FeatureBuilder, Log1p, QuantileBinner, ReflectionLog
+from humanizer_explainer import build_humanizer_bundle, humanize_contribution
 
 # Alias ke __main__ agar joblib unpickler menemukan kelas transformer kustom
 __main__.FeatureBuilder = FeatureBuilder
@@ -369,11 +370,19 @@ def _build_response(scenario: str, pred_waste: float, df_raw: pd.DataFrame, mode
     )
 
 
+class HumanizerSummary(BaseModel):
+    headline: str
+    story: str
+    cause_plain: str
+    action_plain: str
+
+
 class ExplanationContribution(BaseModel):
     key: str
     label: str
     display_value: str
     shap_pp: float
+    plain_note: str = ""
 
 
 class ExplainResponse(PredictionResponse):
@@ -382,6 +391,8 @@ class ExplainResponse(PredictionResponse):
     contributions: List[ExplanationContribution]
     derived_telemetry: Dict[str, Any]
     alert_flags: List[str]
+    humanizer_summary: HumanizerSummary
+    plain_recommendations: List[str]
 
 
 def _group_shap_contributions(
@@ -452,6 +463,7 @@ def _group_shap_contributions(
             label=v["label"],
             display_value=v["display_value"],
             shap_pp=round(v["shap"], 3),
+            plain_note=humanize_contribution(v["key"], row, round(v["shap"], 3)),
         )
         for v in buckets.values()
     ]
@@ -532,6 +544,14 @@ def _explain_inference(scenario: str, plan: DistributionPlanInput, is_posthoc: b
     }
     feat_cols = MODELS.get(key_cols, [f"f_{i}" for i in range(len(sv))])
     contributions = _group_shap_contributions(feat_cols, sv, df_raw, scenario)
+    human_bundle = build_humanizer_bundle(
+        scenario=scenario,
+        pred_waste=pred_waste,
+        loss_idr=base_resp.estimated_loss_per_portion_idr,
+        effective_cost_idr=base_resp.effective_cost_per_portion_idr,
+        raw_row=row_dict,
+        contributions=[c.model_dump() for c in contributions],
+    )
 
     return ExplainResponse(
         **base_resp.model_dump(),
@@ -540,6 +560,13 @@ def _explain_inference(scenario: str, plan: DistributionPlanInput, is_posthoc: b
         contributions=contributions,
         derived_telemetry=derived,
         alert_flags=_extract_flags(pred_waste, df_raw),
+        humanizer_summary=HumanizerSummary(
+            headline=human_bundle["headline"],
+            story=human_bundle["story"],
+            cause_plain=human_bundle["cause_plain"],
+            action_plain=human_bundle["action_plain"],
+        ),
+        plain_recommendations=human_bundle["plain_recommendations"],
     )
 
 

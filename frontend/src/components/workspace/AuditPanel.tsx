@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUpRight, CheckCircle2, Download, Search, ShieldAlert } from "lucide-react";
+import {
+  ArrowUpRight,
+  BookOpenText,
+  CheckCircle2,
+  Download,
+  Search,
+  ShieldAlert,
+} from "lucide-react";
 import {
   assetUrl,
   BenchmarkResponse,
@@ -17,19 +24,22 @@ import { VALID_CLUSTERS, VALID_PROVINCES } from "@/lib/constants";
 import PipelineArchitecture from "@/components/PipelineArchitecture";
 
 interface AuditPanelProps {
+  plainMode?: boolean;
   onLoadToSimulator: (row: HoldoutItem) => void;
 }
 
 type AuditSubTab = "benchmark" | "pipeline" | "holdout";
 
-export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
+export default function AuditPanel({
+  plainMode = true,
+  onLoadToSimulator,
+}: AuditPanelProps) {
   const [subTab, setSubTab] = useState<AuditSubTab>("benchmark");
   const [bench, setBench] = useState<BenchmarkResponse | null>(null);
   const [scenario, setScenario] = useState<"pra" | "posthoc">("pra");
   const [shapType, setShapType] = useState<"beeswarm" | "bar">("beeswarm");
   const [leakView, setLeakView] = useState<"valid" | "leaked">("valid");
 
-  // Holdout Inspector state
   const [holdout, setHoldout] = useState<HoldoutResponse | null>(null);
   const [cluster, setCluster] = useState<string>("Semua");
   const [province, setProvince] = useState<string>("Semua");
@@ -84,13 +94,42 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
 
   return (
     <div className="space-y-5">
-      {/* Sub-view Bar */}
+      {plainMode && (
+        <div className="sage-frame p-4">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0f5257] text-white">
+              <BookOpenText className="h-4 w-4" />
+            </span>
+            <div>
+              <h2 className="text-[14.5px] font-bold text-[#141414]">
+                Membaca Hasil Uji Kejujuran Model dengan Bahasa Sederhana
+              </h2>
+              <p className="mt-1 text-[13px] leading-relaxed text-[#3d525c]">
+                Sistem ini diuji pada <strong className="text-[#141414]">2.600 kiriman nyata</strong> yang sebelumnya disembunyikan saat latihan. Angka{" "}
+                <strong className="text-[#141414]">MAE</strong> menunjukkan rata-rata selisih tebakan (makin kecil makin jitu: model terbaik hanya meleset sekitar{" "}
+                <strong className="text-[#0f5257]">2,9 sampai 3,7 poin persen</strong>). Kolom yang mengandung bocoran angka akhir sengaja diblokir agar akurasi tetap jujur.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sub-view Floating Glass Capsule */}
       <div className="hairline-card flex flex-col justify-between gap-3 p-3.5 sm:flex-row sm:items-center">
         <div className="flex flex-wrap items-center gap-1.5">
           {[
-            { id: "benchmark", label: "Benchmark 7 Model & SHAP" },
-            { id: "holdout", label: "Browser Holdout 2.600" },
-            { id: "pipeline", label: "Arsitektur ETL & Anti-Leakage" },
+            {
+              id: "benchmark",
+              label: plainMode ? "Perbandingan 7 Model & Faktor" : "Benchmark 7 Model & SHAP",
+            },
+            {
+              id: "holdout",
+              label: plainMode ? "2.600 Data Uji Nyata" : "Browser Holdout 2.600",
+            },
+            {
+              id: "pipeline",
+              label: plainMode ? "Alur Kerja & Blokir Bocoran" : "Arsitektur ETL & Anti-Leakage",
+            },
           ].map((item) => {
             const active = subTab === item.id;
             return (
@@ -98,10 +137,10 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
                 key={item.id}
                 type="button"
                 onClick={() => setSubTab(item.id as AuditSubTab)}
-                className={`rounded-lg px-3 py-1.5 text-[13px] font-medium cursor-pointer transition-colors ${
+                className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold cursor-pointer transition-colors ${
                   active
-                    ? "bg-[#06525c] text-[#f7f9f8]"
-                    : "text-[#2f737d] hover:bg-[#ebf0ee] hover:text-[#0d2429]"
+                    ? "bg-[#0f5257] text-white shadow-sm"
+                    : "bg-white/55 text-[#3d525c] hover:bg-white hover:text-[#141414]"
                 }`}
               >
                 {item.label}
@@ -111,24 +150,24 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
         </div>
 
         {subTab === "benchmark" && (
-          <div className="inline-flex rounded-lg border border-[rgba(6,82,92,0.16)] bg-[#f7f9f8] p-0.5">
+          <div className="inline-flex rounded-full border border-white/90 bg-white/60 p-0.5">
             <button
               type="button"
               onClick={() => setScenario("pra")}
-              className={`rounded-md px-3 py-1 text-[12.5px] font-medium cursor-pointer ${
-                scenario === "pra" ? "bg-[#06525c] text-white" : "text-[#2f737d]"
+              className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
+                scenario === "pra" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
               }`}
             >
-              Pra-Distribusi (34F)
+              {plainMode ? "Sebelum Kirim (34F)" : "Pra-Distribusi (34F)"}
             </button>
             <button
               type="button"
               onClick={() => setScenario("posthoc")}
-              className={`rounded-md px-3 py-1 text-[12.5px] font-medium cursor-pointer ${
-                scenario === "posthoc" ? "bg-[#06525c] text-white" : "text-[#2f737d]"
+              className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
+                scenario === "posthoc" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
               }`}
             >
-              Post-Hoc (38F)
+              {plainMode ? "Setelah Makan (38F)" : "Post-Hoc (38F)"}
             </button>
           </div>
         )}
@@ -139,8 +178,10 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
             <div className="hairline-card p-5 lg:col-span-5">
-              <h3 className="text-[15.5px] font-semibold text-[#0d2429]">
-                Holdout MAE &amp; R² 7 model
+              <h3 className="text-[15.5px] font-bold text-[#141414]">
+                {plainMode
+                  ? "Ketepatan 7 Model Uji (makin pendek makin jitu)"
+                  : "Holdout MAE & R² 7 model"}
               </h3>
               <div className="mt-4 space-y-3">
                 {modelRows.map((m) => {
@@ -150,22 +191,22 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
                       <div className="flex items-center justify-between text-[13px]">
                         <span
                           className={
-                            isSelected ? "font-semibold text-[#06525c]" : "text-[#0d2429]"
+                            isSelected ? "font-bold text-[#0f5257]" : "font-medium text-[#141414]"
                           }
                         >
                           {m.model}
                         </span>
-                        <span className="t-mono font-medium text-[#0d2429]">
+                        <span className="t-mono font-semibold text-[#141414]">
                           {m.holdout_MAE.toFixed(3).replace(".", ",")} pp (R²{" "}
                           {m.holdout_R2.toFixed(3).replace(".", ",")})
                         </span>
                       </div>
-                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#ebf0ee]">
+                      <div className="h-3 w-full overflow-hidden rounded-full border border-white/85 bg-white/55">
                         <div
                           className="h-full rounded-full"
                           style={{
                             width: `${(m.holdout_MAE / maxMae) * 100}%`,
-                            backgroundColor: isSelected ? "#06525c" : "#6c8e63",
+                            backgroundColor: isSelected ? "#0f5257" : "#6c8e63",
                           }}
                         />
                       </div>
@@ -176,26 +217,28 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
             </div>
 
             <div className="hairline-card overflow-hidden p-5 lg:col-span-7">
-              <h3 className="text-[15.5px] font-semibold text-[#0d2429]">
-                Matriks kestabilan 5-Fold Cross-Validation
+              <h3 className="text-[15.5px] font-bold text-[#141414]">
+                {plainMode
+                  ? "Uji Kestabilan di 5 Kelompok Acak (5-Fold CV)"
+                  : "Matriks kestabilan 5-Fold Cross-Validation"}
               </h3>
-              <p className="mt-0.5 mb-3.5 text-[12.5px] text-[#2f737d]">
-                Nilai MAE per fold langsung dari{" "}
-                <code className="t-mono text-[#0d2429]">models/cv_per_fold_report.csv</code>.
+              <p className="mt-0.5 mb-3.5 text-[12.5px] text-[#3d525c]">
+                Rata-rata selisih per bagian uji dari{" "}
+                <code className="t-mono text-[#141414]">models/cv_per_fold_report.csv</code>.
               </p>
-              <div className="overflow-x-auto rounded-lg border border-[rgba(6,82,92,0.12)]">
+              <div className="overflow-x-auto rounded-[16px] border border-white/85 bg-white/60">
                 <table className="w-full border-collapse text-left text-[13px]">
-                  <thead className="bg-[#ebf0ee] text-[#2f737d]">
+                  <thead className="bg-[#eef4f7] text-[#3d525c]">
                     <tr>
-                      <th className="px-3.5 py-2.5 font-medium">Model</th>
+                      <th className="px-3.5 py-2.5 font-semibold">Model</th>
                       {[1, 2, 3, 4, 5].map((f) => (
-                        <th key={f} className="px-3 py-2.5 text-right font-medium">
-                          Fold {f}
+                        <th key={f} className="px-3 py-2.5 text-right font-semibold">
+                          Bagian {f}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[rgba(6,82,92,0.08)]">
+                  <tbody className="divide-y divide-[rgba(15,82,87,0.08)]">
                     {modelsInFolds.map((modelName) => {
                       const byFold = Object.fromEntries(
                         foldRows.filter((r) => r.model === modelName).map((r) => [r.fold, r.MAE])
@@ -204,14 +247,14 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
                       return (
                         <tr
                           key={modelName}
-                          className={isOptuna ? "bg-[#ebf0ee]/50 font-semibold" : ""}
+                          className={isOptuna ? "bg-[#0f5257]/10 font-bold" : ""}
                         >
-                          <td className="px-3.5 py-2.5 text-[#0d2429]">{modelName}</td>
+                          <td className="px-3.5 py-2.5 text-[#141414]">{modelName}</td>
                           {[1, 2, 3, 4, 5].map((f) => (
                             <td
                               key={f}
                               className={`t-mono px-3 py-2.5 text-right ${
-                                isOptuna ? "text-[#06525c]" : "text-[#2f737d]"
+                                isOptuna ? "text-[#0f5257]" : "text-[#3d525c]"
                               }`}
                             >
                               {byFold[f] !== undefined
@@ -231,37 +274,39 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
           <div className="hairline-card p-5">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
-                <h3 className="text-[16px] font-semibold text-[#0d2429]">
-                  Global TreeSHAP ({scenario === "pra" ? "Pra-Distribusi" : "Post-Hoc"})
+                <h3 className="text-[16px] font-bold text-[#141414]">
+                  {plainMode
+                    ? `Faktor Paling Berpengaruh (${scenario === "pra" ? "Sebelum Kirim" : "Setelah Makan"})`
+                    : `Global TreeSHAP (${scenario === "pra" ? "Pra-Distribusi" : "Post-Hoc"})`}
                 </h3>
-                <p className="text-[12.5px] text-[#2f737d]">
-                  Peringkat penggerak fitur dari pelatihan akhir Optuna LightGBM.
+                <p className="text-[12.5px] text-[#3d525c]">
+                  Urutan pengaruh fitur pada model terbaik Optuna LightGBM di seluruh 2.600 data uji.
                 </p>
               </div>
-              <div className="inline-flex rounded-lg border border-[rgba(6,82,92,0.16)] bg-[#f7f9f8] p-0.5">
+              <div className="inline-flex rounded-full border border-white/90 bg-white/60 p-0.5">
                 <button
                   type="button"
                   onClick={() => setShapType("beeswarm")}
-                  className={`rounded-md px-3 py-1 text-[12.5px] font-medium cursor-pointer ${
-                    shapType === "beeswarm" ? "bg-[#06525c] text-white" : "text-[#2f737d]"
+                  className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
+                    shapType === "beeswarm" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
                   }`}
                 >
-                  Beeswarm
+                  Sebaran Titik
                 </button>
                 <button
                   type="button"
                   onClick={() => setShapType("bar")}
-                  className={`rounded-md px-3 py-1 text-[12.5px] font-medium cursor-pointer ${
-                    shapType === "bar" ? "bg-[#06525c] text-white" : "text-[#2f737d]"
+                  className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
+                    shapType === "bar" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
                   }`}
                 >
-                  Mean |SHAP| Bar
+                  Peringkat Batang
                 </button>
               </div>
             </div>
 
             <div className="sage-frame mt-4 p-3">
-              <div className="overflow-hidden rounded-lg border border-[rgba(6,82,92,0.12)] bg-white p-3">
+              <div className="overflow-hidden rounded-[18px] border border-white bg-white p-3">
                 <img
                   src={assetUrl(`/figures-fase3/shap_${shapType}_${scenario}.png`)}
                   alt={`SHAP ${shapType} ${scenario}`}
@@ -275,25 +320,25 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
 
       {/* VIEW 2: Holdout 2.600 Audit Browser */}
       {subTab === "holdout" && (
-        <div className="hairline-card p-5 space-y-4">
+        <div className="hairline-card space-y-4 p-5">
           <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
             <div>
-              <h3 className="text-[16.5px] font-semibold text-[#0d2429]">
-                Inspeksi 2.600 sampel uji holdout
+              <h3 className="text-[16.5px] font-bold text-[#141414]">
+                Telusuri 2.600 Pengiriman Uji Nyata
               </h3>
-              <p className="text-[12.5px] text-[#2f737d]">
-                Klik tombol Simulator pada baris mana pun untuk memuat datanya ke mode interaktif.
+              <p className="text-[12.5px] text-[#3d525c]">
+                Tekan tombol <strong className="text-[#141414]">Uji</strong> pada baris mana pun untuk langsung mencoba angkanya di Simulator.
               </p>
             </div>
             <a href={exportUrl} className="btn-secondary shrink-0">
               <Download className="h-4 w-4" aria-hidden="true" />
-              Unduh CSV terfilter
+              Unduh CSV Terfilter
             </a>
           </div>
 
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
             <label className="relative block">
-              <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[#2f737d]" />
+              <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[#0f5257]" />
               <input
                 type="text"
                 placeholder="Cari ID, provinsi, lauk..."
@@ -314,7 +359,7 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
               }}
               className="app-control"
             >
-              <option value="Semua">Semua klaster wilayah</option>
+              <option value="Semua">Semua zona wilayah</option>
               {VALID_CLUSTERS.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -346,10 +391,10 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
               }}
               className="app-control"
             >
-              <option value="Semua">Semua tingkat aktual</option>
-              <option value="optimal">Optimal (&lt;10%)</option>
-              <option value="waspada">Waspada (10% - 20%)</option>
-              <option value="kritis">Bermasalah (&ge;20%)</option>
+              <option value="Semua">Semua tingkat sisa nyata</option>
+              <option value="optimal">Bagus (&lt;10%)</option>
+              <option value="waspada">Sedang (10% - 20%)</option>
+              <option value="kritis">Tinggi (&ge;20%)</option>
             </select>
 
             <select
@@ -360,37 +405,37 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
               }}
               className="app-control"
             >
-              <option value="abs_error_desc">Urut: Galat Pra terbesar</option>
-              <option value="abs_error_asc">Urut: Prediksi Pra paling akurat</option>
-              <option value="actual_desc">Urut: Sisa aktual tertinggi</option>
-              <option value="actual_asc">Urut: Sisa aktual terendah</option>
+              <option value="abs_error_desc">Urut: Selisih terbesar</option>
+              <option value="abs_error_asc">Urut: Tebakan paling pas</option>
+              <option value="actual_desc">Urut: Sisa paling banyak</option>
+              <option value="actual_asc">Urut: Sisa paling sedikit</option>
             </select>
           </div>
 
           {holdout && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[rgba(6,82,92,0.12)] bg-[#f7f9f8] px-3.5 py-2.5 text-[12.5px]">
+            <div className="glass-field flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-[12.5px]">
               <div className="flex flex-wrap items-center gap-4">
                 <span>
                   Cocok:{" "}
-                  <strong className="t-mono text-[#0d2429]">
+                  <strong className="t-mono text-[#141414]">
                     {holdout.total.toLocaleString("id-ID")}
                   </strong>
                 </span>
                 <span>
-                  Aktual:{" "}
-                  <strong className="t-mono text-[#0d2429]">
+                  Sisa nyata:{" "}
+                  <strong className="t-mono text-[#141414]">
                     {formatPct(holdout.slice_metrics.mean_actual_waste_pct)}
                   </strong>
                 </span>
                 <span>
                   MAE Pra:{" "}
-                  <strong className="t-mono text-[#06525c]">
+                  <strong className="t-mono text-[#0f5257]">
                     {holdout.slice_metrics.mae_pra.toFixed(3).replace(".", ",")} pp
                   </strong>
                 </span>
                 <span>
                   MAE Post:{" "}
-                  <strong className="t-mono text-[#06525c]">
+                  <strong className="t-mono text-[#0f5257]">
                     {holdout.slice_metrics.mae_posthoc.toFixed(3).replace(".", ",")} pp
                   </strong>
                 </span>
@@ -401,11 +446,11 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
                   type="button"
                   disabled={offset === 0}
                   onClick={() => setOffset((o) => Math.max(0, o - limit))}
-                  className="rounded border border-[rgba(6,82,92,0.2)] bg-white px-2.5 py-1 text-[12px] disabled:opacity-40 cursor-pointer"
+                  className="rounded-full border border-white/90 bg-white/80 px-3 py-1 text-[12px] font-semibold disabled:opacity-40 cursor-pointer"
                 >
                   Prev
                 </button>
-                <span className="t-mono text-[12px] text-[#2f737d]">
+                <span className="t-mono text-[12px] text-[#3d525c]">
                   {holdout.total === 0 ? 0 : offset + 1}-
                   {Math.min(offset + limit, holdout.total)} / {holdout.total}
                 </span>
@@ -413,7 +458,7 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
                   type="button"
                   disabled={offset + limit >= holdout.total}
                   onClick={() => setOffset((o) => o + limit)}
-                  className="rounded border border-[rgba(6,82,92,0.2)] bg-white px-2.5 py-1 text-[12px] disabled:opacity-40 cursor-pointer"
+                  className="rounded-full border border-white/90 bg-white/80 px-3 py-1 text-[12px] font-semibold disabled:opacity-40 cursor-pointer"
                 >
                   Next
                 </button>
@@ -421,32 +466,32 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
             </div>
           )}
 
-          <div className="overflow-x-auto rounded-lg border border-[rgba(6,82,92,0.12)]">
+          <div className="overflow-x-auto rounded-[18px] border border-white/85 bg-white/60">
             <table className="w-full border-collapse text-left text-[12.5px]">
-              <thead className="bg-[#ebf0ee] text-[#2f737d]">
+              <thead className="bg-[#eef4f7] text-[#3d525c]">
                 <tr>
-                  <th className="px-3.5 py-2.5 font-medium">ID &amp; Provinsi</th>
-                  <th className="px-3.5 py-2.5 font-medium">Penerima &amp; Protein</th>
-                  <th className="px-3.5 py-2.5 text-right font-medium">Suhu / Transit</th>
-                  <th className="px-3.5 py-2.5 text-right font-medium">Aktual</th>
-                  <th className="px-3.5 py-2.5 text-right font-medium">Pred Pra</th>
-                  <th className="px-3.5 py-2.5 text-right font-medium">Pred Post</th>
-                  <th className="px-3.5 py-2.5 text-right font-medium">Aksi</th>
+                  <th className="px-3.5 py-2.5 font-semibold">ID &amp; Provinsi</th>
+                  <th className="px-3.5 py-2.5 font-semibold">Penerima &amp; Lauk</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold">Suhu / Jalan</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold">Nyata</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold">Tebak Pra</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold">Tebak Post</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold">Coba</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[rgba(6,82,92,0.08)]">
+              <tbody className="divide-y divide-[rgba(15,82,87,0.08)]">
                 {(holdout?.items ?? []).map((item) => (
-                  <tr key={item.distribution_id} className="hover:bg-[#f7f9f8]">
+                  <tr key={item.distribution_id} className="hover:bg-white/75">
                     <td className="px-3.5 py-2.5">
-                      <div className="t-mono text-[11.5px] font-medium text-[#06525c]">
+                      <div className="t-mono text-[11.5px] font-semibold text-[#0f5257]">
                         {item.distribution_id}
                       </div>
-                      <div className="font-medium text-[#0d2429]">{item.province}</div>
-                      <div className="text-[11.5px] text-[#2f737d]">{item.regional_cluster}</div>
+                      <div className="font-semibold text-[#141414]">{item.province}</div>
+                      <div className="text-[11.5px] text-[#3d525c]">{item.regional_cluster}</div>
                     </td>
                     <td className="px-3.5 py-2.5">
-                      <div className="text-[#0d2429]">{item.beneficiary_category}</div>
-                      <div className="text-[11.5px] text-[#2f737d]">
+                      <div className="text-[#141414]">{item.beneficiary_category}</div>
+                      <div className="text-[11.5px] text-[#3d525c]">
                         {item.protein_type} · {formatIdr(item.total_meal_cost_idr)}
                       </div>
                     </td>
@@ -454,34 +499,34 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
                       <div
                         className={
                           item.food_arrival_temperature_celsius < 60
-                            ? "font-semibold text-[#b93815]"
-                            : "text-[#0d2429]"
+                            ? "font-bold text-[#b53418]"
+                            : "text-[#141414]"
                         }
                       >
-                        {item.food_arrival_temperature_celsius.toFixed(1)}°C
+                        {item.food_arrival_temperature_celsius.toFixed(1).replace(".", ",")}°C
                       </div>
-                      <div className="text-[11.5px] text-[#2f737d]">
-                        {item.transit_time_minutes} m · {item.delivery_distance_km} km
+                      <div className="text-[11.5px] text-[#3d525c]">
+                        {item.transit_time_minutes} m · {String(item.delivery_distance_km).replace(".", ",")} km
                       </div>
                     </td>
                     <td
-                      className={`t-mono px-3.5 py-2.5 text-right font-semibold ${
-                        item.actual_waste_pct >= 20 ? "text-[#b93815]" : "text-[#0d2429]"
+                      className={`t-mono px-3.5 py-2.5 text-right font-bold ${
+                        item.actual_waste_pct >= 20 ? "text-[#b53418]" : "text-[#141414]"
                       }`}
                     >
                       {formatPct(item.actual_waste_pct)}
                     </td>
-                    <td className="t-mono px-3.5 py-2.5 text-right text-[#06525c]">
+                    <td className="t-mono px-3.5 py-2.5 text-right text-[#0f5257]">
                       {formatPct(item.pred_pra_pct)}
                     </td>
-                    <td className="t-mono px-3.5 py-2.5 text-right font-medium text-[#06525c]">
+                    <td className="t-mono px-3.5 py-2.5 text-right font-semibold text-[#0f5257]">
                       {formatPct(item.pred_posthoc_pct)}
                     </td>
                     <td className="px-3.5 py-2.5 text-right">
                       <button
                         type="button"
                         onClick={() => onLoadToSimulator(item)}
-                        className="inline-flex items-center gap-1 rounded-md border border-[rgba(6,82,92,0.2)] bg-[#ebf0ee] px-2.5 py-1 text-[12px] font-medium text-[#06525c] hover:bg-[#06525c] hover:text-white transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1 rounded-full border border-white/90 bg-white/80 px-3 py-1 text-[12px] font-semibold text-[#0f5257] hover:bg-[#0f5257] hover:text-white transition-colors cursor-pointer"
                       >
                         Uji <ArrowUpRight className="h-3.5 w-3.5" />
                       </button>
@@ -497,91 +542,89 @@ export default function AuditPanel({ onLoadToSimulator }: AuditPanelProps) {
       {/* VIEW 3: ETL Pipeline & Anti-Leakage Audit */}
       {subTab === "pipeline" && (
         <div className="space-y-5">
-          <PipelineArchitecture />
+          <PipelineArchitecture plainMode={plainMode} />
 
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
             <div className="hairline-card p-5 lg:col-span-6">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-[15.5px] font-semibold text-[#0d2429]">
-                  Audit integritas anti-leakage (<code className="t-mono text-[14px]">DROP_LEAK</code>)
+                <h3 className="text-[15.5px] font-bold text-[#141414]">
+                  {plainMode
+                    ? "Pencegahan Kolom Bocor Agar Akurasi Jujur"
+                    : "Audit integritas anti-leakage (DROP_LEAK)"}
                 </h3>
-                <div className="inline-flex rounded-lg border border-[rgba(6,82,92,0.16)] bg-[#f7f9f8] p-0.5">
+                <div className="inline-flex rounded-full border border-white/90 bg-white/60 p-0.5">
                   <button
                     type="button"
                     onClick={() => setLeakView("valid")}
-                    className={`rounded-md px-2.5 py-1 text-[12px] font-medium cursor-pointer ${
-                      leakView === "valid" ? "bg-[#06525c] text-white" : "text-[#2f737d]"
+                    className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
+                      leakView === "valid" ? "bg-[#0f5257] text-white" : "text-[#3d525c]"
                     }`}
                   >
-                    Pipeline sah
+                    Alur Jujur
                   </button>
                   <button
                     type="button"
                     onClick={() => setLeakView("leaked")}
-                    className={`rounded-md px-2.5 py-1 text-[12px] font-medium cursor-pointer ${
-                      leakView === "leaked" ? "bg-[#b93815] text-white" : "text-[#2f737d]"
+                    className={`rounded-full px-3 py-1 text-[12px] font-semibold cursor-pointer ${
+                      leakView === "leaked" ? "bg-[#b53418] text-white" : "text-[#3d525c]"
                     }`}
                   >
-                    Dengan fitur bocor
+                    Bila Bocor Lolos
                   </button>
                 </div>
               </div>
 
               {leakView === "valid" ? (
                 <div className="mt-4 space-y-2.5 text-[13.5px]">
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[rgba(6,82,92,0.1)] bg-[#f7f9f8] px-3.5 py-2.5">
-                    <span className="inline-flex items-center gap-2 font-medium text-[#06525c]">
+                  <div className="glass-field flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5">
+                    <span className="inline-flex items-center gap-2 font-semibold text-[#0f5257]">
                       <CheckCircle2 className="h-4 w-4 shrink-0" />
                       Post-Hoc LightGBM Optuna
                     </span>
-                    <span className="t-mono font-semibold text-[#0d2429]">
+                    <span className="t-mono font-bold text-[#141414]">
                       R² 0,551 · MAE 2,929
                     </span>
                   </div>
-                  <p className="text-[13px] leading-relaxed text-[#2f737d]">
-                    Fitur{" "}
-                    <code className="t-mono text-[#0d2429]">waste_adjusted_effective_cost_idr</code>{" "}
-                    (selisih maks Rp0,5 dari rumus target) dan{" "}
-                    <code className="t-mono text-[#0d2429]">bgn_program_compliance_tier</code>{" "}
-                    diblokir otomatis.
+                  <p className="text-[13px] leading-relaxed text-[#3d525c]">
+                    Kolom{" "}
+                    <code className="t-mono text-[#141414]">waste_adjusted_effective_cost_idr</code>{" "}
+                    (yang dihitung balik dari persentase sisa) dan{" "}
+                    <code className="t-mono text-[#141414]">bgn_program_compliance_tier</code>{" "}
+                    otomatis dikeluarkan sebelum latihan dimulai.
                   </p>
                 </div>
               ) : (
                 <div className="mt-4 space-y-2.5 text-[13.5px]">
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#b93815]/25 bg-[#fbeae5] px-3.5 py-2.5">
-                    <span className="inline-flex items-center gap-2 font-medium text-[#b93815]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[rgba(181,52,24,0.28)] bg-[rgba(255,240,236,0.9)] px-3.5 py-2.5">
+                    <span className="inline-flex items-center gap-2 font-semibold text-[#b53418]">
                       <ShieldAlert className="h-4 w-4 shrink-0" />
-                      Skor semu bila tier kepatuhan lolos
+                      Skor palsu bila kolom label ikut terbaca
                     </span>
-                    <span className="t-mono font-semibold text-[#b93815]">
+                    <span className="t-mono font-bold text-[#b53418]">
                       R² 0,682 · MAE 2,363
                     </span>
                   </div>
-                  <p className="text-[13px] leading-relaxed text-[#2f737d]">
-                    Skor R² 0,682 ditolak oleh pipeline produksi karena kelas compliance tier
-                    menggunakan ambang sisa piring 20%-30% pasca-kejadian.
+                  <p className="text-[13px] leading-relaxed text-[#3d525c]">
+                    Angka tinggi 0,682 ditolak sistem karena kelas kepatuhan memakai batas sisa 20%-30% yang baru diketahui sesudah makan selesai.
                   </p>
                 </div>
               )}
             </div>
 
             <div className="hairline-card p-5 lg:col-span-6">
-              <h3 className="text-[15.5px] font-semibold text-[#0d2429]">
-                Ablasi TargetEncoder 38 provinsi (5-Fold CV)
+              <h3 className="text-[15.5px] font-bold text-[#141414]">
+                Uji Pengaruh Ciri 38 Provinsi (5-Fold CV)
               </h3>
               <div className="mt-3.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 {teRows.map((item) => (
-                  <div
-                    key={item.config}
-                    className="rounded-lg border border-[rgba(6,82,92,0.1)] bg-[#f7f9f8] p-3"
-                  >
-                    <div className="t-mono text-[11px] uppercase text-[#2f737d]">
+                  <div key={item.config} className="glass-field p-3">
+                    <div className="t-mono text-[11px] font-semibold uppercase text-[#3d525c]">
                       {item.scenario}
                     </div>
-                    <div className="mt-0.5 text-[13px] font-medium text-[#0d2429]">
+                    <div className="mt-0.5 text-[13px] font-semibold text-[#141414]">
                       {item.config}
                     </div>
-                    <div className="t-mono mt-1.5 flex justify-between text-[12.5px] text-[#06525c]">
+                    <div className="t-mono mt-1.5 flex justify-between text-[12px] font-semibold text-[#0f5257]">
                       <span>MAE {item.cv_mae.toFixed(4).replace(".", ",")}</span>
                       <span>R² {item.cv_r2.toFixed(4).replace(".", ",")}</span>
                     </div>

@@ -124,6 +124,14 @@ export interface ExplainContribution {
   label: string;
   display_value: string;
   shap_pp: number;
+  plain_note?: string;
+}
+
+export interface HumanizerSummary {
+  headline: string;
+  story: string;
+  cause_plain: string;
+  action_plain: string;
 }
 
 export interface ExplainResponse {
@@ -141,6 +149,8 @@ export interface ExplainResponse {
   contributions: ExplainContribution[];
   derived_telemetry: Record<string, number>;
   alert_flags: string[];
+  humanizer_summary?: HumanizerSummary;
+  plain_recommendations?: string[];
 }
 
 export interface HoldoutItem {

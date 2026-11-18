@@ -1,39 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-manrope), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-host-grotesk), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 :root {
-  --p-bg: #f7f9f8;
-  --p-surface: #ebf0ee;
-  --p-card: #ffffff;
-  --p-ink: #0d2429;
-  --p-brand: #06525c;
-  --p-muted: #2f737d;
-  --p-accent: #06525c;
-  --p-accent-ink: #f7f9f8;
-  --p-line: rgba(6, 82, 92, 0.12);
-  --p-line-strong: rgba(6, 82, 92, 0.24);
+  /* Design 5: Spatial Frosted Glass + Dealt swap-pastels sky/sage/teal palette */
+  --bg-sky: #c3d7e5;
+  --bg-surf: #d0e0eb;
+  --ink: #141414;
+  --muted: #3d525c;
+  --accent: #0f5257;
+  --accent-hover: #0a3c40;
+  --accent-ink: #ffffff;
+  --sage: #cdd6c6;
 
-  /* Botanical sage panel surface from taste-skill tokens */
-  --ground-bg: #cdd6c6;
-  --ground-surface: #dce3d6;
-  --ground-ink: #262d24;
-  --ground-accent: #6c8e63;
+  --glass: rgba(255, 255, 255, 0.58);
+  --glass-strong: rgba(255, 255, 255, 0.78);
+  --glass-field: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.88);
+  --glass-line: rgba(15, 82, 87, 0.14);
+  --glass-line-strong: rgba(15, 82, 87, 0.28);
+  --glass-shadow:
+    0 20px 44px -18px rgba(15, 82, 87, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
 
   /* Semantic clinical thresholds */
-  --risk-ok: #0f7d45;
-  --risk-ok-bg: #e7f4ec;
+  --risk-ok: #137242;
+  --risk-ok-bg: rgba(19, 114, 66, 0.12);
   --risk-warn: #b4532a;
-  --risk-warn-bg: #fbf0ea;
-  --risk-crit: #b93815;
-  --risk-crit-bg: #fbeae5;
+  --risk-warn-bg: rgba(180, 83, 42, 0.12);
+  --risk-crit: #b53418;
+  --risk-crit-bg: rgba(181, 52, 24, 0.14);
 
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-btn: 8px;
+  --r-win: 24px;
+  --r-tile: 16px;
+  --r-field: 14px;
+  --r-pill: 999px;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -45,48 +49,93 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--p-bg);
-  color: var(--p-ink);
+  min-height: 100%;
+  color: var(--ink);
   font-family: var(--font-sans);
   font-feature-settings: "tnum" 1, "cv11" 1;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  background-color: var(--bg-sky);
+  background-image:
+    radial-gradient(62% 78% at 12% 14%, rgba(255, 255, 255, 0.76), transparent 64%),
+    radial-gradient(54% 72% at 88% 18%, rgba(205, 214, 198, 0.85), transparent 62%),
+    radial-gradient(68% 68% at 62% 94%, rgba(15, 82, 87, 0.22), transparent 68%),
+    radial-gradient(45% 50% at 24% 82%, rgba(226, 238, 244, 0.92), transparent 64%);
+  background-attachment: fixed;
 }
 
+/* Primary Spatial Glass Panes */
+.glass-surface {
+  background: var(--glass);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-strong,
+.hairline-card {
+  background: var(--glass-strong);
+  backdrop-filter: blur(26px) saturate(155%);
+  -webkit-backdrop-filter: blur(26px) saturate(155%);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-win);
+  box-shadow: var(--glass-shadow);
+  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease);
+}
+
+/* Elevated Inner Refraction Surfaces */
 .sage-frame {
   position: relative;
-  border-radius: var(--r-md);
-  background-color: var(--ground-bg);
-  background-image:
-    radial-gradient(75% 88% at 14% 0%, color-mix(in oklab, var(--ground-surface) 92%, white), transparent 72%),
-    radial-gradient(62% 82% at 100% 100%, color-mix(in oklab, var(--ground-accent) 28%, var(--ground-bg)), transparent 74%);
-  border: 1px solid rgba(38, 45, 36, 0.14);
+  border-radius: var(--r-win);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.74) 0%,
+    rgba(205, 214, 198, 0.52) 55%,
+    rgba(195, 215, 229, 0.56) 100%
+  );
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--glass-shadow);
 }
 
-.hairline-card {
-  background-color: var(--p-card);
-  border: 1px solid var(--p-line);
-  border-radius: var(--r-md);
-  transition: border-color 150ms var(--ease), box-shadow 150ms var(--ease);
+.glass-tile {
+  background: rgba(255, 255, 255, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--r-tile);
+}
+
+.glass-field {
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: var(--r-field);
+}
+
+.glass-subpane {
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--r-tile);
 }
 
 .app-control {
   width: 100%;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--p-line-strong);
-  background-color: #f7f9f8;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 82, 87, 0.2);
+  background-color: rgba(255, 255, 255, 0.88);
   padding: 7px 10px;
   font-size: 13px;
+  font-weight: 500;
   line-height: 1.4;
-  color: var(--p-ink);
-  transition: border-color 140ms var(--ease), background-color 140ms var(--ease);
+  color: var(--ink);
+  transition: border-color 140ms var(--ease), background-color 140ms var(--ease), box-shadow 140ms var(--ease);
 }
 
 .app-control:focus {
   outline: none;
-  border-color: var(--p-brand);
+  border-color: var(--accent);
   background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(6, 82, 92, 0.12);
+  box-shadow: 0 0 0 3px rgba(15, 82, 87, 0.14);
 }
 
 .btn-primary {
@@ -94,22 +143,24 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 38px;
-  padding: 0 16px;
-  border-radius: var(--r-btn);
-  background-color: var(--p-brand);
-  color: var(--p-accent-ink);
-  font-weight: 500;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: var(--r-pill);
+  background-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
   font-size: 13.5px;
   line-height: 1;
   text-decoration: none;
-  border: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 24px -8px rgba(15, 82, 87, 0.45);
   cursor: pointer;
-  transition: transform 120ms var(--ease), background-color 120ms var(--ease);
+  transition: transform 130ms var(--ease), background-color 130ms var(--ease), box-shadow 130ms var(--ease);
 }
 
 .btn-primary:hover {
-  background-color: #084048;
+  background-color: var(--accent-hover);
+  box-shadow: 0 12px 26px -8px rgba(15, 82, 87, 0.55);
 }
 
 .btn-primary:active {
@@ -121,23 +172,23 @@ body {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-height: 38px;
-  padding: 0 14px;
-  border-radius: var(--r-btn);
-  background-color: #ffffff;
-  color: var(--p-brand);
-  font-weight: 500;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  background-color: rgba(255, 255, 255, 0.78);
+  color: var(--accent);
+  font-weight: 600;
   font-size: 13.5px;
   line-height: 1;
   text-decoration: none;
-  border: 1px solid var(--p-line-strong);
+  border: 1px solid rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 16px -8px rgba(15, 82, 87, 0.18);
   cursor: pointer;
-  transition: transform 120ms var(--ease), background-color 120ms var(--ease), border-color 120ms var(--ease);
+  transition: transform 130ms var(--ease), background-color 130ms var(--ease);
 }
 
 .btn-secondary:hover {
-  background-color: var(--p-surface);
-  border-color: rgba(6, 82, 92, 0.42);
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .btn-secondary:active {
@@ -149,8 +200,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--p-brand);
-  font-weight: 500;
+  color: var(--accent);
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -160,7 +211,7 @@ body {
   left: 0;
   bottom: -2px;
   width: 100%;
-  height: 1px;
+  height: 1.5px;
   background-color: currentColor;
   transform: scaleX(0.35);
   transform-origin: left;
@@ -190,7 +241,7 @@ body {
 }
 
 input[type="range"] {
-  accent-color: #06525c;
+  accent-color: #0f5257;
   height: 5px;
   border-radius: 999px;
   cursor: pointer;
@@ -204,9 +255,9 @@ input[type="range"] {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(6, 82, 92, 0.22);
+  background: rgba(15, 82, 87, 0.25);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(6, 82, 92, 0.4);
+  background: rgba(15, 82, 87, 0.45);
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   BookmarkPlus,
+  BookOpenText,
   CheckCircle2,
   Flame,
   Loader2,
@@ -34,6 +35,8 @@ interface SimulatorPanelProps {
   initialPresetId?: string | null;
   loadedHoldoutRow?: HoldoutItem | null;
   loadedRun?: SimulationRunRecord | null;
+  plainMode?: boolean;
+  onTogglePlainMode?: () => void;
   onClearLoadedRow?: () => void;
   onSaveRun?: (run: SimulationRunRecord) => void;
 }
@@ -61,6 +64,8 @@ export default function SimulatorPanel({
   initialPresetId,
   loadedHoldoutRow,
   loadedRun,
+  plainMode = true,
+  onTogglePlainMode,
   onClearLoadedRow,
   onSaveRun,
 }: SimulatorPanelProps) {
@@ -227,45 +232,50 @@ export default function SimulatorPanel({
 
   const riskBadgeClass =
     wastePct >= 15
-      ? "bg-[#fbeae5] text-[#b93815] border-[#b93815]/25"
+      ? "bg-[rgba(181,52,24,0.14)] text-[#b53418] border-[rgba(181,52,24,0.28)]"
       : wastePct >= 10
-      ? "bg-[#fbf0ea] text-[#b4532a] border-[#b4532a]/25"
-      : "bg-[#e7f4ec] text-[#0f7d45] border-[#0f7d45]/25";
+      ? "bg-[rgba(180,83,42,0.14)] text-[#b4532a] border-[rgba(180,83,42,0.28)]"
+      : "bg-[rgba(19,114,66,0.14)] text-[#137242] border-[rgba(19,114,66,0.28)]";
+
+  const activeRecs =
+    plainMode && result?.plain_recommendations?.length
+      ? result.plain_recommendations
+      : result?.recommendations ?? [];
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-      {/* Left Workbench Inspector Form */}
+      {/* LEFT GLASS WINDOW: Rencana Distribusi Parameters */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           runPredict(mode, form);
         }}
-        className="hairline-card flex w-full shrink-0 flex-col overflow-hidden lg:w-[410px] xl:w-[435px]"
+        className="glass-strong flex w-full shrink-0 flex-col overflow-hidden rounded-[24px] lg:w-[410px] xl:w-[426px]"
       >
-        {/* Top Mode & Quick Preset Strip */}
-        <div className="border-b border-[rgba(6,82,92,0.1)] bg-[#ebf0ee]/60 p-3 space-y-2">
-          <div className="grid grid-cols-2 gap-1 rounded-lg border border-[rgba(6,82,92,0.14)] bg-[#ffffff] p-0.5">
+        {/* Top Mode Pill & Quick Presets */}
+        <div className="border-b border-[rgba(15,82,87,0.1)] bg-white/40 p-4 space-y-2.5">
+          <div className="grid grid-cols-2 gap-1 rounded-full border border-white/85 bg-white/55 p-1">
             <button
               type="button"
               onClick={() => handleModeSwitch("pra")}
-              className={`rounded-md px-2.5 py-1.5 text-[12.5px] font-medium cursor-pointer transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-[12.5px] font-semibold cursor-pointer transition-colors ${
                 mode === "pra"
-                  ? "bg-[#06525c] text-[#f7f9f8]"
-                  : "text-[#2f737d] hover:text-[#0d2429]"
+                  ? "bg-[#0f5257] text-white shadow-sm"
+                  : "text-[#3d525c] hover:text-[#141414]"
               }`}
             >
-              Pra-Distribusi (34F)
+              {plainMode ? "Sebelum Kirim" : "Pra-Distribusi (34F)"}
             </button>
             <button
               type="button"
               onClick={() => handleModeSwitch("posthoc")}
-              className={`rounded-md px-2.5 py-1.5 text-[12.5px] font-medium cursor-pointer transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-[12.5px] font-semibold cursor-pointer transition-colors ${
                 mode === "posthoc"
-                  ? "bg-[#06525c] text-[#f7f9f8]"
-                  : "text-[#2f737d] hover:text-[#0d2429]"
+                  ? "bg-[#0f5257] text-white shadow-sm"
+                  : "text-[#3d525c] hover:text-[#141414]"
               }`}
             >
-              Post-Hoc Audit (38F)
+              {plainMode ? "Evaluasi Selesai" : "Post-Hoc Audit (38F)"}
             </button>
           </div>
 
@@ -275,7 +285,7 @@ export default function SimulatorPanel({
                 key={p.id}
                 type="button"
                 onClick={() => applyPreset(p.id)}
-                className="rounded-md border border-[rgba(6,82,92,0.16)] bg-white px-2 py-1 text-[11.5px] font-medium text-[#0d2429] hover:border-[#06525c] hover:bg-[#f7f9f8] cursor-pointer"
+                className="rounded-full border border-white/90 bg-white/70 px-2.5 py-1 text-[11.5px] font-semibold text-[#141414] hover:bg-white hover:border-[#0f5257]/30 cursor-pointer"
               >
                 {p.label.split("·")[0].trim()}
               </button>
@@ -283,8 +293,8 @@ export default function SimulatorPanel({
             <button
               type="button"
               onClick={resetDefaults}
-              className="ml-auto inline-flex items-center gap-1 rounded-md border border-[rgba(6,82,92,0.16)] bg-white px-2 py-1 text-[11.5px] text-[#2f737d] hover:text-[#0d2429] cursor-pointer"
-              title="Kembalikan default"
+              className="ml-auto inline-flex items-center gap-1 rounded-full border border-white/90 bg-white/70 px-2.5 py-1 text-[11.5px] font-semibold text-[#3d525c] hover:text-[#141414] cursor-pointer"
+              title="Kembalikan nilai awal"
             >
               <RotateCcw className="h-3 w-3" />
               Reset
@@ -292,22 +302,22 @@ export default function SimulatorPanel({
           </div>
 
           {loadedHoldoutRow && (
-            <div className="t-mono rounded-md border border-[#06525c]/25 bg-white px-2.5 py-1.5 text-[11.5px] text-[#06525c]">
-              Holdout {loadedHoldoutRow.distribution_id} · Aktual{" "}
+            <div className="t-mono rounded-2xl border border-white bg-white/75 px-3 py-1.5 text-[11.5px] font-semibold text-[#0f5257]">
+              Uji Sampel {loadedHoldoutRow.distribution_id} · Nyata{" "}
               {formatPct(loadedHoldoutRow.actual_waste_pct)}
             </div>
           )}
         </div>
 
-        {/* Scrollable Input Sections */}
-        <div className="space-y-3 p-3.5">
+        {/* Inputs in Translucent Frosted Fields */}
+        <div className="space-y-3 p-4">
           <div className="space-y-2">
-            <div className="t-mono text-[11px] font-medium uppercase tracking-wider text-[#2f737d]">
-              1. Wilayah &amp; Sasaran
+            <div className="t-mono text-[11px] font-semibold uppercase tracking-wider text-[#3d525c]">
+              1. Daerah &amp; Sekolah Tujuan
             </div>
             <div className="grid grid-cols-2 gap-2.5">
-              <label className="block text-[12px]">
-                <span className="font-medium text-[#0d2429]">Provinsi</span>
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <span className="font-semibold text-[#3d525c]">Provinsi</span>
                 <select
                   value={form.province}
                   onChange={(e) => updateStr("province", e.target.value)}
@@ -321,8 +331,8 @@ export default function SimulatorPanel({
                 </select>
               </label>
 
-              <label className="block text-[12px]">
-                <span className="font-medium text-[#0d2429]">Klaster</span>
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <span className="font-semibold text-[#3d525c]">Zona Wilayah</span>
                 <select
                   value={form.regional_cluster}
                   onChange={(e) => updateStr("regional_cluster", e.target.value)}
@@ -336,8 +346,8 @@ export default function SimulatorPanel({
                 </select>
               </label>
 
-              <label className="block text-[12px]">
-                <span className="font-medium text-[#0d2429]">Jenjang</span>
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <span className="font-semibold text-[#3d525c]">Penerima</span>
                 <select
                   value={form.beneficiary_category}
                   onChange={(e) => updateStr("beneficiary_category", e.target.value)}
@@ -351,8 +361,8 @@ export default function SimulatorPanel({
                 </select>
               </label>
 
-              <label className="block text-[12px]">
-                <span className="font-medium text-[#0d2429]">Kapasitas dapur</span>
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <span className="font-semibold text-[#3d525c]">Porsi Dapur/Hari</span>
                 <input
                   type="number"
                   min={100}
@@ -370,12 +380,12 @@ export default function SimulatorPanel({
             </div>
           </div>
 
-          <div className="space-y-2.5 border-t border-[rgba(6,82,92,0.1)] pt-3.5">
-            <div className="t-mono text-[11px] font-medium uppercase tracking-wider text-[#2f737d]">
-              2. Menu, Gizi &amp; Pagu Biaya
+          <div className="space-y-2.5 border-t border-[rgba(15,82,87,0.1)] pt-3">
+            <div className="t-mono text-[11px] font-semibold uppercase tracking-wider text-[#3d525c]">
+              2. Lauk, Gizi &amp; Biaya Porsi
             </div>
-            <label className="block text-[12px]">
-              <span className="font-medium text-[#0d2429]">Sumber protein utama</span>
+            <label className="glass-field block p-2.5 text-[11.5px]">
+              <span className="font-semibold text-[#3d525c]">Menu Protein Utama</span>
               <select
                 value={form.protein_type}
                 onChange={(e) => updateStr("protein_type", e.target.value)}
@@ -389,11 +399,11 @@ export default function SimulatorPanel({
               </select>
             </label>
 
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <label className="block text-[12px]">
-                <div className="flex justify-between font-medium text-[#0d2429]">
-                  <span>Energi</span>
-                  <span className="t-mono text-[#06525c]">{form.estimated_calories_kcal} kkal</span>
+            <div className="grid grid-cols-2 gap-2.5">
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <div className="flex justify-between font-semibold text-[#3d525c]">
+                  <span>Kalori</span>
+                  <span className="t-mono text-[#0f5257]">{form.estimated_calories_kcal} kkal</span>
                 </div>
                 <input
                   type="range"
@@ -402,14 +412,14 @@ export default function SimulatorPanel({
                   step={10}
                   value={form.estimated_calories_kcal}
                   onChange={(e) => updateNum("estimated_calories_kcal", Number(e.target.value))}
-                  className="mt-1.5 w-full"
+                  className="mt-2 w-full"
                 />
               </label>
 
-              <label className="block text-[12px]">
-                <div className="flex justify-between font-medium text-[#0d2429]">
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <div className="flex justify-between font-semibold text-[#3d525c]">
                   <span>Protein</span>
-                  <span className="t-mono text-[#06525c]">{form.estimated_protein_grams} g</span>
+                  <span className="t-mono text-[#0f5257]">{form.estimated_protein_grams} g</span>
                 </div>
                 <input
                   type="range"
@@ -418,12 +428,12 @@ export default function SimulatorPanel({
                   step={0.5}
                   value={form.estimated_protein_grams}
                   onChange={(e) => updateNum("estimated_protein_grams", Number(e.target.value))}
-                  className="mt-1.5 w-full"
+                  className="mt-2 w-full"
                 />
               </label>
 
-              <label className="block text-[12px]">
-                <span className="font-medium text-[#0d2429]">Bahan baku (Rp)</span>
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <span className="font-semibold text-[#3d525c]">Bahan Baku (Rp)</span>
                 <input
                   type="number"
                   min={5000}
@@ -435,8 +445,8 @@ export default function SimulatorPanel({
                 />
               </label>
 
-              <label className="block text-[12px]">
-                <span className="font-medium text-[#0d2429]">Total pagu (Rp)</span>
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <span className="font-semibold text-[#3d525c]">Harga Total/Porsi (Rp)</span>
                 <input
                   type="number"
                   min={7000}
@@ -450,13 +460,13 @@ export default function SimulatorPanel({
             </div>
           </div>
 
-          <div className="space-y-2.5 border-t border-[rgba(6,82,92,0.1)] pt-3.5">
-            <div className="t-mono text-[11px] font-medium uppercase tracking-wider text-[#2f737d]">
-              3. Logistik &amp; Rantai Termal HACCP
+          <div className="space-y-2.5 border-t border-[rgba(15,82,87,0.1)] pt-3">
+            <div className="t-mono text-[11px] font-semibold uppercase tracking-wider text-[#3d525c]">
+              3. Pengiriman &amp; Kehangatan Makanan
             </div>
 
-            <label className="block text-[12px]">
-              <span className="font-medium text-[#0d2429]">Moda transportasi</span>
+            <label className="glass-field block p-2.5 text-[11.5px]">
+              <span className="font-semibold text-[#3d525c]">Kendaraan Pengantar</span>
               <select
                 value={form.delivery_transport_mode}
                 onChange={(e) => updateStr("delivery_transport_mode", e.target.value)}
@@ -470,11 +480,11 @@ export default function SimulatorPanel({
               </select>
             </label>
 
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <label className="block text-[12px]">
-                <div className="flex justify-between font-medium text-[#0d2429]">
+            <div className="grid grid-cols-2 gap-2.5">
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <div className="flex justify-between font-semibold text-[#3d525c]">
                   <span>Jarak</span>
-                  <span className="t-mono text-[#06525c]">{form.delivery_distance_km} km</span>
+                  <span className="t-mono text-[#0f5257]">{form.delivery_distance_km} km</span>
                 </div>
                 <input
                   type="range"
@@ -483,14 +493,14 @@ export default function SimulatorPanel({
                   step={0.5}
                   value={form.delivery_distance_km}
                   onChange={(e) => updateNum("delivery_distance_km", Number(e.target.value))}
-                  className="mt-1.5 w-full"
+                  className="mt-2 w-full"
                 />
               </label>
 
-              <label className="block text-[12px]">
-                <div className="flex justify-between font-medium text-[#0d2429]">
-                  <span>Transit</span>
-                  <span className="t-mono text-[#06525c]">{form.transit_time_minutes} mnt</span>
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <div className="flex justify-between font-semibold text-[#3d525c]">
+                  <span>Lama Jalan</span>
+                  <span className="t-mono text-[#0f5257]">{form.transit_time_minutes} mnt</span>
                 </div>
                 <input
                   type="range"
@@ -499,15 +509,15 @@ export default function SimulatorPanel({
                   step={1}
                   value={form.transit_time_minutes}
                   onChange={(e) => updateNum("transit_time_minutes", Number(e.target.value))}
-                  className="mt-1.5 w-full"
+                  className="mt-2 w-full"
                 />
               </label>
 
-              <label className="col-span-2 block text-[12px]">
-                <div className="flex justify-between font-medium text-[#0d2429]">
-                  <span>Suhu tiba di sekolah (ambang &ge; 60°C)</span>
-                  <span className={`t-mono font-semibold ${isCold ? "text-[#b93815]" : "text-[#0f7d45]"}`}>
-                    {form.food_arrival_temperature_celsius.toFixed(1)}°C
+              <label className="glass-field col-span-2 block p-2.5 text-[12px]">
+                <div className="flex justify-between font-semibold text-[#141414]">
+                  <span>Suhu Makanan Tiba (Aman &ge; 60°C)</span>
+                  <span className={`t-mono font-bold ${isCold ? "text-[#b53418]" : "text-[#137242]"}`}>
+                    {form.food_arrival_temperature_celsius.toFixed(1).replace(".", ",")}°C
                   </span>
                 </div>
                 <input
@@ -517,14 +527,14 @@ export default function SimulatorPanel({
                   step={0.5}
                   value={form.food_arrival_temperature_celsius}
                   onChange={(e) => updateNum("food_arrival_temperature_celsius", Number(e.target.value))}
-                  className="mt-1.5 w-full"
+                  className="mt-2 w-full"
                 />
               </label>
 
-              <label className="block text-[12px]">
-                <div className="flex justify-between font-medium text-[#0d2429]">
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <div className="flex justify-between font-semibold text-[#3d525c]">
                   <span>Kehadiran</span>
-                  <span className="t-mono text-[#06525c]">{form.student_attendance_rate_pct}%</span>
+                  <span className="t-mono text-[#0f5257]">{form.student_attendance_rate_pct}%</span>
                 </div>
                 <input
                   type="range"
@@ -533,14 +543,14 @@ export default function SimulatorPanel({
                   step={0.5}
                   value={form.student_attendance_rate_pct}
                   onChange={(e) => updateNum("student_attendance_rate_pct", Number(e.target.value))}
-                  className="mt-1.5 w-full"
+                  className="mt-2 w-full"
                 />
               </label>
 
-              <label className="block text-[12px]">
-                <div className="flex justify-between font-medium text-[#0d2429]">
-                  <span>Petani lokal</span>
-                  <span className="t-mono text-[#06525c]">{form.local_farmer_sourcing_pct}%</span>
+              <label className="glass-field block p-2.5 text-[11.5px]">
+                <div className="flex justify-between font-semibold text-[#3d525c]">
+                  <span>Bahan Lokal</span>
+                  <span className="t-mono text-[#0f5257]">{form.local_farmer_sourcing_pct}%</span>
                 </div>
                 <input
                   type="range"
@@ -549,16 +559,16 @@ export default function SimulatorPanel({
                   step={0.5}
                   value={form.local_farmer_sourcing_pct}
                   onChange={(e) => updateNum("local_farmer_sourcing_pct", Number(e.target.value))}
-                  className="mt-1.5 w-full"
+                  className="mt-2 w-full"
                 />
               </label>
             </div>
           </div>
 
           {mode === "posthoc" && (
-            <div className="space-y-2 border-t border-[rgba(6,82,92,0.1)] pt-3.5">
-              <div className="t-mono text-[11px] font-medium uppercase tracking-wider text-[#2f737d]">
-                4. Pemicu Sisa Makanan (Post-Hoc)
+            <div className="glass-field space-y-1.5 p-2.5">
+              <div className="t-mono text-[11px] font-semibold uppercase tracking-wider text-[#3d525c]">
+                4. Temuan Lapangan (Sesudah Makan)
               </div>
               <select
                 value={form.primary_food_waste_driver}
@@ -575,8 +585,8 @@ export default function SimulatorPanel({
           )}
         </div>
 
-        {/* Sticky Footer Action Bar */}
-        <div className="flex items-center gap-2 border-t border-[rgba(6,82,92,0.12)] bg-[#ebf0ee]/70 p-3">
+        {/* Sticky Pill Action Footer */}
+        <div className="flex items-center gap-2 border-t border-[rgba(15,82,87,0.1)] bg-white/45 p-3.5">
           <button
             type="submit"
             disabled={loading}
@@ -587,7 +597,7 @@ export default function SimulatorPanel({
                 <Loader2 className="h-4 w-4 animate-spin" /> Menghitung...
               </>
             ) : (
-              <>Jalankan prediksi {mode === "pra" ? "Pra" : "Post-Hoc"}</>
+              <>{plainMode ? "Hitung Perkiraan Sisa" : `Jalankan prediksi ${mode === "pra" ? "Pra" : "Post-Hoc"}`}</>
             )}
           </button>
           {onSaveRun && (
@@ -595,8 +605,8 @@ export default function SimulatorPanel({
               type="button"
               onClick={handleSaveCurrentRun}
               disabled={!result}
-              title="Simpan skenario ini ke Riwayat Sidebar"
-              className="btn-secondary shrink-0 px-3 disabled:opacity-40"
+              title="Simpan skenario ke panel Riwayat"
+              className="btn-secondary shrink-0 px-3.5 disabled:opacity-40"
             >
               <BookmarkPlus className="h-4 w-4" />
               {savedFeedback ? "Tersimpan" : "Simpan"}
@@ -605,46 +615,50 @@ export default function SimulatorPanel({
         </div>
       </form>
 
-      {/* Right Result & Diagnostic Cockpit */}
+      {/* RIGHT SPATIAL STAGE */}
       <div className="min-w-0 flex-1 space-y-4">
         {errorMsg && (
-          <div className="rounded-xl border border-[#b93815]/30 bg-[#fbeae5] p-3.5 text-[13px] text-[#b93815]">
+          <div className="rounded-[20px] border border-[rgba(181,52,24,0.3)] bg-[rgba(255,240,236,0.9)] p-4 text-[13px] font-medium text-[#b53418]">
             {errorMsg}
           </div>
         )}
 
         {result && (
           <>
-            {/* Top Outcome Strip (Botanical Sage Panel + Crisp Telemetry) */}
-            <div className="sage-frame p-3 sm:p-3.5">
-              <div className="grid grid-cols-1 gap-3.5 rounded-xl border border-[rgba(6,82,92,0.12)] bg-white p-4 lg:grid-cols-12 lg:items-center">
-                <div className="lg:col-span-4">
+            {/* HERO SPATIAL GLASS PANEL */}
+            <div className="sage-frame p-4 sm:p-5">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
+                <div className="lg:col-span-5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="t-mono text-[11px] font-medium text-[#2f737d]">
+                    <span className="t-mono rounded-full bg-white/75 px-2.5 py-0.5 text-[11px] font-semibold text-[#3d525c]">
                       {result.model_version}
                     </span>
-                    <span className="t-mono rounded bg-[#ebf0ee] px-1.5 py-0.5 text-[11px] text-[#06525c]">
+                    <span className="t-mono rounded-full bg-white/75 px-2 py-0.5 text-[11px] font-semibold text-[#0f5257]">
                       {result.latency_ms} ms
                     </span>
                   </div>
 
-                  <div className="mt-1.5 flex flex-wrap items-baseline gap-2">
-                    <span className="t-mono text-[38px] font-semibold leading-none tracking-[-0.03em] text-[#0d2429]">
+                  <div className="mt-2.5 flex flex-wrap items-baseline gap-2.5">
+                    <span className="t-mono text-[44px] sm:text-[50px] font-bold leading-none tracking-[-0.03em] text-[#141414]">
                       {formatPct(result.predicted_plate_waste_percentage)}
                     </span>
                     <span
-                      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11.5px] font-semibold whitespace-nowrap ${riskBadgeClass}`}
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11.5px] font-semibold whitespace-nowrap ${riskBadgeClass}`}
                     >
                       Risiko {result.risk_level}
                     </span>
                   </div>
 
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[12px] text-[#2f737d]">
-                    <span>{result.waste_category}</span>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[12.5px] font-medium text-[#3d525c]">
+                    <span>
+                      {plainMode
+                        ? "Perkiraan porsi tersisa di piring siswa"
+                        : result.waste_category}
+                    </span>
                     {deltaFromPrev !== null && deltaFromPrev !== 0 && (
                       <span
-                        className={`t-mono font-medium ${
-                          deltaFromPrev > 0 ? "text-[#b93815]" : "text-[#0f7d45]"
+                        className={`t-mono font-semibold ${
+                          deltaFromPrev > 0 ? "text-[#b53418]" : "text-[#137242]"
                         }`}
                       >
                         ({deltaFromPrev > 0 ? "+" : ""}
@@ -654,158 +668,228 @@ export default function SimulatorPanel({
                   </div>
                 </div>
 
-                {/* Right Compact Operational Counters */}
-                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:col-span-8">
-                  <div className="rounded-lg border border-[rgba(6,82,92,0.1)] bg-[#f7f9f8] p-2.5">
-                    <div className="text-[11px] text-[#2f737d] whitespace-nowrap">Menguap/porsi</div>
-                    <div className="t-mono mt-1 text-[14px] font-semibold text-[#0d2429] whitespace-nowrap">
+                {/* 4 Spatial Mini Glass Tiles */}
+                <div className="grid grid-cols-2 gap-2.5 lg:col-span-7">
+                  <div className="glass-tile p-3">
+                    <div className="text-[11px] font-semibold text-[#3d525c]">
+                      {plainMode ? "Nilai terbuang per kotak" : "Menguap / porsi"}
+                    </div>
+                    <div className="t-mono mt-1 text-[16px] font-bold text-[#141414]">
                       {formatIdr(result.estimated_loss_per_portion_idr)}
                     </div>
-                    <div className="t-mono mt-0.5 text-[11px] text-[#2f737d] whitespace-nowrap">
-                      Efek {formatIdr(result.effective_cost_per_portion_idr)}
+                    <div className="t-mono mt-0.5 text-[11px] text-[#3d525c]">
+                      {plainMode ? "Biaya efektif " : "Efek "}
+                      {formatIdr(result.effective_cost_per_portion_idr)}
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-[rgba(6,82,92,0.1)] bg-[#f7f9f8] p-2.5">
-                    <div className="text-[11px] text-[#2f737d] whitespace-nowrap">Status suhu</div>
+                  <div className="glass-tile p-3">
+                    <div className="text-[11px] font-semibold text-[#3d525c]">
+                      Suhu tiba di sekolah
+                    </div>
                     <div
-                      className={`t-mono mt-1 inline-flex items-center gap-1 text-[14px] font-semibold whitespace-nowrap ${
-                        isCold ? "text-[#b93815]" : "text-[#0f7d45]"
+                      className={`t-mono mt-1 inline-flex items-center gap-1 text-[16px] font-bold ${
+                        isCold ? "text-[#b53418]" : "text-[#137242]"
                       }`}
                     >
                       {isCold ? (
-                        <ThermometerSnowflake className="h-3.5 w-3.5 shrink-0" />
+                        <ThermometerSnowflake className="h-4 w-4 shrink-0" />
                       ) : (
-                        <Flame className="h-3.5 w-3.5 shrink-0" />
+                        <Flame className="h-4 w-4 shrink-0" />
                       )}
-                      {form.food_arrival_temperature_celsius.toFixed(1)}°C
+                      {form.food_arrival_temperature_celsius.toFixed(1).replace(".", ",")}°C
                     </div>
-                    <div className="mt-0.5 text-[11px] text-[#2f737d] whitespace-nowrap">
-                      {isCold ? "Di bawah 60°C" : "Aman HACCP"}
+                    <div className="mt-0.5 text-[11px] font-medium text-[#3d525c]">
+                      {isCold ? "Dingin (di bawah 60°C)" : "Hangat & aman"}
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-[rgba(6,82,92,0.1)] bg-[#f7f9f8] p-2.5">
-                    <div className="text-[11px] text-[#2f737d] whitespace-nowrap">Biaya/protein</div>
-                    <div className="t-mono mt-1 text-[14px] font-semibold text-[#0d2429] whitespace-nowrap">
+                  <div className="glass-tile p-3">
+                    <div className="text-[11px] font-semibold text-[#3d525c]">
+                      {plainMode ? "Biaya per gram protein" : "Cost / Nutrition Ratio"}
+                    </div>
+                    <div className="t-mono mt-1 text-[16px] font-bold text-[#141414]">
                       Rp{Math.round(result.derived_telemetry.cost_to_nutrition_ratio)}/g
                     </div>
-                    <div className="t-mono mt-0.5 text-[11px] text-[#2f737d] whitespace-nowrap">
-                      Rp{result.derived_telemetry.biaya_per_kkal.toFixed(1)}/kkal
+                    <div className="t-mono mt-0.5 text-[11px] text-[#3d525c]">
+                      Rp{result.derived_telemetry.biaya_per_kkal.toFixed(1).replace(".", ",")}/kkal
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-[rgba(6,82,92,0.1)] bg-[#f7f9f8] p-2.5">
-                    <div className="text-[11px] text-[#2f737d] whitespace-nowrap">Risiko basi</div>
-                    <div className="t-mono mt-1 text-[14px] font-semibold text-[#0d2429] whitespace-nowrap">
-                      {result.derived_telemetry.spoilage_risk_index.toFixed(2)}/10
+                  <div className="glass-tile p-3">
+                    <div className="text-[11px] font-semibold text-[#3d525c]">
+                      {plainMode ? "Risiko cepat basi" : "Indeks Pembusukan"}
                     </div>
-                    <div className="t-mono mt-0.5 text-[11px] text-[#2f737d] whitespace-nowrap">
-                      {result.derived_telemetry.kecepatan_km_jam} km/j
+                    <div className="t-mono mt-1 text-[16px] font-bold text-[#141414]">
+                      {result.derived_telemetry.spoilage_risk_index.toFixed(2).replace(".", ",")}/10
+                    </div>
+                    <div className="t-mono mt-0.5 text-[11px] text-[#3d525c]">
+                      {String(result.derived_telemetry.kecepatan_km_jam).replace(".", ",")} km/j
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Budget Calculator Strip */}
-            <div className="hairline-card p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[rgba(6,82,92,0.08)]">
-                <span className="text-[13.5px] font-semibold text-[#0d2429]">
-                  Kalkulator kebocoran anggaran dapur SPPG
+            {/* HUMANIZER AI PLAIN-LANGUAGE CARD */}
+            {result.humanizer_summary && (
+              <div className="hairline-card p-5">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[rgba(15,82,87,0.1)]">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#0f5257] text-white">
+                      <BookOpenText className="h-3.5 w-3.5" />
+                    </span>
+                    <div>
+                      <h3 className="text-[14.5px] font-bold text-[#141414]">
+                        Ringkasan Bahasa Sederhana (Mudah Dipahami Awam)
+                      </h3>
+                    </div>
+                  </div>
+                  {onTogglePlainMode && (
+                    <button
+                      type="button"
+                      onClick={onTogglePlainMode}
+                      className="rounded-full border border-white/90 bg-white/75 px-3 py-1 text-[11.5px] font-semibold text-[#0f5257] hover:bg-white cursor-pointer"
+                    >
+                      {plainMode ? "Lihat Istilah Teknis" : "Aktifkan Penjelas Awam"}
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-3 space-y-2.5 text-[13.5px] leading-relaxed text-[#141414]">
+                  <p className="font-semibold text-[#0f5257]">
+                    {result.humanizer_summary.headline}
+                  </p>
+                  <p>{result.humanizer_summary.story}</p>
+                  <div className="grid grid-cols-1 gap-2.5 pt-1 md:grid-cols-2">
+                    <div className="glass-field p-3 text-[12.5px]">
+                      <div className="font-semibold text-[#3d525c]">Mengapa angkanya segini?</div>
+                      <div className="mt-1 text-[#141414]">{result.humanizer_summary.cause_plain}</div>
+                    </div>
+                    <div className="glass-field p-3 text-[12.5px]">
+                      <div className="font-semibold text-[#0f5257]">Langkah cepat yang disarankan</div>
+                      <div className="mt-1 font-medium text-[#141414]">
+                        {result.humanizer_summary.action_plain}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* BUDGET IMPACT CALCULATOR */}
+            <div className="hairline-card p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(15,82,87,0.1)] pb-3">
+                <span className="text-[14.5px] font-bold text-[#141414]">
+                  {plainMode
+                    ? "Hitung Perkiraan Anggaran yang Terbuang"
+                    : "Kalkulator kebocoran anggaran dapur SPPG"}
                 </span>
                 <div className="flex items-center gap-3 text-[12px]">
                   <label className="flex items-center gap-1.5">
-                    <span className="text-[#2f737d]">Porsi:</span>
+                    <span className="font-medium text-[#3d525c]">Porsi/hari:</span>
                     <input
                       type="number"
                       min={100}
                       max={20000}
                       value={portionsToEvaluate}
                       onChange={(e) => setPortionsToEvaluate(Math.max(100, Number(e.target.value)))}
-                      className="t-mono w-20 rounded border border-[rgba(6,82,92,0.2)] bg-[#f7f9f8] px-2 py-0.5 text-[12px]"
+                      className="t-mono w-20 rounded-xl border border-[rgba(15,82,87,0.2)] bg-white/85 px-2.5 py-1 text-[12px] font-semibold text-[#141414]"
                     />
                   </label>
                   <label className="flex items-center gap-1.5">
-                    <span className="text-[#2f737d]">Hari:</span>
+                    <span className="font-medium text-[#3d525c]">Hari sekolah:</span>
                     <input
                       type="number"
                       min={1}
                       max={30}
                       value={schoolDays}
                       onChange={(e) => setSchoolDays(Math.max(1, Number(e.target.value)))}
-                      className="t-mono w-14 rounded border border-[rgba(6,82,92,0.2)] bg-[#f7f9f8] px-2 py-0.5 text-[12px]"
+                      className="t-mono w-14 rounded-xl border border-[rgba(15,82,87,0.2)] bg-white/85 px-2.5 py-1 text-[12px] font-semibold text-[#141414]"
                     />
                   </label>
                 </div>
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-lg bg-[#f7f9f8] p-3">
-                  <div className="text-[11.5px] text-[#2f737d]">Terbuang harian ({portionsToEvaluate} porsi)</div>
-                  <div className="t-mono mt-0.5 text-[17px] font-semibold text-[#0d2429]">
+                <div className="glass-field p-3">
+                  <div className="text-[11.5px] font-medium text-[#3d525c]">
+                    Terbuang per hari ({portionsToEvaluate.toLocaleString("id-ID")} kotak)
+                  </div>
+                  <div className="t-mono mt-1 text-[17px] font-bold text-[#141414]">
                     {formatIdr(dailyLossIdr)}
                   </div>
                 </div>
-                <div className="rounded-lg bg-[#f7f9f8] p-3">
-                  <div className="text-[11.5px] text-[#2f737d]">Proyeksi {schoolDays} hari sekolah</div>
-                  <div className="t-mono mt-0.5 text-[17px] font-semibold text-[#b93815]">
+                <div className="glass-field p-3">
+                  <div className="text-[11.5px] font-medium text-[#3d525c]">
+                    Perkiraan {schoolDays} hari sekolah
+                  </div>
+                  <div className="t-mono mt-1 text-[17px] font-bold text-[#b53418]">
                     {formatIdr(monthlyLossIdr)}
                   </div>
                 </div>
-                <div className="rounded-lg border border-[#06525c]/15 bg-[#ebf0ee] p-3">
-                  <div className="text-[11.5px] text-[#06525c]">Potensi hemat (target 10%)</div>
-                  <div className="t-mono mt-0.5 text-[17px] font-semibold text-[#06525c]">
+                <div className="rounded-[14px] border border-[rgba(15,82,87,0.22)] bg-[rgba(15,82,87,0.09)] p-3">
+                  <div className="text-[11.5px] font-semibold text-[#0f5257]">
+                    Uang diselamatkan jika sisa turun ke 10%
+                  </div>
+                  <div className="t-mono mt-1 text-[17px] font-bold text-[#0f5257]">
                     {formatIdr(monthlyPotentialSavingIdr)}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Dual Bottom Diagnostics: TreeSHAP + Mitigation & Pipeline Trace */}
+            {/* BOTTOM DIAGNOSTICS: TreeSHAP + Mitigation + Trace */}
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-              <div className="hairline-card p-4 sm:p-5 xl:col-span-7">
+              <div className="hairline-card p-5 xl:col-span-7">
                 <div className="mb-3">
-                  <h3 className="text-[15px] font-semibold text-[#0d2429]">
-                    Atribusi TreeSHAP lokal
+                  <h3 className="text-[15px] font-bold text-[#141414]">
+                    {plainMode
+                      ? "Faktor Penyebab Angka Prediksi (TreeSHAP)"
+                      : "Atribusi TreeSHAP lokal"}
                   </h3>
-                  <p className="text-[12.5px] text-[#2f737d]">
-                    Kontribusi faktor terhadap selisih prediksi dari rataan nasional 13,33%.
+                  <p className="text-[12.5px] text-[#3d525c]">
+                    {plainMode
+                      ? "Batang merah menaikkan perkiraan sisa makanan; batang hijau menurunkannya."
+                      : "Kontribusi faktor terhadap selisih prediksi dari rataan nasional 13,33%."}
                   </p>
                 </div>
                 <ShapWaterfallSvg
                   baseValue={result.base_value_pct}
                   predictedPct={result.raw_predicted_pct}
                   contributions={result.contributions}
+                  plainMode={plainMode}
                 />
               </div>
 
               <div className="space-y-4 xl:col-span-5">
-                <div className="hairline-card p-4 sm:p-5">
-                  <h3 className="text-[15px] font-semibold text-[#0d2429]">
-                    Rekomendasi aksi SPPG
+                <div className="hairline-card p-5">
+                  <h3 className="text-[15px] font-bold text-[#141414]">
+                    {plainMode ? "Saran Praktis untuk Dapur" : "Rekomendasi aksi SPPG"}
                   </h3>
                   <ul className="mt-2.5 space-y-2">
-                    {result.recommendations.map((rec, idx) => {
+                    {activeRecs.map((rec, idx) => {
                       const isAlert =
                         rec.startsWith("RISIKO") ||
                         rec.startsWith("KRITIS") ||
                         rec.startsWith("TRANSIT") ||
                         rec.startsWith("ZONA") ||
-                        rec.startsWith("AKAR MASALAH");
+                        rec.startsWith("AKAR MASALAH") ||
+                        wastePct >= 15 ||
+                        isCold;
                       return (
                         <li
                           key={idx}
-                          className={`flex items-start gap-2.5 rounded-lg border p-2.5 text-[12.5px] leading-relaxed ${
+                          className={`flex items-start gap-2.5 rounded-2xl border p-3 text-[12.5px] leading-relaxed ${
                             isAlert
-                              ? "border-[#b4532a]/25 bg-[#fbf0ea] text-[#0d2429]"
-                              : "border-[#0f7d45]/25 bg-[#e7f4ec] text-[#0d2429]"
+                              ? "border-[rgba(181,52,24,0.22)] bg-[rgba(255,244,240,0.85)] text-[#141414]"
+                              : "border-[rgba(19,114,66,0.24)] bg-[rgba(235,250,242,0.85)] text-[#141414]"
                           }`}
                         >
                           {isAlert ? (
-                            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#b4532a]" />
+                            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#b53418]" />
                           ) : (
-                            <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0f7d45]" />
+                            <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#137242]" />
                           )}
                           <span>{rec}</span>
                         </li>
@@ -814,18 +898,18 @@ export default function SimulatorPanel({
                   </ul>
                 </div>
 
-                {/* DupeFinder-inspired Engine Trace */}
+                {/* Engine Trace */}
                 <div className="hairline-card p-4">
-                  <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-[#06525c]">
+                  <div className="mb-2 flex items-center gap-2 text-[12px] font-bold text-[#0f5257]">
                     <Terminal className="h-3.5 w-3.5" />
-                    Trace Inferensi Engine
+                    {plainMode ? "Catatan Perhitungan Sistem" : "Trace Inferensi Engine"}
                   </div>
-                  <div className="t-mono space-y-1 rounded-lg bg-[#0d2429] p-3 text-[11.5px] leading-relaxed text-[#c1d0d2]">
+                  <div className="t-mono space-y-1 rounded-2xl bg-[#102528] p-3.5 text-[11.5px] leading-relaxed text-[#c6dada]">
                     <div>&gt; mode: {mode} ({mode === "pra" ? "34 fitur" : "38 fitur"})</div>
-                    <div>&gt; guardrail: DROP_LEAK aktif</div>
-                    <div>&gt; prov_te: &quot;{form.province}&quot; -&gt; klaster {form.regional_cluster}</div>
-                    <div>&gt; cool_rate: {result.derived_telemetry.transit_cooling_rate_c_per_min}°C/mnt</div>
-                    <div className="text-[#f7f9f8]">&gt; selesai: {result.predicted_plate_waste_percentage}% ({result.latency_ms} ms)</div>
+                    <div>&gt; aturan: kolom bocor diblokir</div>
+                    <div>&gt; daerah: &quot;{form.province}&quot; ({form.regional_cluster})</div>
+                    <div>&gt; susut_suhu: {String(result.derived_telemetry.transit_cooling_rate_c_per_min).replace(".", ",")}°C/mnt</div>
+                    <div className="font-semibold text-white">&gt; hasil: {formatPct(result.predicted_plate_waste_percentage)} ({result.latency_ms} ms)</div>
                   </div>
                 </div>
               </div>

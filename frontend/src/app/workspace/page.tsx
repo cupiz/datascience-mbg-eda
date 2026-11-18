@@ -5,7 +5,7 @@ export default function WorkspacePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#f7f9f8] text-[14px] text-[#2f737d]">
+        <div className="flex min-h-screen items-center justify-center bg-[#c3d7e5] text-[14px] font-medium text-[#0f5257]">
           Memuat workspace PlateGuard MBG...
         </div>
       }
