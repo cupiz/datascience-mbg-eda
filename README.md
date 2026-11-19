@@ -1,15 +1,3 @@
----
-title: PlateGuard MBG
-emoji: 🍱
-colorFrom: green
-colorTo: blue
-sdk: docker
-app_port: 7860
-pinned: false
-license: mit
-short_description: Prediksi Sisa Makanan MBG (LightGBM Optuna + SHAP)
----
-
 <p align="center">
   <img src="PlateGuard_MBG_cover.png" alt="PlateGuard MBG — Predictive Plate Waste Intelligence" width="100%" />
 </p>
