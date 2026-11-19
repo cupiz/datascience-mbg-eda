@@ -10,7 +10,12 @@
 </p>
 
 <p align="center">
-  <a href="https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg"><img src="https://img.shields.io/badge/Live_Demo-ModelScope_Studios-0f5257?logo=docker&logoColor=white" alt="Live Demo ModelScope Studios" /></a>
+  <a href="https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg">
+    <img src="https://img.shields.io/badge/COBA_APLIKASI_LIVE-ModelScope_Studios-0f5257?style=for-the-badge&logo=docker&logoColor=white" alt="Coba Aplikasi Live di ModelScope Studios" />
+  </a>
+</p>
+
+<p align="center">
   <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-06525C?logo=nextdotjs&logoColor=white" alt="Next.js 16" /></a>
   <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white" alt="FastAPI" /></a>
   <a href="https://lightgbm.readthedocs.io/"><img src="https://img.shields.io/badge/LightGBM-Optuna_5F_CV-0f5257" alt="LightGBM Optuna" /></a>
@@ -20,16 +25,39 @@
   <a href="#tim-dan-lisensi"><img src="https://img.shields.io/badge/License-MIT-green" alt="License MIT" /></a>
 </p>
 
-> **Coba Aplikasi Live (Tanpa Instalasi):** Uji prediksi sisa makanan, *TreeSHAP*, penjelas Bahasa Awam, dan penjelajah 2.600 sampel holdout langsung lewat **[Plateguard MBG · Studios](https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg)** di ModelScope Studios.
-
 <p align="center">
+  <a href="#coba-aplikasi-live">Aplikasi Live</a> •
   <a href="#ringkasan-masalah-dan-solusi">Masalah dan Solusi</a> •
-  <a href="#temuan-kunci-eda-13000-distribusi">Temuan EDA</a> •
+  <a href="#temuan-kunci-eda-13000-distribusi">Grafik EDA</a> •
   <a href="#rekayasa-fitur-dan-guardrail-anti-leakage">Guardrail Anti-Leakage</a> •
-  <a href="#hasil-benchmark-fase-3-5-fold-cv-dan-holdout-2600">Benchmark Model</a> •
-  <a href="#arsitektur-aplikasi-web-v2">Web App v2</a> •
+  <a href="#hasil-benchmark-fase-3-5-fold-cv-dan-holdout-2600">Benchmark dan SHAP</a> •
   <a href="#panduan-menjalankan-proyek">Quickstart</a>
 </p>
+
+---
+
+## Coba Aplikasi Live
+
+> [!TIP]
+> **Aplikasi sudah berjalan online di ModelScope Studios (`2 vCPU · 8 GB RAM`, Docker Port `7860`, tanpa perlu instalasi):**
+> Uji langsung simulator prediksi sisa piring, penjelasan lokal *TreeSHAP*, narasi Bahasa Awam (`humanizer-id`), serta eksplorasi 38 provinsi dan 2.600 data uji melalui tautan utama berikut:
+>
+> ### [Buka PlateGuard MBG Live → ModelScope Studios (`plateguard-mbg`)](https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg)
+
+<p align="center">
+  <a href="https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg" title="Klik untuk membuka aplikasi live PlateGuard MBG v2 di ModelScope Studios">
+    <img src="App%20UI.png" alt="Tampilan Live Aplikasi PlateGuard MBG v2 — Simulator Pra-Distribusi, Ringkasan Bahasa Sederhana, dan Kurva What-If" width="100%" />
+  </a>
+  <br/>
+  <sub><em>Antarmuka live <a href="https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg">PlateGuard MBG v2 di ModelScope Studios</a> — menampilkan Simulator Pra-Distribusi (34 fitur), Ringkasan Bahasa Sederhana (Awam/Teknis), serta Kurva Sensitivitas What-If 9 titik.</em></sub>
+</p>
+
+| Ruang Kerja Live di Studio | Hal yang Bisa Langsung Dicoba |
+|---|---|
+| **Simulator dan TreeSHAP** | Ubah provinsi, lauk, kalori, durasi, serta suhu tiba (`°C`) lalu pantau dampak rupiah dan air terjun *TreeSHAP* secara instan |
+| **Analitik 38 Provinsi** | Bandingkan peta risiko 3T vs Jawa Metro pada 13.000 catatan dan uji titik scatter langsung ke simulator |
+| **Audit Model dan Holdout** | Bandingkan 7 model CV 5-fold, plot kalibrasi prediksi vs aktual, panel `DROP_LEAK`, dan penjelajah 2.600 sampel uji |
+| **Batch CSV dan API `/docs`** | Unggah jadwal pengiriman massal hingga 100 baris atau uji endpoint FastAPI secara interaktif |
 
 ---
 
@@ -62,18 +90,17 @@ Seluruh temuan berikut dihitung langsung oleh [eda_run.py](eda_run.py) dan disim
   - **Perilaku Jajanan dan Takaran Porsi:** `Prior-Snack-Consumption` mendominasi **`63,43%`** pemicu lapangan, disusul `Excessive-Portion-Size` (`22,40%`), `Sub-Optimal-Arrival-Temperature` (`8,58%`), `Delivery-Transit-Delay` (`4,04%`), dan `Low-Palatability-Menu` (`1,55%`).
 - **Retensi Disengaja atas Pencilan (*Outliers*):** Titik ekstrem IQR seperti `spoilage_risk_index` (`11,22%` baris) dan waktu transit 120 menit pada rute 3T tetap dipertahankan penuh karena merupakan fakta logistik nyata yang paling krusial dideteksi model.
 
-<details>
-<summary><strong>Lihat Cuplikan Grafik EDA dan TreeSHAP Terverifikasi</strong></summary>
+### Grafik Kunci EDA Terverifikasi
 
-| Ketimpangan Risiko per Klaster dan Provinsi | Profil Suhu dan Pembusukan Tiap Tier |
+| Ketimpangan Risiko per Klaster Wilayah | Sebaran Operasional Tiap Tier Kepatuhan |
 |---|---|
 | ![Bermasalah per Klaster](figures/fig09_bermasalah_cluster.png) | ![Box Plot per Tier](figures/fig06_box_per_tier.png) |
 
-| TreeSHAP Global — Pra-Distribusi (34 Fitur) | TreeSHAP Global — Audit Post-Hoc (38 Fitur) |
+| Komposisi Tier per Pemicu Sisa Makanan | Matriks Korelasi Pearson Fitur Numerik |
 |---|---|
-| ![SHAP Bar Pra](figures_fase3/shap_bar_pra.png) | ![SHAP Bar Post-Hoc](figures_fase3/shap_bar_posthoc.png) |
+| ![Driver per Tier](figures/fig10_driver_tier.png) | ![Heatmap Korelasi](figures/fig07_corr_heatmap.png) |
 
-</details>
+*Seluruh 10 grafik hasil eksekusi [eda_run.py](eda_run.py) tersimpan di [figures/](figures/).*
 
 ---
 
@@ -119,6 +146,14 @@ Eksperimen [train.py](train.py) dan [train-kaggle-done.ipynb](train-kaggle-done.
 
 > **Catatan Kejujuran Ilmiah:** Pada mode **Audit Post-Hoc**, `LightGBM (Optuna)` melampaui seluruh target teknis Project Charter (`MAE 2,929 <= 3,0 pp`, `RMSE 3,761 <= 4,5 pp`, `R² 0,551 >= 0,35` — turun **`-34,1%`** galat terhadap baseline). Pada mode **Pra-Distribusi**, model memangkas galat **`-17,7%`**, sedangkan selisih `R² 0,333` terhadap `0,35` mencerminkan **batas alamiah pradistribusi** karena kebiasaan siswa jajan (`63,43%` kasus) memang belum diamati saat armada belum berangkat.
 
+### Penjelasan Fitur Global (*TreeSHAP*)
+
+| Pra-Distribusi (`34` Fitur — Sebelum Berangkat) | Audit Post-Hoc (`38` Fitur — Evaluasi Lapangan) |
+|---|---|
+| ![SHAP Bar Pra](figures_fase3/shap_bar_pra.png) | ![SHAP Bar Post-Hoc](figures_fase3/shap_bar_posthoc.png) |
+
+*Plot arah sebaran (*beeswarm*) untuk kedua skenario tersedia di [figures_fase3/](figures_fase3/).*
+
 ---
 
 ## Arsitektur Aplikasi Web v2
@@ -144,6 +179,10 @@ Empat ruang kerja interaktif di [frontend/](frontend/) dan [api.py](api.py):
 ---
 
 ## Panduan Menjalankan Proyek
+
+### 0. Coba Langsung via Web (Tanpa Instalasi)
+Buka aplikasi produksi yang sudah terpasang di ModelScope Studios:  
+**[https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg](https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg)**
 
 ### 1. Lingkungan Python dan Unduh Dataset
 ```bash
@@ -198,6 +237,7 @@ docker run -p 7860:7860 plateguard-mbg-v2
 ```text
 Proyek_MBG/
 ├── PlateGuard_MBG_cover.png          # Gambar sampul utama repositori
+├── App UI.png                        # Tangkapan layar aplikasi live di ModelScope Studios
 ├── api.py                            # Peladen FastAPI v2 + serving UI statis + TreeSHAP lokal
 ├── humanizer_explainer.py            # Generator penjelasan Bahasa Awam (kaidah apissaj/humanizer-id)
 ├── etl_pipeline.py                   # Pipeline sklearn bebas leakage (ReflectionLog, FeatureBuilder, TE)
@@ -206,7 +246,8 @@ Proyek_MBG/
 ├── build_v2_aggregates.py            # Generator agregat 38 provinsi dan tabel audit holdout
 ├── app.py                            # Dasbor Streamlit v1 (legacy)
 ├── Dockerfile & docker-compose.yml   # Multi-stage Node 20 + Python 3.12-slim (UID 1000, port 7860)
-├── requirements.txt                  # Daftar dependensi Python lengkap
+├── requirements-docker.txt           # Dependensi runtime ramping terkunci (scikit-learn==1.6.1)
+├── requirements.txt                  # Daftar dependensi Python lengkap (pelatihan dan riset)
 ├── frontend/                         # Aplikasi Next.js 16 + Tailwind v4 (Spatial Frosted Glass UI)
 ├── data/processed/                   # Split siap latih, overview_aggregates.json, holdout_audit.csv
 ├── models/                           # Artefak terbaik (.joblib dan .pkl), pipeline, fase3_metrics.json
