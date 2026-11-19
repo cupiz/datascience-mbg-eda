@@ -297,8 +297,9 @@ def main():
         "Iqbal Ahdagita Elbadra (NIM: 26MA41D022)\n"
         "Program Studi Magister Ilmu Komputer, Fakultas Ilmu Komputer, Universitas Amikom Purwokerto\n"
         "Dosen Pengampu: Giat Karyono, M.Kom., Ph.D.  •  E-mail: iqbal.elbadra@mhs.unsoed.ac.id\n"
-        "Repositori Kode: https://github.com/cupiz/datascience-mbg-eda",
-        size=8.8, align="center", space_after=6,
+        "Repositori: https://github.com/cupiz/datascience-mbg-eda  •  "
+        "Live Demo: https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg",
+        size=8.6, align="center", space_after=6,
     )
 
     pra_best_lbl = pra_m["best_model"].replace("[pra] ", "")
@@ -320,10 +321,10 @@ def main():
         f"dari Rp{fmt_id_int(avg_cost)} menjadi Rp{fmt_id_int(eff_cost)} per porsi (+{fmt_id_dec(waste_pct_cost, 1)}% "
         f"atau pemborosan Rp{fmt_id_int(waste_cost)}/porsi). Kesenjangan wilayah tampak nyata ketika "
         f"{fmt_id_dec(cluster_risk['Wilayah 3T Perbatasan & Pedalaman'], 2)}% kiriman zona 3T tercatat bermasalah, "
-        f"berbanding {fmt_id_dec(cluster_risk['Jawa Metropolitan'], 2)}% di Jawa Metropolitan. Hingga kini "
+        f"dibanding {fmt_id_dec(cluster_risk['Jawa Metropolitan'], 2)}% pada klaster Jawa Metropolitan. Hingga kini "
         f"pengukuran sisa piring baru tersedia pascakonsumsi sehingga koreksi dapur selalu terlambat. Riset "
         f"ini membangun sistem PlateGuard MBG v2 berbasis kerangka Team Data Science Process (TDSP) yang membalik "
-        f"alur menjadi prediktif pradistribusi. Pipeline scikit-learn membuktikan lalu memblokir dua sumber kebocoran "
+        f"alur menjadi prediktif pradistribusi. Pipeline scikit-learn membuktikan sekaligus memblokir dua sumber kebocoran "
         f"data: waste_adjusted_effective_cost_idr (selisih aljabar maks Rp{fmt_id_dec(EDA['leak_effective_cost_maxdiff'], 2)}) "
         f"serta bgn_program_compliance_tier (akurasi Random Forest {fmt_id_dec(EDA['rf_cv_acc']*100, 1)}% dan "
         f"lonjakan R² palsu ke {fmt_id_dec(leak_m['r2'], 3)}). Transformasi ColumnTransformer menyatukan Log1p, "
@@ -336,10 +337,10 @@ def main():
         f"dari baseline {fmt_id_dec(EDA['waste_mean_predictor_mae'], 3)} pp; R² {fmt_id_dec(pra_m['R2'], 3)}), sementara "
         f"audit pascakonsumsi ({n_post} fitur) mencapai CV MAE {fmt_id_dec(post_cv['cv_mae_mean'], 3)} pp dan "
         f"Holdout MAE {fmt_id_dec(post_m['MAE'], 3)} pp, RMSE {fmt_id_dec(post_m['RMSE'], 3)} pp, R² {fmt_id_dec(post_m['R2'], 3)}. "
-        f"Interpretabilitas TreeSHAP yang diterjemahkan ke bahasa awam lewat modul penjelas humanizer-id menegaskan peran "
+        f"Interpretabilitas TreeSHAP yang diterjemahkan ke bahasa awam melalui modul penjelas humanizer-id menegaskan peran "
         f"kecukupan kalori serta suhu tiba >= 60 °C dalam menekan sisa makanan, sedangkan kebiasaan jajan (63,43% kasus) "
-        f"menjadi pemicu lapangan utama. Keseluruhan sistem dilacak di MLflow (14 percobaan) lalu diterapkan sebagai "
-        f"antarmuka web Next.js 16 (desain Spatial Frosted Glass) terpadu bersama layanan API FastAPI dan Docker port 7860.",
+        f"menjadi pemicu lapangan utama. Keseluruhan sistem dilacak pada MLflow (14 percobaan) lalu diterapkan sebagai "
+        f"antarmuka web Next.js 16 bersama layanan API FastAPI pada kontainer Docker port 7860 yang tayang aktif di ModelScope Studios.",
         size=8.6, align="justify", space_after=3,
     )
     add_p(
@@ -681,11 +682,24 @@ def main():
     add_sec_heading(doc, "VII. ARSITEKTUR MLOPS DAN PENERAPAN SISTEM PLATEGUARD V2")
     add_p(
         doc,
-        "PlateGuard MBG v2 memadukan antarmuka aplikasi Next.js 16 (statis terintegrasi, gaya visual Spatial Frosted Glass "
-        "dengan palet cerah swap-pastels tanpa keunguan generik), backend FastAPI tunggal, serta modul penjelas bahasa awam "
-        "berbasis kaidah penyuntingan humanizer-id supaya seluruh angka mudah dimengerti pengelola dapur SPPG maupun publik:",
+        "PlateGuard MBG v2 memadukan antarmuka web Next.js 16 statis (tata letak kaca semi-transparan berkejelasan tinggi), "
+        "peladen FastAPI tunggal, serta modul penjelas bahasa awam berkaidah editorial humanizer-id guna menyampaikan "
+        "hasil prediksi secara mudah dipahami pengelola dapur SPPG maupun penelaah teknis. Untuk penerapan awan, bangun "
+        "kontainer multi-tahap Docker (Node 20-alpine ke Python 3.12-slim, port 7860) mengunci versi pustaka melalui "
+        "berkas requirements-docker.txt (scikit-learn==1.6.1, numpy==2.0.2, lightgbm==4.6.0, shap==0.47.2) guna menjamin "
+        "kompatibilitas deserialisasi artefak ColumnTransformer (_RemainderColsList). Aplikasi telah tayang aktif secara "
+        "publik di ModelScope Studios (https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg):",
         first_line_cm=0.35,
     )
+
+    p_ui = os.path.join(BASE, "App UI.png")
+    if os.path.exists(p_ui):
+        add_figure(
+            doc, p_ui,
+            "Gambar 10. Tangkapan layar aplikasi live PlateGuard MBG v2 di ModelScope Studios: simulator pradistribusi, "
+            "ringkasan bahasa sederhana (humanizer-id), dan kurva sensitivitas What-If 9 titik.",
+            width_cm=7.8,
+        )
 
     add_table(
         doc,
@@ -696,10 +710,10 @@ def main():
             ["POST /predict/pra dan /posthoc", "FastAPI + LGBM", f"Prediksi real-time ({n_pra}/{n_post} fitur + provinsi)", "JSON Real-Time"],
             ["POST /api/explain/pra dan /posthoc", "TreeSHAP + Humanizer", "Atribusi TreeSHAP lokal dan ringkasan bahasa awam", "JSON Penjelas"],
             ["POST /api/what-if-curve", "FastAPI + LGBM", "Kurva sensitivitas perubahan suhu, kalori, dan durasi", "JSON 9 Titik"],
-            ["GET /api/overview dan /eda-interactive", "FastAPI + Pandas", "Agregat 38 provinsi, scatter holdout, & SHAP global", "JSON Interaktif"],
+            ["GET /api/overview dan /eda-interactive", "FastAPI + Pandas", "Agregat 38 provinsi, scatter holdout, dan SHAP global", "JSON Interaktif"],
             ["GET /api/holdout-samples", "FastAPI + Pandas", "Filter, urut, serta ekspor CSV 2.600 sampel uji", "JSON / CSV"],
-            ["Antarmuka Web v2 (static/)", "Next.js 16 + Tailwind v4", "UI Spatial Frosted Glass, grafik interaktif & sakelar Awam", "Origin Port 7860/8000"],
-            ["app.py dan Dockerfile", "Streamlit + Docker 3.12", "Dasbor warisan 8501 plus bangun multi-tahap HF Spaces", "Port 7860 dan 8501"],
+            ["Antarmuka Web v2 (static/)", "Next.js 16 + Tailwind v4", "UI Spatial Frosted Glass, grafik interaktif dan sakelar Awam", "Origin Port 7860/8000"],
+            ["app.py dan Dockerfile", "Streamlit + Docker 3.12", "Dasbor Streamlit (8501) dan kontainer live ModelScope Studios", "Port 7860 (live) dan 8501"],
         ],
         widths_cm=[2.6, 1.5, 3.0, 1.7],
         size=6.7,
@@ -732,6 +746,7 @@ def main():
             ["Algoritma dan 5F CV", "6 Model + RF + 5F", "6 Kandidat + per-fold + Optuna", "Tercapai Penuh"],
             ["Pelacakan dan Format", "MLflow + .pkl/.joblib", "14 runs MLflow + .pkl/.joblib", "Tercapai Penuh"],
             ["Guardrail dan XAI", "0 leak + SHAP + Awam", "TE fit-fold + 4 SHAP + Humanizer v2", "Tercapai Penuh"],
+            ["Kontainer dan Cloud Live", "Docker + Web Aktif", "Docker 7860 live di ModelScope Studios", "Tercapai Penuh"],
         ],
         widths_cm=[2.2, 2.1, 2.5, 1.9],
         size=6.7,
@@ -755,16 +770,17 @@ def main():
     add_sub_heading(doc, "B. Keterbatasan Teknis dan Pekerjaan Lanjutan")
     add_p(
         doc,
-        "Seluruh elemen eksperimen Charter maupun sistem penuh PlateGuard v2—pembanding Random Forest, evaluasi 5-Fold CV, target-encoding 38 provinsi, "
-        "artefak berkas model pkl serta joblib, 14 catatan MLflow, aplikasi web Next.js 16 (Desain Spatial Frosted Glass), modul penjelas bahasa awam humanizer_explainer.py, "
-        "dan peladen FastAPI—telah selesai dibangun dan terverifikasi lokal lewat rangkaian uji otomatis serta tangkapan layar peramban. "
-        "Keterbatasan operasional tersisa hanya pada belum dijalankannya bangun citra Docker secara lokal karena ketiadaan Docker Engine di komputer "
-        "pengembang serta belum ditayangkannya tautan awan Hugging Face Spaces secara aktif. Pengembangan lanjutan mencakup sensor suhu IoT dan pencatatan "
-        "riwayat harian tiap dapur SPPG.",
+        "Seluruh elemen eksperimen Charter beserta sistem penuh PlateGuard v2—pembanding Random Forest, validasi silang 5-fold, TargetEncoder 38 provinsi, "
+        "artefak berkas model pkl serta joblib, 14 catatan MLflow, aplikasi web Next.js 16, modul penjelas humanizer_explainer.py, "
+        "peladen FastAPI, hingga bangun kontainer Docker terkunci melalui requirements-docker.txt—telah rampung dan tayang secara publik pada "
+        "ModelScope Studios (https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg). Keterbatasan yang tersisa berpusat pada sifat dataset "
+        "berupa potret sesaat (snapshot) tanpa stempel waktu pengantaran maupun identitas dapur SPPG sehingga dinamika musiman antarminggu belum termodelkan, "
+        "di samping angka kalori serta protein yang berasal dari estimasi perencanaan menu. Pengembangan lanjutan diarahkan pada integrasi sensor suhu "
+        "IoT pada kotak armada serta pencatatan deret waktu harian tiap dapur SPPG.",
         first_line_cm=0.35,
     )
 
-    # IX. KESIMPULAN (no duplicateOptuna phrasing)
+    # IX. KESIMPULAN
     add_sec_heading(doc, "IX. KESIMPULAN")
     add_p(
         doc,
@@ -772,8 +788,8 @@ def main():
         f"menjadi preventif. Melalui guardrail anti-leakage pada pipeline ETL, penyetelan {pra_best_lbl} oleh Optuna meraih MAE "
         f"{fmt_id_dec(pra_m['MAE'], 3)} pp (-{fmt_id_dec(red_pra_pct, 1)}% daripada baseline) pada skenario pradistribusi dan MAE "
         f"{fmt_id_dec(post_m['MAE'], 3)} pp (R² {fmt_id_dec(post_m['R2'], 3)}) pada audit pascamakan yang melampaui seluruh target teknis. "
-        f"Dipadukan bersama transparansi TreeSHAP, penjelas bahasa awam humanizer-id, antarmuka Next.js 16, dan API FastAPI, sistem ini siap "
-        f"membantu pengendalian mutu serta efisiensi anggaran Badan Gizi Nasional.",
+        f"Dipadukan bersama transparansi TreeSHAP, penjelas bahasa awam humanizer-id, antarmuka Next.js 16, serta peladen FastAPI di kontainer "
+        f"Docker ModelScope Studios, sistem ini mendukung pengendalian mutu dan efisiensi anggaran Badan Gizi Nasional secara daring.",
         first_line_cm=0.35,
     )
 

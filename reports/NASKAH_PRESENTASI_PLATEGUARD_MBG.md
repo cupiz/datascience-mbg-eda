@@ -7,6 +7,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 1 — COVER
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Halaman sampul formal berlatar kaca terang cerah (*Spatial Frosted Glass* khas palet PlateGuard `#c3d7e5` dan `#0f5257`), dilengkapi logo **Universitas Amikom Purwokerto** di bagian atas tengah serta garis aksen teal tipis di sisi bawah.
 - **Elemen Teks di Layar:**
   - Header Institusi: **UNIVERSITAS AMIKOM PURWOKERTO · FAKULTAS ILMU KOMPUTER · PROGRAM STUDI MAGISTER ILMU KOMPUTER**
@@ -18,6 +19,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - Kaki Halaman: **Purwokerto · 2026**
 
 ### Narasi Presenter
+
 "Selamat pagi atau siang kepada Bapak Dosen Pengampu beserta rekan-rekan sekalian. Pada kesempatan ini kami mempresentasikan proyek akhir mata kuliah Sains Data berjudul **PlateGuard MBG**, yaitu sistem prediksi sisa makanan pada distribusi Program Makan Bergizi Gratis berbasis *Gradient Boosting Regression* untuk mendukung efisiensi anggaran Badan Gizi Nasional."
 
 ---
@@ -25,6 +27,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 2 — Agenda dan Alur Pembahasan
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Garis alur bernomor **1 sampai 5** tersusun horizontal berbentuk kapsul kaca (*Spatial Glass*) beserta estimasi waktu tiap segmen.
 - **Elemen Teks di Layar:**
   - Judul: **Peta Jalan Presentasi (32 Slide)**
@@ -32,16 +35,18 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **2. Data dan Temuan EDA (Slide 7–15):** Profil `13.000` baris, *guardrail anti-leakage*, risiko wilayah 3T dan suhu `<60°C`, serta retensi pencilan.
   - **3. Rekayasa Fitur dan Pemodelan (Slide 16–21):** *ReflectionLog*, `TargetEncoder` 38 provinsi, CV 5-Fold, Optuna, dan benchmark 7 model.
   - **4. Keterjelaskan dan Bahasa Awam (Slide 22–24):** *TreeSHAP* global dan lokal serta modul `humanizer-id`.
-  - **5. Demo Web v2 dan Kebijakan (Slide 25–32):** Arsitektur Next.js + FastAPI, demo fitur interaktif, serta rekomendasi untuk BGN.
+  - **5. Demo Web v2 dan Kebijakan (Slide 25–32):** Arsitektur Next.js + FastAPI, demo live di ModelScope Studios, serta rekomendasi untuk BGN.
 
 ### Narasi Presenter
-"Presentasi dibagi menjadi lima alur utama: mulai dari konteks pemborosan anggaran pada Program MBG, temuan kritis selama eksplorasi data termasuk pembuktian kebocoran data, metode pemodelan tanpa bocoran lintas lipatan, keterjelaskan *TreeSHAP* bersama terjemahan bahasa awam, hingga demonstrasi aplikasi web PlateGuard MBG v2 dan rekomendasi kebijakan."
+
+"Presentasi dibagi menjadi lima alur utama: mulai dari konteks pemborosan anggaran pada Program MBG, temuan kritis selama eksplorasi data termasuk pembuktian kebocoran data, metode pemodelan tanpa bocoran lintas lipatan, keterjelaskan *TreeSHAP* beserta terjemahan bahasa awam, hingga demonstrasi live aplikasi web PlateGuard MBG v2 di ModelScope Studios dan rekomendasi kebijakan."
 
 ---
 
 ## Slide 3 — Konteks Kebijakan dan Skala Operasional MBG 2026
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Peta ringkas sebaran nasional 38 provinsi di kiri dan tiga kartu skala operasi di kanan.
 - **Elemen Teks di Layar:**
   - Judul: **Intervensi Nutrisi Berskala Nasional Melalui Dapur SPPG**
@@ -50,6 +55,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Rp308,8 Miliar:** Total nilai biaya harian teramati pada `13.000` catatan distribusi nasional (`rata-rata biaya porsi Rp13.526`).
 
 ### Narasi Presenter
+
 "Program Makan Bergizi Gratis di bawah Badan Gizi Nasional menyalurkan jutaan porsi harian melalui dapur SPPG yang tersebar di 38 provinsi. Pada skala pembiayaan sebesar itu, keberhasilan program bukan hanya diukur dari jumlah kotak makan yang terkirim dari dapur, melainkan seberapa banyak makanan yang benar-benar masuk menjadi asupan gizi penerima."
 
 ---
@@ -57,6 +63,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 4 — Persoalan Bisnis: Sisa Makanan Menggerus Efisiensi Anggaran
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Perbandingan dua batang biaya vertikal yang kontras (**Pagu Produksi Rp13.526** melawan **Biaya Efektif Nyata Rp15.677**) beserta kartu penghematan.
 - **Elemen Teks di Layar:**
   - Judul: **Dampak Finansial Nyata dari Sisa Piring (*Plate Waste*)**
@@ -65,6 +72,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Nilai 1 Poin Persentase:** Setiap penurunan **1 pp** sisa makanan menghemat sekitar **`Rp135`** biaya efektif pada tiap porsi.
 
 ### Narasi Presenter
+
 "Data operasional mengungkap rata-rata sisa makanan di piring mencapai **13,34%**, dengan kasus paling ekstrem hingga **37,7%**. Apabila makanan tersisa, anggaran yang dikeluarkan per kalori yang benar-benar dimakan ikut melambung. Biaya produksi rata-rata **Rp13.526** per porsi membengkak menjadi **Rp15.677**, atau terbuang sekitar **Rp2.151** setiap kotak makan. Setiap satu poin persentase sisa yang berhasil ditekan berpotensi menghemat sekitar **Rp135** per porsi."
 
 ---
@@ -72,6 +80,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 5 — Celah Waktu Keputusan (*Reaktif vs Preventif*)
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Diagram perbandingan dua alur panah horizontal: baris atas alur lama berwarna merah bata, baris bawah alur **PlateGuard MBG** berwarna teal.
 - **Elemen Teks di Layar:**
   - Judul: **Menggeser Tata Kelola dari Reaktif Pascamakan ke Preventif Pradistribusi**
@@ -79,6 +88,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Solusi PlateGuard (Preventif):** Input Rencana Kirim → **Prediksi Risiko dan Penyebab (< 100 ms)** → Koreksi Porsi / Wadah Termal / Jadwal → Pengiriman Lebih Tepat Sasaran.
 
 ### Narasi Presenter
+
 "Kelemahan tata kelola selama ini terletak pada urutan waktu pengambilan keputusan. Dapur baru mengetahui tingkat sisa makanan sesudah jam istirahat makan berakhir, yakni saat makanan sudah terlanjur dibuang. PlateGuard MBG membalik urutan tersebut agar pengelola dapur mampu mengukur risiko pemborosan *sebelum* armada berangkat dari dapur."
 
 ---
@@ -86,6 +96,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 6 — Rumusan Masalah, Tipe Tugas Regresi, dan Target Project Charter
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Dua kotak terstruktur berdampingan: sisi kiri memuat sasaran bisnis; sisi kanan menampilkan ambang metrik evaluasi teknis Project Charter.
 - **Elemen Teks di Layar:**
   - Judul: **Rumusan Masalah dan Sasaran Keberhasilan Terukur**
@@ -95,13 +106,15 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Target Charter (CV 5-Fold Bebas Bocoran):** `MAE <= 3,0 pp`, `RMSE <= 4,5 pp`, dan `R² >= 0,35`, serta melampaui Ridge dan bersaing dengan Random Forest.
 
 ### Narasi Presenter
-"Sesuai dokumen Project Charter, proyek ini ditetapkan sebagai pemodelan **regresi kontinu** terhadap persentase sisa piring. Kolom tier kepatuhan empat kelas tetap dicatat hanya sebagai konteks analisis mutu program. Secara teknis, model wajib mengalahkan *mean-predictor* ber-MAE `4,443` poin persentase dengan target sasaran `MAE <= 3,0`, `RMSE <= 4,5`, dan `R² >= 0,35` secara jujur."
+
+"Sesuai dokumen Project Charter, proyek ini ditetapkan sebagai pemodelan **regresi kontinu** terhadap persentase sisa piring. Kolom tier kepatuhan empat kelas tetap dicatat hanya sebagai konteks analisis mutu program. Secara teknis, model wajib mengalahkan *mean-predictor* ber-MAE `4,443` poin persentase dengan target sasaran `MAE <= 3,0`, `RMSE <= 4,5`, dan `R² >= 0,35` tanpa kebocoran data."
 
 ---
 
 ## Slide 7 — Metodologi TDSP dan Profil Dataset Telemetri MBG 2026
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Bagan siklus *Team Data Science Process* (TDSP) pada setengah atas dan tabel ringkas struktur 26 kolom dataset di setengah bawah.
 - **Elemen Teks di Layar:**
   - Judul: **Alur Kerja TDSP dan Anatomi Dataset Nasional**
@@ -111,6 +124,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Kepatuhan UU PDP No. 27/2022:** Seluruh entitas memakai pengenal hash anonim `ID_MBG_*` tanpa data pribadi siswa.
 
 ### Narasi Presenter
+
 "Pengerjaan proyek mengikuti tahapan standar TDSP dari Microsoft dengan satu penyusun merangkap peran Data Scientist, Data Engineer, dan MLOps. Kami memakai dataset telemetri nasional 2026 berisi **13.000 baris dan 26 kolom**. Kolom teks dokumentasi berantai tidak dimasukkan sebagai prediktor, dan seluruh identitas siswa terlindungi karena data hanya memuat kode pengiriman anonim."
 
 ---
@@ -118,6 +132,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 8 — Pemeriksaan Kualitas Data: 0 Nilai Kosong dan Catatan Kurasi
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Sisi kiri menampilkan gambar penuh [`figures/fig01_missing.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig01_missing.png); sisi kanan merangkum hasil audit kelengkapan beserta catatan kehati-hatian produksi.
 - **Elemen Teks di Layar:**
   - Judul: **Kelengkapan 100%: Properti Kurasi vs Kesiapan Produksi**
@@ -126,13 +141,15 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Transparansi Ilmiah:** Kelengkapan sempurna tersebut merupakan efek kurasi penyedia dataset (`Cohen's Kappa 0,9203` dan *denoising Cleanlab*) sehingga pipeline produksi tetap menyiapkan strategi imputasi median/modus dan KNN/MICE pada masa depan.
 
 ### Narasi Presenter
-"Sebagaimana tampak pada Gambar 4.1 di kiri, seluruh 26 kolom tercatat nol nilai hilang dan nol duplikat. Meskipun demikian, kami menegaskan sikap kritis dalam laporan EDA: nol *missing value* ini berasal dari proses kurasi penyedia data. Oleh sebab itu, arsitektur pipeline tetap menyiapkan mekanisme imputasi apabila sistem menerima formulir tidak lengkap di lapangan nyata."
+
+"Sebagaimana tampak pada Gambar 4.1 di kiri, seluruh 26 kolom tercatat nol nilai hilang dan nol duplikat. Meskipun demikian, kelengkapan mutlak tersebut berasal dari kurasi penyedia data, bukan jaminan lapangan bebas celah. Oleh karena itu, arsitektur pipeline tetap menyiapkan mekanisme imputasi apabila sistem menerima formulir tidak lengkap pada kondisi operasional nyata."
 
 ---
 
 ## Slide 9 — Audit Guardrail Kebocoran Data (*DROP_LEAK*)
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Dua kartu bukti kebocoran beraksen merah bata di atas dan satu kartu hasil pemblokiran (`R²` turun dari `0,682` palsu menjadi valid) di bawah.
 - **Elemen Teks di Layar:**
   - Judul: **Membuktikan dan Memblokir Dua Sumber Kebocoran Target**
@@ -141,6 +158,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Aturan Keras `etl_pipeline.py`:** Kedua kolom bocor bersama `confidence_score`, narasi CoT, dan `distribution_id` wajib diblokir sebelum pemisahan data uji.
 
 ### Narasi Presenter
+
 "Temuan kebocoran data menjadi pilar integritas terpenting proyek ini. Pertama, kolom biaya efektif ternyata turunan aljabar langsung dari target sisa piring dengan selisih maksimal di seluruh 13.000 baris hanya Rp0,50 akibat pembulatan. Kedua, kolom tier kepatuhan BGN disusun memakai batas sisa 20–30% yang mendongkrak `R²` semu ke `0,682`. Pipeline kami menolak skor palsu tersebut dengan memblokir kedua fitur lewat aturan `DROP_LEAK`."
 
 ---
@@ -148,6 +166,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 10 — Profil Kategori Program dan Ketimpangan Kelas Kepatuhan
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Grafik penuh [`figures/fig03_bar_kategorikal.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig03_bar_kategorikal.png) di tengah dengan 4 poin sorotan proporsi di bagian bawah.
 - **Elemen Teks di Layar:**
   - Judul: **Komposisi Sasaran, Lauk Protein, Moda Kirim, dan Mutu**
@@ -156,6 +175,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Lauk dan Armada Utama:** Daging Ayam Broiler (`35,6%`) mendominasi protein; Motor Listrik/Roda Tiga Box (`4.527` perjalanan) mendominasi armada.
 
 ### Narasi Presenter
+
 "Sebelum masuk ke pemodelan, grafik enam panel ini merangkum komposisi seluruh atribut kategori pada 13.000 pengiriman. Hampir seperempat atau **24,0%** distribusi masuk kategori bermasalah mutu. Kelompok penerima terbesar ialah siswa SD sebesar 41,8% porsi nasional, sementara protein terbanyak berupa daging ayam broiler dan pengantaran paling lazim memakai motor box."
 
 ---
@@ -163,6 +183,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 11 — Temuan EDA 1: Jurang Ketimpangan Geografis Wilayah 3T
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Grafik [`figures/fig09_bermasalah_cluster.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig09_bermasalah_cluster.png) di kiri; tabel peringkat 8 provinsi teratas dan pembanding terendah di kanan.
 - **Elemen Teks di Layar:**
   - Judul: **Wilayah 3T Bermasalah 3,4 Kali Lebih Tinggi Dibanding Jawa Metro**
@@ -175,6 +196,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Pembanding Paling Terkendali:** Banten (**16,3%**) dan Maluku Utara (**18,9%**).
 
 ### Narasi Presenter
+
 "Kesenjangan infrastruktur antardaerah terlihat tajam pada grafik di sebelah kiri. Di Jawa Metropolitan, tingkat pengiriman bermasalah berada di angka 13,82%. Namun, di wilayah 3T angkanya melompat menjadi **47,52%**, atau hampir tiga setengah kali lipat lebih tinggi. Pada tingkat provinsi, Kalimantan Utara mencapai 51,3% bermasalah dan diikuti empat provinsi di Papua serta Nusa Tenggara Timur di atas 42%."
 
 ---
@@ -182,6 +204,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 12 — Temuan EDA 2: Efek Ambang Aman Suhu Tiba `60 °C`
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Diagram kotak [`figures/fig06_box_per_tier.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig06_box_per_tier.png) di kiri dan kartu kontras rasio risiko `5,1x` pada batas HACCP `60 °C` di kanan.
 - **Elemen Teks di Layar:**
   - Judul: **Batas Kritis HACCP `60 °C`: Risiko Melonjak 5,1 Kali Saat Dingin**
@@ -191,6 +214,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Profil Tiap Tier (`fig06`):** Dari *Exemplary* ke *Non-Compliant*, rata-rata suhu tiba anjlok dari **`66,6 °C`** menjadi **`38,1 °C`**, sementara indeks pembusukan melonjak dari **`1,61`** ke **`9,33`** dan waktu jalan naik dari `18,4` ke `78,2` menit.
 
 ### Narasi Presenter
+
 "Jika ditanya satu indikator lapangan paling tajam penentu kualitas distribusi, jawabannya ialah suhu makanan saat tiba di sekolah. Menurut standar keamanan pangan HACCP, makanan hangat siap santap harus terjaga minimal 60 derajat Celsius. Data membuktikan kiriman yang tiba dingin di bawah 60 derajat mencatat tingkat bermasalah **63,7%**, lebih dari lima kali lipat dibandingkan makanan hangat sebesar **12,5%**. Pada diagram kotak, pemisahan kelas menurut suhu dan indeks pembusukan tampak sangat tegas."
 
 ---
@@ -198,6 +222,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 13 — Temuan EDA 3: Pemicu Lapangan (*Driver*) dan Perilaku Siswa
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Grafik penuh [`figures/fig10_driver_tier.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig10_driver_tier.png) di kiri dan rincian pangsa lima pemicu sisa makanan di kanan.
 - **Elemen Teks di Layar:**
   - Judul: **63,43% Masalah Lapangan Terjadi Karena Jajanan Sebelum Jam Makan**
@@ -209,13 +234,15 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
     4. `Delivery-Transit-Delay`: **`4,04%`** | 5. `Low-Palatability-Menu`: **`1,55%`**
 
 ### Narasi Presenter
-"Diagram ini mengungkap sisi perilaku penerima yang jarang terukur secara logistik murni. Ternyata pemicu paling sering muncul ialah siswa sudah kenyang jajan sebelum makan sebesar **63,43%**, disusul takaran porsi terlalu besar sebesar **22,40%**. Meskipun masalah suhu tiba yang dingin hanya terjadi pada 8,58% catatan, seluruh kasus pada kategori suhu dingin itu berujung bermasalah dan menyumbang 69,3% kegagalan mutu terparah."
+
+"Diagram ini mengungkap sisi perilaku penerima yang jarang terukur secara logistik murni. Data pemicu lapangan memperlihatkan bahwa kebiasaan jajan siswa sebelum makan menduduki urutan terbanyak sebesar **63,43%**, disusul takaran porsi berlebih sebesar **22,40%**. Meskipun masalah suhu tiba yang dingin hanya terjadi pada 8,58% catatan, seluruh kasus pada kategori suhu dingin itu berujung bermasalah dan menyumbang 69,3% kegagalan mutu terparah."
 
 ---
 
 ## Slide 14 — Eksplorasi Distribusi Numerik (*Skewness* dan *Kurtosis*)
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Grafik 9 histogram [`figures/fig02_hist_kde.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig02_hist_kde.png) mengisi area utama; tabel nilai kecondongan lima fitur `|skew| > 1` di sisi kanan.
 - **Elemen Teks di Layar:**
   - Judul: **Asimetri Distribusi Operasional: Ekor Panjang Logistik vs Suhu Tiba**
@@ -224,6 +251,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Implikasi Statistik:** Uji normalitas tidak terpenuhi pada fitur logistik, memandu pemilihan uji korelasi peringkat Spearman dan model berbasis pohon.
 
 ### Narasi Presenter
+
 "Kesembilan histogram KDE ini memperlihatkan bentuk sebaran variabel numerik kami. Tiga atribut logistik miring tajam ke kanan karena sebagian besar rute Jawa berjarak dekat, sedangkan rute 3T membentuk ekor panjang. Sebaliknya, suhu makanan tiba miring tajam ke kiri. Kondisi tidak normal ini menuntut perlakuan transformasi berbeda serta menegaskan perlunya model nonparametrik berbasis pohon keputusan."
 
 ---
@@ -231,6 +259,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 15 — Analisis dan Keputusan Retensi Pencilan (*Outliers*)
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Gambar [`figures/fig08_outlier_box.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig08_outlier_box.png) di kiri dan panel justifikasi domain (*Mengapa Dipertahankan?*) di kanan.
 - **Elemen Teks di Layar:**
   - Judul: **Retensi Pencilan: Rute Terpencil Bukan Kesalahan Input**
@@ -242,6 +271,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Keputusan Rekayasa:** **Seluruh pencilan dipertahankan** karena konsisten antarvariabel (jarak 35 km + transit 120 menit + suhu rendah muncul bersamaan di wilayah 3T). Menghapusnya sama dengan membutakan model terhadap kasus paling penting dideteksi.
 
 ### Narasi Presenter
+
 "Banyak alur data pemula langsung membuang titik pencilan secara mekanis. Pada dataset ini, pemeriksaan IQR memang menandai lebih dari sebelas persen baris indeks pembusukan sebagai pencilan. Namun, setelah dicek silang antarkolom, titik ekstrem tersebut saling konsisten sebagai pengiriman nyata berdurasi hingga dua jam di daerah perbatasan. Oleh karena itu, seluruh pencilan dipertahankan utuh supaya model tetap peka mendeteksi risiko tinggi di wilayah 3T."
 
 ---
@@ -249,6 +279,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 16 — Penanganan Kecondongan via Modul *ReflectionLog*
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Gambar perbandingan [`figures/fig04_log_transform.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig04_log_transform.png) di bagian atas/kiri disertai tabel perbandingan angka kecondongan sebelum, sesudah `log1p`, dan sesudah *ReflectionLog*.
 - **Elemen Teks di Layar:**
   - Judul: **Solusi *ReflectionLog* Saat `log1p` Gagal Memperbaiki Suhu**
@@ -257,13 +288,15 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Transformator Kustom `ReflectionLog` (`etl_pipeline.py`):** Menerapkan $\ln(\max_{\text{train}}(X_{\text{suhu}}) + 1 - \min(x, \max_{\text{train}}(X_{\text{suhu}})))$ memakai $\max_{\text{train}} = 72,0^\circ\text{C}$, menurunkan kemencengan suhu ke **`-0,087`**.
 
 ### Narasi Presenter
-"Hasil eksperimen transformasi di Gambar 6.1 memberikan pembelajaran teknis berharga. Penerapan `log1p` menormalkan variabel jarak dan durasi transit, tetapi malah merusak distribusi suhu tiba menjadi minus 2,771 karena ekornya berada di sisi kiri. Melalui transformator `ReflectionLog` yang mempelajari batas maksimum suhu hanya dari himpunan latih, kemencengan suhu berhasil dinormalkan menjadi minus 0,087."
+
+"Hasil eksperimen transformasi pada Gambar 6.1 memperlihatkan konsekuensi pemilihan metode transformasi terhadap bentuk sebaran. Penerapan `log1p` menormalkan variabel jarak dan durasi transit, tetapi justru memperburuk kecondongan suhu tiba menjadi minus 2,771 karena ekornya berada pada sisi kiri. Melalui transformator `ReflectionLog` yang mempelajari batas maksimum suhu hanya dari himpunan latih, kemencengan suhu berhasil dinormalkan menjadi minus 0,087."
 
 ---
 
 ## Slide 17 — Penskalaan, Pengkodean Kategori, dan Rekayasa Fitur Domain
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Bagan alur `ColumnTransformer` di sisi kiri yang memetakan 6 cabang transformasi (`num`, `log`, `temp`, `bin`, `cat`, `prov_te`) dan 3 fitur baru di kanan.
 - **Elemen Teks di Layar:**
   - Judul: **Arsitektur Prapemrosesan `etl_pipeline.py` (`ColumnTransformer`)**
@@ -272,6 +305,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **3 Fitur Rekayasa (`FeatureBuilder`):** `biaya_per_kkal` (`rataan Rp20,3/kkal`), `kecepatan_km_jam` (`rataan 16,5 km/jam`), serta `interaksi_suhu_transit`.
 
 ### Narasi Presenter
+
 "Seluruh transformasi tersebut kami bungkus ke dalam `ColumnTransformer` yang reprodusibel pada `etl_pipeline.py`. Selain penskalaan standar dan pembagian kuartil jarak, `FeatureBuilder` menurunkan fitur domain seperti biaya per kilokalori dan laju kecepatan armada. Khusus atribut 38 provinsi, kami memakai `TargetEncoder` lima lipatan agar model mengenali ciri daerah tanpa membebani dimensi matriks."
 
 ---
@@ -279,6 +313,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 18 — Korelasi Multivariat dan Dasar Pemilihan Model Taklinear
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Duet gambar [`figures/fig05_scatter.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig05_scatter.png) (kiri) dan [`figures/fig07_corr_heatmap.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures/fig07_corr_heatmap.png) (kanan).
 - **Elemen Teks di Layar:**
   - Judul: **Hubungan Bivariat, Kolineritas `0,928`, dan Sinyal Terpencar**
@@ -287,6 +322,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Kesimpulan Algoritmik:** Tidak ada satu prediktor dominan tunggal dan interaksi antarfitur bersifat taklinear, mengunggulkan *Gradient Boosted Decision Trees*.
 
 ### Narasi Presenter
+
 "Diagram pencar dan matriks korelasi ini menegaskan dua hal penting. Pertama, jarak dan waktu transit berkorelasi `0,928`, yang berisiko menggoyahkan bobot model linear apabila tidak ditangani. Kedua, sinyal penentu sisa piring tersebar di berbagai aspek gizi dan logistik mulai dari kalori sebesar minus `0,372` hingga suhu tiba minus `0,252`. Inilah alasan algoritma pohon peningkatan gradien menjadi pilihan paling tepat."
 
 ---
@@ -294,6 +330,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 19 — Desain Eksperimen Tanpa Kebocoran dan Dua Skenario Uji
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Bagan partisi `13.000` baris → `10.400 latih (5-Fold CV)` + `2.600 holdout`, dilengkapi kotak hasil uji ablasi `TargetEncoder` di kanan bawah.
 - **Elemen Teks di Layar:**
   - Judul: **Protokol Evaluasi Ketat (`train.py` & `train-kaggle-done.ipynb`)**
@@ -303,6 +340,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Pelacakan:** **6 model Charter + Optuna TPE (30 trial × 5 fold)**, tercatat **14 percobaan** pada MLflow.
 
 ### Narasi Presenter
+
 "Dalam protokol eksperimen di `train.py`, data dibagi mengikuti kuartil target sehingga rataan sisa piring antara gugus latih dan uji identik di angka 13,3%. Seluruh transformer termasuk `TargetEncoder` 38 provinsi di-*fit* secara ketat di dalam setiap lipatan 5-fold agar nol kebocoran dari data validasi. Kami membandingkan enam algoritma Charter bersama model hasil optimasi Bayesian Optuna 30 trial dan merekam semua percobaannya di MLflow."
 
 ---
@@ -310,19 +348,23 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 20 — Hasil Benchmark Skenario Pradistribusi (34 Fitur — Sebelum Kirim)
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Tabel lengkap 7 model skenario **Pra (34 fitur)** dari `models/fase3_metrics.json` di kiri dan penjelasan batas alamiah pradistribusi di kanan.
 - **Elemen Teks di Layar:**
   - Judul: **Benchmark Pradistribusi: Pengurangan Galat `-17,7%` Sebelum Truk Jalan**
+
   - | Model | CV MAE 5F | Holdout MAE | RMSE | R² |
-    |---|---|---|---|---|
+    | --- | --- | --- | --- | --- |
     | **`LightGBM (Optuna)`** | **`3,604±0,042`** | **`3,658`** | **`4,586`** | **`0,333`** |
     | `RandomForest` | `3,636±0,040` | `3,658` | `4,604` | `0,327` |
     | `HistGradientBoosting` | `3,792±0,036` | `3,660` | `4,592` | `0,331` |
     | `LightGBM` / `XGBoost` / `Ridge` | `3,683–3,710` | `3,706–3,720` | `4,647–4,672` | `0,307–0,315` |
     | `MeanPredictor` (Baseline) | `4,443±0,043` | `4,447` | `5,613` | `-0,000` |
+
   - **Analisis Jujur:** Memangkas galat `-17,7%` daripada baseline; selisih `R² 0,333` terhadap `0,35` mencerminkan **batas alamiah** karena perilaku jajan siswa (`63,43%` kasus) belum terjadi saat pagi hari sebelum pengiriman.
 
 ### Narasi Presenter
+
 "Pada skenario Pradistribusi yang hanya memakai 34 fitur awal sebelum armada berangkat, **LightGBM Optuna** unggul secara konsisten di validasi silang 5-fold (`CV MAE 3,604`) dan meraih Holdout `MAE 3,658 pp`, `RMSE 4,586 pp`, serta `R² 0,333`—mengungguli `RandomForest` di RMSE dan R², sekaligus menekan kesalahan 17,7% dari baseline. Selisih tipis menuju R² 0,35 terjadi secara alami karena faktor perilaku jajan anak di sekolah baru muncul setelah makan berlangsung."
 
 ---
@@ -330,26 +372,31 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 21 — Hasil Benchmark Audit Post-Hoc (38 Fitur) dan Kestabilan 5-Fold
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Tabel 7 model skenario **Post-Hoc (38 fitur)** di kiri dan matriks kestabilan **Fold 1–5** + verifikasi lencana lulus semua target di kanan.
 - **Elemen Teks di Layar:**
   - Judul: **Audit Post-Hoc: `LightGBM (Optuna)` Melampaui Seluruh Target Charter**
+
   - | Model | CV MAE 5F | Holdout MAE | RMSE | R² |
-    |---|---|---|---|---|
+    | --- | --- | --- | --- | --- |
     | **`LightGBM (Optuna)`** | **`2,905±0,046`** | **`2,929`** | **`3,761`** | **`0,551`** |
     | `HistGradientBoosting` | `3,046±0,026` | `2,940` | `3,773` | `0,548` |
     | `RandomForest` | `2,943±0,038` | `2,962` | `3,797` | `0,542` |
     | `LightGBM` / `XGBoost` | `2,964–2,984` | `2,977–2,979` | `3,806–3,819` | `0,537–0,540` |
     | `Ridge` (Linear Pembanding) | `2,997±0,033` | `3,018` | `3,892` | `0,519` |
-  - **Capaian Charter:** **`MAE 2,929 <= 3,0`** (`-34,1%` vs baseline), **`RMSE 3,761 <= 4,5`**, **`R² 0,551 >= 0,35`**. Kinerja 5 lipatan CV sangat stabil di rentang **`2,848–2,959 pp`**.
+
+  - **Capaian Charter:** **`MAE 2,929 <= 3,0`** (`-34,1%` vs baseline), **`RMSE 3,761 <= 4,5`**, **`R² 0,551 >= 0,35`**. Kinerja 5 lipatan CV konsisten pada rentang **`2,848–2,959 pp`**.
 
 ### Narasi Presenter
-"Ketika faktor pengamatan pascamakan disertakan pada skenario Audit Post-Hoc dengan 38 fitur, seluruh target teknis Project Charter terlampaui dengan meyakinkan. **LightGBM Optuna** mencatat Holdout **`MAE 2,929`**, **`RMSE 3,761`**, dan **`R² 0,551`**, atau 34,1% lebih akurat daripada baseline. Kami mencatat pula temuan teknis unik pada HistGradientBoosting bahwa parameter bawaan `early_stopping='auto'` hanya aktif pada gugus latih penuh 10.400 baris, bukan lipatan CV 8.320 baris."
+
+"Ketika faktor pengamatan pascamakan disertakan pada skenario Audit Post-Hoc dengan 38 fitur, seluruh target teknis Project Charter terlampaui. **LightGBM Optuna** mencatat Holdout **`MAE 2,929`**, **`RMSE 3,761`**, dan **`R² 0,551`**, atau 34,1% lebih akurat daripada baseline. Kami mencatat pula temuan teknis pada HistGradientBoosting bahwa parameter bawaan `early_stopping='auto'` hanya aktif pada gugus latih penuh 10.400 baris, bukan lipatan CV 8.320 baris."
 
 ---
 
 ## Slide 22 — Interpretabilitas *TreeSHAP*: Skenario Pradistribusi
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Kiri memuat [`figures_fase3/shap_beeswarm_pra.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures_fase3/shap_beeswarm_pra.png); kanan memuat [`figures_fase3/shap_bar_pra.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures_fase3/shap_bar_pra.png).
 - **Elemen Teks di Layar:**
   - Judul: **TreeSHAP Pradistribusi: Apa yang Mendorong Sisa Sebelum Kirim?**
@@ -358,6 +405,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Nilai Kalibrasi Provinsi:** `TargetEncoder` provinsi menangkap keragaman lokal di seluruh 38 provinsi selain efek zona 3T.
 
 ### Narasi Presenter
+
 "Untuk membuka kotak hitam model sebelum pengantaran berangkat, grafik *TreeSHAP* menunjukkan peran besar jenjang usia penerima, rasio biaya terhadap energi, kecukupan kalori menu, serta penurunan suhu makanan tiba. Titik merah pada suhu rendah bergeser tajam ke sisi kanan sumbu SHAP, memberi sinyal dini bagi dapur untuk memperbaiki kemasan kotak hangat sebelum makanan dikirim."
 
 ---
@@ -365,6 +413,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 23 — Interpretabilitas *TreeSHAP*: Skenario Audit Post-Hoc
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Kiri memuat [`figures_fase3/shap_beeswarm_posthoc.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures_fase3/shap_beeswarm_posthoc.png); kanan memuat [`figures_fase3/shap_bar_posthoc.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/figures_fase3/shap_bar_posthoc.png).
 - **Elemen Teks di Layar:**
   - Judul: **TreeSHAP Post-Hoc: Memisahkan Tanggung Jawab Dapur dan Sekolah**
@@ -373,6 +422,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Keuntungan Auditor:** BGN bisa membedakan distribusi boros karena makanan dingin (tanggung jawab logistik SPPG) vs anak kenyang jajan (koordinasi kantin sekolah).
 
 ### Narasi Presenter
+
 "Pada skenario Post-Hoc di slide ini, begitu catatan pemicu sekolah ikut dievaluasi, pengaruh kebiasaan siswa jajan mendominasi posisi teratas dalam memengaruhi persentase sisa piring. Temuan SHAP ini bernilai strategis bagi auditor BGN karena dapat membedakan apakah sisa makanan berasal dari suhu makanan yang dingin di perjalanan atau kebijakan jam buka kantin di sekolah."
 
 ---
@@ -380,6 +430,7 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
 ## Slide 24 — Modul *Humanizer AI* (`humanizer-id`): Menerjemahkan ML ke Bahasa Awam
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Kiri menunjukkan potongan JSON mentah (`SHAP +2,07 pp`, `base 13,33%`); kanan menunjukkan tampilan kartu **Ringkasan Bahasa Sederhana (Mudah Dipahami Awam)** di PlateGuard v2.
 - **Elemen Teks di Layar:**
   - Judul: **Humanizer Bahasa Awam: Data Sains yang Bisa Dibaca Kepala Dapur**
@@ -388,44 +439,51 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Sakelar Ganda UI (`Awam | Teknis`):** Satu klik di bilah atas aplikasi bagi masyarakat umum maupun penelaah akademis.
 
 ### Narasi Presenter
-"Tantangan utama penerapan sains data di sektor publik ialah jembatan bahasa. Kepala dapur SPPG tidak terbiasa membaca `MAE`, `cost_to_nutrition_ratio`, maupun nilai Shapley. Karena itu kami membangun modul `humanizer_explainer.py` berdasarkan prinsip editorial `humanizer-id` untuk menerjemahkan setiap hasil prediksi dan faktor SHAP menjadi kalimat aktif sehari-hari beserta taksiran rupiah yang terbuang. Bagi keperluan audit akademik, pengguna tinggal menekan sakelar `Teknis` di bilah atas."
+
+"Tantangan utama penerapan sains data di sektor publik ialah jembatan bahasa. Kepala dapur SPPG tidak terbiasa membaca `MAE`, `cost_to_nutrition_ratio`, maupun nilai Shapley. Oleh karena itu, kami membangun modul `humanizer_explainer.py` berdasarkan prinsip editorial `humanizer-id` untuk menerjemahkan setiap hasil prediksi dan faktor SHAP menjadi kalimat aktif sehari-hari beserta taksiran rupiah yang terbuang. Bagi keperluan audit akademik, pengguna tinggal menekan sakelar `Teknis` pada bilah atas."
 
 ---
 
 ## Slide 25 — Arsitektur Full-Stack PlateGuard MBG v2 (Desain *Spatial Frosted Glass*)
 
 ### Keterangan Isi dan Tata Letak Slide
-- **Tata Letak:** Diagram blok 3 lapis (*Next.js 16 Frontend* → *FastAPI Single Origin Engine* → *Model `.joblib` + `Docker Port 7860`*) di tengah layar.
+
+- **Tata Letak:** Diagram blok 3 lapis (*Next.js 16 Frontend* → *FastAPI Single Origin Engine* → *Model `.joblib` + `Docker Port 7860` di ModelScope Studios*) di tengah layar.
 - **Elemen Teks di Layar:**
-  - Judul: **Arsitektur v2 Terpadu: Next.js 16 + FastAPI + Docker Port 7860**
+  - Judul: **Arsitektur v2 Terpadu: Next.js 16 + FastAPI + Docker ModelScope Studios**
   - **Frontend Statis Modern ([`frontend/`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/frontend)):** Next.js 16 + Tailwind v4 berkonsep **Desain 5 *Spatial Frosted Glass*** (bilah kapsul mengambang, dok kaca kiri, pencarian cepat `/`, riwayat tersimpan via `localStorage`).
   - **Peladen API Tunggal ([`api.py`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/api.py)):** Menyajikan 10+ endpoint JSON/CSV (`/predict/*`, `/api/explain/*`, `/api/what-if-curve`, `/api/overview`, `/api/eda-interactive`, `/api/benchmark`, `/api/holdout-samples`) dan aset UI sekaligus.
-  - **Kontainerisasi Siap Cloud (`Dockerfile`):** Bangun multi-tahap Node 20 + Python 3.12-slim siap Hugging Face Spaces (`port 7860`), sambil menjaga dasbor Streamlit `app.py` v1 tetap kompatibel.
+  - **Kontainerisasi Cloud Live (`Dockerfile` dan `requirements-docker.txt`):** Bangun multi-tahap Node 20 + Python 3.12-slim terkunci (`scikit-learn==1.6.1`) tayang aktif pada **ModelScope Studios (`2 vCPU / 8 GB RAM`, port `7860`)**, sementara dasbor Streamlit `app.py` v1 tetap kompatibel.
 
 ### Narasi Presenter
-"Agar model siap dipakai sebagai perangkat lunak sesungguhnya, kami meningkatkan antarmuka dari dasbor warisan menjadi arsitektur full-stack **PlateGuard MBG v2**. Sisi antarmuka dirancang berkonsep kaca buram cerah berkejelasan tinggi dengan Next.js 16 lalu digabungkan bersama peladen FastAPI pada satu origin. Konfigurasi Docker multi-tahap di repositori turut disiapkan untuk port 7860 milik Hugging Face Spaces."
+
+"Agar model siap dipakai sebagai perangkat lunak sesungguhnya, kami meningkatkan antarmuka dari dasbor warisan menjadi arsitektur full-stack **PlateGuard MBG v2**. Sisi antarmuka dirancang berkonsep kaca buram cerah berkejelasan tinggi dengan Next.js 16 lalu digabungkan bersama peladen FastAPI pada satu origin. Kontainer Docker multi-tahap beserta penguncian dependensi di `requirements-docker.txt` sudah berjalan aktif pada port 7860 di ModelScope Studios."
 
 ---
 
 ## Slide 26 — Demo Aplikasi 1: Simulator, *Auto-Update*, Kurva *What-If*, dan Patokan A vs B
 
 ### Keterangan Isi dan Tata Letak Slide
-- **Tata Letak:** Tangkapan layar aplikasi nyata [`plateguard_interactive_sim.png`](file:///C:/Users/Cupiz/.gemini/antigravity/brain/d25a6a89-d204-4008-8c1d-57314ba330d8/plateguard_interactive_sim.png) di kanan; 4 anotasi keunggulan interaktif di kiri.
+
+- **Tata Letak:** Tangkapan layar aplikasi live ModelScope [`App UI.png`](file:///D:/S2%20Amikom/Data%20Science/Proyek_MBG/App%20UI.png) mendominasi area kanan; empat anotasi keunggulan interaktif di sisi kiri.
 - **Elemen Teks di Layar:**
   - Judul: **Simulasi Real-Time: Dari Slider ke Hitungan Penghematan Bulanan**
+  - **Tautan Aplikasi Live:** **[Plateguard MBG · Studios (`modelscope.cn`)](https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg)**
   - **Mode `Auto` (*Debounced 260 ms*):** Perubahan suhu, kalori, jarak, atau provinsi otomatis memanggil inferensi FastAPI + TreeSHAP lokal (`~74 ms`).
   - **Kunci Sebagai Patokan (A):** Mengunci rencana lama lalu menguji perbaikan (misalnya menaikkan suhu tiba di atas `60 °C`) dan langsung menghitung selisih rupiah per bulan.
   - **Kurva *What-If* (`/api/what-if-curve`):** Memplot 9 skenario sensitivitas perubahan suhu, kalori, dan durasi perjalanan dalam satu grafik interaktif.
 
 ### Narasi Presenter
-*(Demonstrasi langsung pada `http://localhost:8000`)*  
-"Pada tampilan Simulator di layar, pengguna cukup menggeser parameter dapur atau memilih skenario cepat wilayah 3T. Dengan mode **Auto**, sistem menghitung prediksi bersama **Kurva What-If** 9 titik secara langsung. Pengelola dapur bisa mengunci skenario awal sebagai **Patokan A**, lalu mencoba memperbaiki suhu wadah di atas 60 derajat untuk melihat secara instan penurunan persen sisa maupun uang yang berhasil diselamatkan dalam 22 hari sekolah."
+
+*(Demonstrasi langsung pada **[Plateguard MBG · Studios](https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg)**; cadangan lokal `http://localhost:8000`)*  
+"Pada tampilan aplikasi live di layar, pengguna cukup menggeser parameter dapur atau memilih skenario cepat wilayah 3T. Melalui mode **Auto**, sistem menghitung prediksi bersama **Kurva What-If** 9 titik secara langsung. Pengelola dapur dapat mengunci skenario awal sebagai **Patokan A**, lalu mencoba memperbaiki suhu wadah di atas 60 derajat untuk melihat secara instan penurunan persen sisa maupun penghematan anggaran dalam 22 hari sekolah."
 
 ---
 
 ## Slide 27 — Demo Aplikasi 2: Explorer EDA Interaktif dan Peta 38 Provinsi
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Tangkapan layar [`plateguard_interactive_analytics.png`](file:///C:/Users/Cupiz/.gemini/antigravity/brain/d25a6a89-d204-4008-8c1d-57314ba330d8/plateguard_interactive_analytics.png) mendominasi layar dengan 3 panggilan penjelasan fitur interaktif.
 - **Elemen Teks di Layar:**
   - Judul: **Mengubah Grafik EDA Menjadi Eksplorasi Data Hidup**
@@ -435,13 +493,15 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Tabel 38 Provinsi:** Pencarian, pengurutan, serta tombol **`Uji`** satu klik menuju Simulator.
 
 ### Narasi Presenter
-"Kami tidak membiarkan analitik EDA berakhir sebagai gambar mati. Pada halaman Analitik, setiap grafik klaster dan pemicu dapat di-*hover* guna melihat rincian telemetri. Di bagian tengah, scatter 240 titik nyata memungkinkan pengguna menginspeksi pengiriman dingin bermasalah lalu langsung mengeklik satu tombol untuk membawanya ke Simulator, sekaligus tetap menyediakan gambar PNG asli dari `eda_run.py` di tab pendamping."
+
+"Kami tidak membiarkan analitik EDA berakhir sebagai gambar mati. Pada halaman Analitik, setiap grafik klaster dan pemicu dapat di-*hover* guna melihat rincian telemetri. Di bagian tengah, scatter 240 titik nyata memungkinkan pengguna menginspeksi pengiriman dingin bermasalah lalu langsung mengeklik satu tombol untuk membawanya ke Simulator, sekaligus tetap menyediakan gambar PNG asli dari `eda_run.py` pada tab pendamping."
 
 ---
 
 ## Slide 28 — Demo Aplikasi 3 dan 4: Audit Kalibrasi, 2.600 Holdout, dan Batch CSV
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Tangkapan layar [`plateguard_interactive_audit.png`](file:///C:/Users/Cupiz/.gemini/antigravity/brain/d25a6a89-d204-4008-8c1d-57314ba330d8/plateguard_interactive_audit.png) di kanan dan ringkasan fitur tab Audit + Batch CSV di kiri.
 - **Elemen Teks di Layar:**
   - Judul: **Audit Transparansi Model, 2.600 Uji Nyata, dan Skoring Batch CSV**
@@ -451,33 +511,38 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **Tab Batch CSV dan Swagger `/docs`:** Mengevaluasi hingga **`100` jadwal kiriman sekaligus** serta contoh integrasi skrip Python internal BGN.
 
 ### Narasi Presenter
-"Di halaman Audit, penelaah dapat menguji kejujuran sistem secara terbuka: mulai dari perbandingan tujuh model pada lima lipatan CV, grafik pengaruh fitur global berbahasa Indonesia, hingga scatter kalibrasi antara tebakan dan kenyataan. Tersedia juga penjelajah 2.600 sampel uji serta fitur **Batch CSV** yang dapat memproses hingga seratus rencana pengantaran sekolah dalam sekali unggah."
+
+"Di halaman Audit, penelaah dapat memverifikasi keandalan sistem secara terbuka: mulai dari perbandingan tujuh model pada lima lipatan CV, grafik pengaruh fitur global berbahasa Indonesia, hingga scatter kalibrasi antara tebakan dan kenyataan. Tersedia pula penjelajah 2.600 sampel uji serta fitur **Batch CSV** yang dapat memproses hingga seratus rencana pengantaran sekolah dalam sekali unggah."
 
 ---
 
 ## Slide 29 — Rekap Realisasi Target Project Charter (*Charter vs Realisasi*)
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Tabel matriks komparasi resmi (sinkron dengan Tabel V pada Laporan Akhir IEEE) disertai tanda status tiap butir.
 - **Elemen Teks di Layar:**
   - Judul: **Audit Pencapaian Akhir Terhadap Seluruh Janji Project Charter**
+
   - | Kriteria Charter | Target Charter | Realisasi Terverifikasi | Status |
-    |---|---|---|---|
+    | --- | --- | --- | --- |
     | Pembanding Dasar | `MAE < 4,44 pp` | Pra `3,658 pp` / Post `2,929 pp` | **Tercapai (`-17,7%` s.d. `-34,1%`)** |
     | Metrik Post-Hoc | `MAE<=3,0`, `R²>=0,35` | `MAE 2,929` · `RMSE 3,761` · `R² 0,551` | **Tercapai Penuh** |
     | Metrik Pradistribusi | `MAE<=3,0`, `R²>=0,35` | `MAE 3,658` · `RMSE 4,586` · `R² 0,333` | **Batas Alamiah Pradistribusi** |
     | Algoritma dan 5F CV | 6 Model + RF + 5F | 6 Kandidat + per-fold + Optuna | **Tercapai Penuh** |
     | Pelacakan dan Artefak | MLflow + `.pkl/.joblib` | 14 runs MLflow + `.pkl` + `.joblib` | **Tercapai Penuh** |
-    | Guardrail dan XAI | 0 leak + SHAP + Web | TE fit-fold + 4 SHAP + Web v2 Awam | **Tercapai Penuh** |
+    | Guardrail, XAI, dan Cloud Live | 0 leak + SHAP + Web Aktif | TE fit-fold + 4 SHAP + ModelScope Docker 7860 | **Tercapai Penuh** |
 
 ### Narasi Presenter
-"Tabel ini merupakan audit jujur pencapaian kami terhadap kontrak awal di Project Charter. Seluruh sasaran rekayasa mulai dari enam pembanding algoritma termasuk Random Forest, pelacakan 14 percobaan MLflow, zero data leakage, hingga web v2 selesai seratus persen. Metrik Post-Hoc melampaui semua ambang (`MAE 2,929 pp`, `R² 0,551`), sedangkan Pra-Distribusi mencatat batas wajar `R² 0,333` tanpa informasi perilaku pascamakan."
+
+"Tabel ini merupakan audit objektif pencapaian kami terhadap kontrak awal di Project Charter. Seluruh sasaran rekayasa mulai dari enam pembanding algoritma termasuk Random Forest, pelacakan 14 percobaan MLflow, zero data leakage, hingga aplikasi web v2 yang tayang live di ModelScope Studios telah tercapai. Metrik Post-Hoc melampaui semua ambang (`MAE 2,929 pp`, `R² 0,551`), sedangkan Pra-Distribusi mencatat batas wajar `R² 0,333` tanpa informasi perilaku pascamakan."
 
 ---
 
 ## Slide 30 — Rekomendasi Kebijakan Operasional untuk Badan Gizi Nasional
 
 ### Keterangan Isi dan Tata Letak Slide
+
 - **Tata Letak:** Empat kartu aksi berprioritas dengan angka bukti pendukung dari analisis EDA dan TreeSHAP.
 - **Elemen Teks di Layar:**
   - Judul: **Empat Intervensi Nyata Berbasis Temuan Data**
@@ -487,37 +552,43 @@ Panduan resmi materi presentasi akademik dan demonstrasi aplikasi **PlateGuard M
   - **4. Kalibrasi Gramasi per Jenjang:** Penyesuaian porsi karbohidrat khusus siswa SD/MI (`rataan sisa tertinggi`) agar menu padat gizi tanpa berlebih.
 
 ### Narasi Presenter
-"Dari bukti empiris ini, kami merumuskan empat langkah praktis untuk Badan Gizi Nasional. Pertama, berkoordinasi dengan sekolah membatasi jajanan sebelum jadwal makan MBG. Kedua, mewajibkan kotak penghangat terstandar di rute melebihi tiga puluh menit agar suhu tiba bertahan di atas 60 derajat. Ketiga, memprioritaskan investasi dapur satelit di wilayah 3T Kalimantan Utara dan Papua. Keempat, menyesuaikan ukuran porsi mengikuti jenjang sekolah."
+
+"Dari bukti empiris ini, kami merumuskan empat langkah praktis untuk Badan Gizi Nasional. Pertama, berkoordinasi dengan sekolah membatasi jajanan sebelum jadwal makan MBG. Kedua, mewajibkan kotak penghangat terstandar pada rute melebihi tiga puluh menit agar suhu tiba bertahan di atas 60 derajat. Ketiga, memprioritaskan investasi dapur satelit pada wilayah 3T Kalimantan Utara dan Papua. Keempat, menyesuaikan ukuran porsi mengikuti jenjang sekolah."
 
 ---
 
-## Slide 31 — Keterbatasan Jujur dan Peta Pengembangan Lanjutan
+## Slide 31 — Keterbatasan Data dan Peta Pengembangan Lanjutan
 
 ### Keterangan Isi dan Tata Letak Slide
-- **Tata Letak:** Dua kolom seimbang: sisi kiri memuat **Keterbatasan Teridentifikasi** saat ini; sisi kanan menampilkan **Peta Pengembangan Fase Berikutnya**.
+
+- **Tata Letak:** Dua kolom seimbang: sisi kiri memuat **Keterbatasan Data Teridentifikasi** saat ini; sisi kanan menampilkan **Pencapaian Deployment dan Peta Pengembangan**.
 - **Elemen Teks di Layar:**
-  - Judul: **Keterbatasan Saat Ini dan Arah Pengembangan Berikutnya**
-  - **Keterbatasan Saat Ini:**
+  - Judul: **Catatan Keterbatasan Data dan Arah Pengembangan Berikutnya**
+  - **Keterbatasan Data Saat Ini:**
     1. Dataset *snapshot* tanpa dimensi stempel waktu (*timestamp*) dan ID dapur untuk fitur riwayat musiman (*lag features*).
     2. Nilai kalori/protein merupakan estimasi rencana menu, belum hasil uji laboratorium sampel acak.
-    3. Pengujian bangun citra Docker secara lokal belum dijalankan karena ketiadaan Docker Engine di mesin pengembang serta belum ditayangkan pada URL awan publik aktif.
-  - **Pengembangan Berikutnya:** Integrasi sensor suhu IoT pada boks armada, pencatatan *time-series* harian tiap SPPG, dan publikasi kontainer langsung ke Hugging Face Spaces.
+    3. Kelengkapan 100% dataset (`0 null`) berasal dari kurasi penyedia data sehingga penerapan lapangan tetap menuntut imputasi fallback otomatis.
+  - **Status Cloud Live dan Pengembangan Berikutnya:** Kontainer Docker (`port 7860`, `requirements-docker.txt` terkunci `scikit-learn==1.6.1`) sudah **aktif online di ModelScope Studios**; pengembangan lanjutan meliputi integrasi sensor suhu IoT pada boks armada dan pencatatan *time-series* harian tiap SPPG.
 
 ### Narasi Presenter
-"Sebagai pertanggungjawaban ilmiah, kami menyampaikan keterbatasan sistem secara terbuka. Pertama, dataset saat ini belum menyertakan penanda waktu pengantaran untuk memodelkan pola musiman maupun riwayat kinerja dapur tertentu. Kedua, meski konfigurasi Dockerfile port 7860 sudah rampung dan aplikasi berjalan mulus secara lokal, uji bangun citra Docker langsung dan publikasi awan Hugging Face Spaces menjadi tahap lanjutan berikutnya bersamaan dengan integrasi sensor suhu IoT."
+
+"Sebagai catatan metodologis, ada tiga batasan data yang perlu dicermati. Pertama, dataset saat ini belum menyertakan penanda waktu pengantaran maupun identitas tiap dapur untuk memodelkan pola musiman. Kedua, angka gizi berasal dari rencana menu dan kelengkapan nol nilai kosong merupakan hasil kurasi dataset. Adapun tantangan deployment kontainer Docker — termasuk penyesuaian versi `scikit-learn 1.6.1` agar artefak model terbaca mulus pada kontainer Linux — telah kami selesaikan sehingga aplikasi sudah berjalan online di ModelScope Studios. Tahap riset berikutnya ialah integrasi sensor suhu IoT serta pencatatan deret waktu harian tiap SPPG."
 
 ---
 
 ## Slide 32 — Kesimpulan dan Penutup (Tanya Jawab)
 
 ### Keterangan Isi dan Tata Letak Slide
-- **Tata Letak:** Kartu ringkas kesimpulan utama berlatar kaca beraksen teal, dilengkapi tautan repositori GitHub dan ucapan terima kasih di bagian bawah.
+
+- **Tata Letak:** Kartu ringkas kesimpulan utama berlatar kaca beraksen teal, dilengkapi tautan aplikasi live ModelScope Studios dan repositori GitHub di bagian bawah.
 - **Elemen Teks di Layar:**
   - Judul: **Kesimpulan Utama PlateGuard MBG v2**
   - **Mengubah Paradigma:** Dari pencatatan sisa reaktif pascamakan menjadi peringatan risiko preventif **sebelum armada berangkat**.
   - **Akurat dan Bebas Kebocoran:** Guardrail `DROP_LEAK` memblokir R² semu; `LightGBM (Optuna)` meraih **`MAE 3,658 pp`** (Pra) serta **`MAE 2,929 pp` / `R² 0,551`** (Post-Hoc).
-  - **Transparan dan Mudah Dipahami Awam:** Dipadukan dengan `TreeSHAP`, penerjemah Bahasa Awam `humanizer-id`, serta aplikasi web interaktif **Next.js 16 + FastAPI** siap pakai.
-  - **Repositori dan Artefak:** `https://github.com/cupiz/datascience-mbg-eda` · **Terima Kasih — Sesi Tanya Jawab**
+  - **Transparan, Awam, dan Tayang Live:** Dipadukan dengan `TreeSHAP`, penerjemah Bahasa Awam `humanizer-id`, serta aplikasi web interaktif **Next.js 16 + FastAPI** dalam kontainer Docker.
+  - **Aplikasi Live:** `https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg`
+  - **Repositori GitHub:** `https://github.com/cupiz/datascience-mbg-eda` · **Terima Kasih — Sesi Tanya Jawab**
 
 ### Narasi Presenter
-"Sebagai penutup, PlateGuard MBG membuktikan bahwa pendekatan sains data berbasis *Gradient Boosting*, audit kebocoran yang ketat, serta antarmuka yang mudah dipahami awam mampu memberi solusi konkret untuk menekan pemborosan pangan Program Makan Bergizi Gratis. Seluruh kode, eksperimen terverifikasi, serta aplikasi web v2 sudah tersimpan rapi di repositori GitHub kami. Terima kasih atas perhatian Bapak Dosen beserta rekan-rekan sekalian; sesi diskusi dan tanya jawab kini kami buka."
+
+"Sebagai penutup, PlateGuard MBG membuktikan bahwa pendekatan regresi *Gradient Boosting*, audit kebocoran yang ketat, serta antarmuka penjelas berbahasa awam mampu menghadirkan sistem pendukung keputusan preventif bagi Program Makan Bergizi Gratis. Seluruh kode, artefak model, dan aplikasi web interaktif sudah dapat diakses langsung melalui ModelScope Studios maupun repositori GitHub kami. Terima kasih atas perhatian Bapak Dosen beserta rekan-rekan sekalian; sesi diskusi dan tanya jawab kini kami buka."
