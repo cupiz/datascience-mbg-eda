@@ -17,17 +17,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Dependensi sistem untuk XGBoost/LightGBM dan healthcheck
+# Dependensi sistem minimal untuk LightGBM (libgomp1) dan healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     libgomp1 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Pasang dependensi Python
-COPY requirements.txt /app/
+# Pasang dependensi Python runtime ramping (termasuk pin scikit-learn==1.6.1)
+COPY requirements-docker.txt /app/
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements-docker.txt
 
 # Buat user non-root (UID 1000 kompatibel dengan Hugging Face Spaces)
 RUN useradd -m -u 1000 user

@@ -1,0 +1,14 @@
+# PlateGuard MBG v2 - Lean Production API Runtime Requirements
+# Pinned ke versi yang kompatibel penuh dengan artefak models/pipeline_*.joblib (scikit-learn 1.6.1 + NumPy 2)
+
+pandas==2.2.3
+numpy==2.0.2
+scipy==1.15.2
+scikit-learn==1.6.1
+lightgbm==4.6.0
+shap==0.47.2
+joblib==1.4.2
+
+fastapi==0.115.12
+uvicorn==0.34.0
+pydantic==2.10.6
