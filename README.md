@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg"><img src="https://img.shields.io/badge/Live_Demo-ModelScope_Studios-0f5257?logo=docker&logoColor=white" alt="Live Demo ModelScope Studios" /></a>
   <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-06525C?logo=nextdotjs&logoColor=white" alt="Next.js 16" /></a>
   <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white" alt="FastAPI" /></a>
   <a href="https://lightgbm.readthedocs.io/"><img src="https://img.shields.io/badge/LightGBM-Optuna_5F_CV-0f5257" alt="LightGBM Optuna" /></a>
@@ -18,6 +19,8 @@
   <a href="https://www.kaggle.com/datasets/luthfimuthathohirin/indonesia-makan-bergizi-gratis-mbg-telemetry"><img src="https://img.shields.io/badge/Dataset-Kaggle_MBG_2026_v4-eab308" alt="Dataset Kaggle MBG 2026 v4" /></a>
   <a href="#tim-dan-lisensi"><img src="https://img.shields.io/badge/License-MIT-green" alt="License MIT" /></a>
 </p>
+
+> **Coba Aplikasi Live (Tanpa Instalasi):** Uji prediksi sisa makanan, *TreeSHAP*, penjelas Bahasa Awam, dan penjelajah 2.600 sampel holdout langsung lewat **[Plateguard MBG · Studios](https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg)** di ModelScope Studios.
 
 <p align="center">
   <a href="#ringkasan-masalah-dan-solusi">Masalah dan Solusi</a> •
