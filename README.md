@@ -270,17 +270,17 @@ Proyek_MBG/
 ├── figures/ & figures_fase3/         # 10 grafik EDA dan 4 plot TreeSHAP
 ├── eda_notebook.ipynb                # Notebook EDA tereksekusi penuh
 ├── train-kaggle-done.ipynb           # Arsip eksekusi Kaggle (14 eksperimen MLflow dan 5-Fold CV)
-└── reports/                          # Laporan Akhir IEEE (.docx) dan Naskah Presentasi 32 Slide (.md)
+└── reports/                          # Dokumen Tugas 1–3 (.docx) dan Naskah Presentasi 32 Slide (.md)
 ```
 
 ---
 
-## Roadmap Proyek
+## Roadmap Proyek dan Berkas Laporan
 
-- [x] **Fase 1:** Project Charter, audit kualitas data, penemuan kebocoran `DROP_LEAK`, serta [eda_notebook.ipynb](eda_notebook.ipynb).
+- [x] **Fase 1 (Tugas 1 dan Tugas 2):** [Project Charter (.docx)](reports/PSIKS2W002-26MA41D022-IQBAL%20AHDAGITA%20ELBADRA-Tugas1-Project-Charter.docx), [Laporan EDA 9 Bab (.docx)](reports/PSIKS2W002-26MA41D022-IQBAL%20AHDAGITA%20ELBADRA-Tugas2-Laporan-EDA.docx), penemuan kebocoran `DROP_LEAK`, serta [eda_notebook.ipynb](eda_notebook.ipynb).
 - [x] **Fase 2:** Pipeline prapemrosesan [etl_pipeline.py](etl_pipeline.py) bebas kebocoran data (`ReflectionLog`, `TargetEncoder` per lipatan, split kuartil `10.400 / 2.600`).
 - [x] **Fase 3:** Benchmark 7 model × 2 skenario + Optuna 30 trial + `TreeSHAP` + pelacakan MLflow ([train-kaggle-done.ipynb](train-kaggle-done.ipynb)).
-- [x] **Fase 4 dan Platform v2:** Web App Next.js 16 + FastAPI + Humanizer Bahasa Awam + Explorer EDA Interaktif + Docker + Laporan IEEE dan Dek Presentasi 32 Slide ([reports/](reports/)).
+- [x] **Fase 4 dan Platform v2 (Tugas 3):** Web App Next.js 16 + FastAPI + Humanizer Bahasa Awam + Explorer EDA Interaktif + Docker ModelScope Studios, [Laporan Akhir IEEE (.docx)](reports/PSIKS2W002-26MA41D022-IQBAL%20AHDAGITA%20ELBADRA-Laporan-Akhir-IEEE.docx), dan [Naskah Presentasi 32 Slide (.md)](reports/NASKAH_PRESENTASI_PLATEGUARD_MBG.md).
 
 ---
 
