@@ -69,10 +69,14 @@
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=fNkgunP2vJc" title="Tonton Presentasi PlateGuard MBG di YouTube">
-    <img src="https://img.youtube.com/vi/fNkgunP2vJc/maxresdefault.jpg" alt="PlateGuard MBG: Prediksi Sisa Makanan Makan Bergizi Gratis | Data Science — Tonton di YouTube" width="85%" />
+    <img src="https://img.youtube.com/vi/fNkgunP2vJc/maxresdefault.jpg" alt="PlateGuard MBG: Prediksi Sisa Makanan Makan Bergizi Gratis | Data Science — Tonton di YouTube" width="90%" />
+  </a>
+  <br/><br/>
+  <a href="https://www.youtube.com/watch?v=fNkgunP2vJc">
+    <img src="https://img.shields.io/badge/%E2%96%B6_Putar_Video_di_YouTube-PlateGuard_MBG-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Putar Video di YouTube" />
   </a>
   <br/>
-  <sub><em>Klik gambar di atas untuk memutar video di YouTube: <a href="https://www.youtube.com/watch?v=fNkgunP2vJc">PlateGuard MBG: Prediksi Sisa Makanan Makan Bergizi Gratis | Data Science</a>.</em></sub>
+  <sub><em>Klik thumbnail atau tombol di atas untuk memutar video: <a href="https://www.youtube.com/watch?v=fNkgunP2vJc">PlateGuard MBG: Prediksi Sisa Makanan Makan Bergizi Gratis | Data Science</a>.</em></sub>
 </p>
 
 ---
