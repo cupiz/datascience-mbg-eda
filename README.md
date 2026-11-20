@@ -13,6 +13,9 @@
   <a href="https://modelscope.cn/studios/iqbalahdagita/plateguard-mbg">
     <img src="https://img.shields.io/badge/COBA_APLIKASI_LIVE-ModelScope_Studios-0f5257?style=for-the-badge&logo=docker&logoColor=white" alt="Coba Aplikasi Live di ModelScope Studios" />
   </a>
+  <a href="https://www.youtube.com/watch?v=fNkgunP2vJc">
+    <img src="https://img.shields.io/badge/TONTON_PRESENTASI_DAN_DEMO-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Tonton Video Presentasi PlateGuard MBG di YouTube" />
+  </a>
 </p>
 
 <p align="center">
@@ -27,6 +30,7 @@
 
 <p align="center">
   <a href="#coba-aplikasi-live">Aplikasi Live</a> •
+  <a href="#video-presentasi-dan-demo-aplikasi">Video YouTube</a> •
   <a href="#ringkasan-masalah-dan-solusi">Masalah dan Solusi</a> •
   <a href="#temuan-kunci-eda-13000-distribusi">Grafik EDA</a> •
   <a href="#rekayasa-fitur-dan-guardrail-anti-leakage">Guardrail Anti-Leakage</a> •
@@ -58,6 +62,18 @@
 | **Analitik 38 Provinsi** | Bandingkan peta risiko 3T vs Jawa Metro pada 13.000 catatan dan uji titik scatter langsung ke simulator |
 | **Audit Model dan Holdout** | Bandingkan 7 model CV 5-fold, plot kalibrasi prediksi vs aktual, panel `DROP_LEAK`, dan penjelajah 2.600 sampel uji |
 | **Batch CSV dan API `/docs`** | Unggah jadwal pengiriman massal hingga 100 baris atau uji endpoint FastAPI secara interaktif |
+
+---
+
+## Video Presentasi dan Demo Aplikasi
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=fNkgunP2vJc" title="Tonton Presentasi PlateGuard MBG di YouTube">
+    <img src="https://img.youtube.com/vi/fNkgunP2vJc/maxresdefault.jpg" alt="PlateGuard MBG: Prediksi Sisa Makanan Makan Bergizi Gratis | Data Science — Tonton di YouTube" width="85%" />
+  </a>
+  <br/>
+  <sub><em>Klik gambar di atas untuk memutar video di YouTube: <a href="https://www.youtube.com/watch?v=fNkgunP2vJc">PlateGuard MBG: Prediksi Sisa Makanan Makan Bergizi Gratis | Data Science</a>.</em></sub>
+</p>
 
 ---
 
